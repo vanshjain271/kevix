@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
 
   const insights = data ? [
     { label: 'Store Sales', value: `₹${data.totalSales.toLocaleString()}`, icon: <TrendingUp />, color: '#10B981', bgColor: '#DCFCE7' },
-    { label: 'Total Orders', value: data.totalOrders.toString(), icon: <ShoppingCart />, color: '#829c65', bgColor: '#eef3e8', link: '/orders/online' },
+    { label: 'Total Orders', value: data.totalOrders.toString(), icon: <ShoppingCart />, color: '#6D28D9', bgColor: '#F3E8FF', link: '/orders/online' },
     { label: 'Abandoned Carts', value: data.abandonedCarts.toString(), icon: <ShoppingCartOutlined />, color: '#EF4444', bgColor: '#FEE2E2', link: '/orders/abandoned' },
     { label: 'Total Customers', value: data.totalCustomers.toString(), icon: <People />, color: '#8B5CF6', bgColor: '#F3E8FF', link: '/customers' },
   ] : [];
@@ -180,8 +180,8 @@ const Dashboard: React.FC = () => {
                 <LineChart data={data?.salesByDay}>
                   <defs>
                     <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#829c65" stopOpacity={0.1} />
-                      <stop offset="95%" stopColor="#829c65" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#6D28D9" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#6D28D9" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
@@ -191,7 +191,7 @@ const Dashboard: React.FC = () => {
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                     formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Sales']}
                   />
-                  <Line type="monotone" dataKey="amount" stroke="#829c65" strokeWidth={4} dot={{ r: 0 }} activeDot={{ r: 6, fill: '#829c65', strokeWidth: 3, stroke: '#fff' }} />
+                  <Line type="monotone" dataKey="amount" stroke="#6D28D9" strokeWidth={4} dot={{ r: 0 }} activeDot={{ r: 6, fill: '#6D28D9', strokeWidth: 3, stroke: '#fff' }} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

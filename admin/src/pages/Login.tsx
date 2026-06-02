@@ -41,7 +41,7 @@ const Login: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #a3b18a 0%, #829c65 100%)',
+                background: 'linear-gradient(135deg, #A855F7 0%, #6D28D9 100%)',
                 p: 2,
             }}
         >
@@ -55,7 +55,7 @@ const Login: React.FC = () => {
                             sx={{ height: 60, mb: 2 }}
                             onError={(e: any) => { e.target.style.display = 'none'; }}
                         />
-                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#829c65' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#6D28D9' }}>
                             Arbuda Admin
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -96,8 +96,8 @@ const Login: React.FC = () => {
                             disabled={loading}
                             sx={{
                                 py: 1.5,
-                                backgroundColor: '#829c65',
-                                '&:hover': { backgroundColor: '#6c8651' },
+                                backgroundColor: '#6D28D9',
+                                '&:hover': { backgroundColor: '#5B21B6' },
                             }}
                         >
                             {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}

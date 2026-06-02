@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
   palette: {
-    primary: { main: '#829c65' }, // Light olive green
+    primary: { main: '#6D28D9' }, // Royal purple
     background: { default: '#F9FAFB', paper: '#FFFFFF' },
     text: { primary: '#1F2937', secondary: '#6B7280' },
     success: { main: '#10B981' },
@@ -28,4 +28,4 @@ export const theme = createTheme({
 export const SIDEBAR_WIDTH = 250;
 export const SIDEBAR_BG = '#FFFFFF';
 export const SIDEBAR_HOVER = '#F3F4F6';
-export const SIDEBAR_ACTIVE = '#eef3e8'; // Very light olive green for active background
+export const SIDEBAR_ACTIVE = '#F3E8FF'; // Very light purple for active background

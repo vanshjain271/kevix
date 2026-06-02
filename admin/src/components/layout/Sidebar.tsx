@@ -114,18 +114,18 @@ const Sidebar: React.FC = () => {
               minHeight: 48,
               px: depth === 0 ? 2.5 : 4,
               py: 1,
-              color: active ? '#829c65' : '#1F2937',
+              color: active ? '#6D28D9' : '#1F2937',
               backgroundColor: active ? SIDEBAR_ACTIVE : 'transparent',
               borderRadius: depth === 0 ? 2 : 0,
               mx: depth === 0 ? 1 : 0,
               '&:hover': {
                 backgroundColor: depth === 0 ? SIDEBAR_HOVER : 'rgba(0, 0, 0, 0.04)',
-                color: '#829c65',
+                color: '#6D28D9',
               },
             }}
           >
             {depth === 0 && (
-              <ListItemIcon sx={{ minWidth: 0, mr: 2, color: active ? '#829c65' : '#4B5563' }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: 2, color: active ? '#6D28D9' : '#4B5563' }}>
                 {item.icon}
               </ListItemIcon>
             )}
@@ -169,7 +169,7 @@ const Sidebar: React.FC = () => {
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
         <Box sx={{
           width: 48, height: 48, borderRadius: 2,
-          background: 'linear-gradient(135deg, #a3b18a 0%, #829c65 100%)',
+          background: 'linear-gradient(135deg, #A855F7 0%, #6D28D9 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           mb: 1, boxShadow: '0 4px 12px rgba(130,156,101,0.3)'
         }}>

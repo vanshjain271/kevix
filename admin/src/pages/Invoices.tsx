@@ -81,7 +81,7 @@ const InvoiceModal = ({
       PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '92vh' } }}>
 
       {/* Header */}
-      <Box sx={{ bgcolor: '#829c65', px: 4, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ bgcolor: '#6D28D9', px: 4, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 20, letterSpacing: 1 }}>INVOICE</Typography>
           <Typography sx={{ color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>{invoice.invoiceNumber}</Typography>
@@ -98,7 +98,7 @@ const InvoiceModal = ({
         {/* Meta cards */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           {[
-            { label: 'Invoice Date',  val: dayjs(invoice.invoiceDate).format('DD MMM YYYY'), border: '#829c65' },
+            { label: 'Invoice Date',  val: dayjs(invoice.invoiceDate).format('DD MMM YYYY'), border: '#6D28D9' },
             { label: 'Order Number',  val: invoice.orderNumber,                              border: '#3B82F6' },
             { label: 'Order Status',  val: invoice.orderStatus,                              border: '#10B981' },
           ].map(c => (
@@ -112,8 +112,8 @@ const InvoiceModal = ({
         </Grid>
 
         {/* Bill To */}
-        <Paper sx={{ p: 2, borderRadius: 2, mb: 3, borderLeft: '4px solid #829c65' }}>
-          <Typography variant="overline" sx={{ fontWeight: 700, color: '#829c65', display: 'block', mb: 0.5 }}>BILL TO</Typography>
+        <Paper sx={{ p: 2, borderRadius: 2, mb: 3, borderLeft: '4px solid #6D28D9' }}>
+          <Typography variant="overline" sx={{ fontWeight: 700, color: '#6D28D9', display: 'block', mb: 0.5 }}>BILL TO</Typography>
           <Typography variant="body1" sx={{ fontWeight: 700 }}>{invoice.customerName}</Typography>
           <Typography variant="body2" color="text.secondary">{invoice.customerPhone}</Typography>
           {addr.addressLine1 && (
@@ -128,7 +128,7 @@ const InvoiceModal = ({
         <TableContainer component={Paper} sx={{ borderRadius: 2, mb: 3 }}>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: '#829c65' }}>
+              <TableRow sx={{ bgcolor: '#6D28D9' }}>
                 {['#', 'Product', 'Qty', 'MRP', 'Price', 'Discount', 'Total'].map(h => (
                   <TableCell key={h} sx={{ color: '#fff', fontWeight: 700, py: 1.5, fontSize: 12 }}>{h}</TableCell>
                 ))}
@@ -175,9 +175,9 @@ const InvoiceModal = ({
             ))}
             {/* Balance Due */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1.5, pt: 1.5,
-              borderTop: '2px solid #829c65', bgcolor: '#FEF2F2', mx: -2.5, px: 2.5, py: 1.5, borderRadius: '0 0 8px 8px' }}>
-              <Typography variant="body1" sx={{ fontWeight: 800, color: '#829c65' }}>Balance Due</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 800, color: '#829c65' }}>{fmtCurr(invoice.balance)}</Typography>
+              borderTop: '2px solid #6D28D9', bgcolor: '#FEF2F2', mx: -2.5, px: 2.5, py: 1.5, borderRadius: '0 0 8px 8px' }}>
+              <Typography variant="body1" sx={{ fontWeight: 800, color: '#6D28D9' }}>Balance Due</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 800, color: '#6D28D9' }}>{fmtCurr(invoice.balance)}</Typography>
             </Box>
           </Paper>
         </Box>
@@ -197,7 +197,7 @@ const InvoiceModal = ({
           startIcon={downloading ? <CircularProgress size={16} color="inherit" /> : <Download />}
           onClick={() => onDownload(invoice)}
           disabled={downloading}
-          sx={{ bgcolor: '#829c65', '&:hover': { bgcolor: '#6c8651' } }}>
+          sx={{ bgcolor: '#6D28D9', '&:hover': { bgcolor: '#5B21B6' } }}>
           {downloading ? 'Generating...' : 'Download PDF'}
         </Button>
       </DialogActions>
@@ -303,7 +303,7 @@ const Invoices: React.FC = () => {
     {
       field: 'invoiceNumber', headerName: 'Invoice #', width: 195,
       renderCell: params => (
-        <Typography variant="body2" sx={{ fontWeight: 700, color: '#829c65', cursor: 'pointer',
+        <Typography variant="body2" sx={{ fontWeight: 700, color: '#6D28D9', cursor: 'pointer',
           '&:hover': { textDecoration: 'underline' } }}
           onClick={() => { setDetailInv(params.row); setModalOpen(true); }}>
           {params.value}
@@ -321,7 +321,7 @@ const Invoices: React.FC = () => {
     {
       field: 'balance', headerName: 'Balance', width: 115,
       renderCell: p => (
-        <Typography variant="body2" sx={{ fontWeight: 700, color: Number(p.value) > 0 ? '#829c65' : '#059669' }}>
+        <Typography variant="body2" sx={{ fontWeight: 700, color: Number(p.value) > 0 ? '#6D28D9' : '#059669' }}>
           ₹{Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </Typography>
       ),
@@ -334,7 +334,7 @@ const Invoices: React.FC = () => {
       field: 'customerName', headerName: 'Customer Name', flex: 1, minWidth: 160,
       renderCell: p => (
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar sx={{ width: 30, height: 30, fontSize: 13, fontWeight: 700, bgcolor: '#829c65' }}>
+          <Avatar sx={{ width: 30, height: 30, fontSize: 13, fontWeight: 700, bgcolor: '#6D28D9' }}>
             {String(p.value || '-').charAt(0).toUpperCase()}
           </Avatar>
           <Box>
@@ -370,7 +370,7 @@ const Invoices: React.FC = () => {
         </Box>
         <Button variant="contained" startIcon={<Settings />}
           onClick={loadInvoices}
-          sx={{ bgcolor: '#829c65', '&:hover': { bgcolor: '#6c8651' } }}>
+          sx={{ bgcolor: '#6D28D9', '&:hover': { bgcolor: '#5B21B6' } }}>
           Refresh
         </Button>
       </Box>
@@ -393,7 +393,7 @@ const Invoices: React.FC = () => {
             <Button key={k} size="small" variant="outlined"
               onClick={() => applyQuickDate(k)}
               sx={{ textTransform: 'none', borderRadius: 10, borderColor: '#E2E8F0', color: '#64748B',
-                '&:hover': { borderColor: '#829c65', color: '#829c65' } }}>
+                '&:hover': { borderColor: '#6D28D9', color: '#6D28D9' } }}>
               {label}
             </Button>
           ))}
@@ -405,7 +405,7 @@ const Invoices: React.FC = () => {
             value={dateTo} onChange={e => setDateTo(e.target.value)} sx={{ width: 150 }} />
           <Button size="small" variant="contained"
             onClick={loadInvoices}
-            sx={{ bgcolor: '#829c65', '&:hover': { bgcolor: '#6c8651' } }}>
+            sx={{ bgcolor: '#6D28D9', '&:hover': { bgcolor: '#5B21B6' } }}>
             Apply
           </Button>
           {(dateFrom || dateTo) && (
@@ -422,8 +422,8 @@ const Invoices: React.FC = () => {
         <Tabs value={tab} onChange={(_, v) => setTab(v)}
           sx={{ borderBottom: '1px solid #E2E8F0', px: 2,
             '& .MuiTab-root': { fontWeight: 700, textTransform: 'none', minWidth: 'auto', px: 2 },
-            '& .Mui-selected': { color: '#829c65' },
-            '& .MuiTabs-indicator': { bgcolor: '#829c65' } }}>
+            '& .Mui-selected': { color: '#6D28D9' },
+            '& .MuiTabs-indicator': { bgcolor: '#6D28D9' } }}>
           <Tab label={`All (${counts.all})`} />
           <Tab label={`Paid (${counts.paid})`} />
           <Tab label={`Unpaid (${counts.unpaid})`} />
