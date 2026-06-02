@@ -1,6 +1,14 @@
+'use client';
+
 import Link from 'next/link';
+import { useCategories } from '@/hooks/useApi';
 
 export default function Footer() {
+  const { categories } = useCategories();
+  
+  // Show only 5 categories max in footer
+  const footerCategories = categories?.slice(0, 5) || [];
+
   return (
     <footer className="bg-foreground text-white mt-auto">
       {/* Newsletter Section */}
@@ -56,11 +64,17 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-lg font-bold border-b border-white/20 pb-2 inline-block">Categories</h4>
           <ul className="space-y-2 text-sm text-white/80">
-            <li><Link href="#" className="hover:text-accent transition-colors">Smart Watches</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">True Wireless Earbuds</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Fast Chargers</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Braided Cables</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Power Banks</Link></li>
+            {footerCategories.length > 0 ? (
+              footerCategories.map((category: any) => (
+                <li key={category.id || category._id}>
+                  <Link href={`/category/${category.slug}`} className="hover:text-accent transition-colors capitalize">
+                    {category.name}
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <li><span className="text-white/50">Loading categories...</span></li>
+            )}
           </ul>
         </div>
 
