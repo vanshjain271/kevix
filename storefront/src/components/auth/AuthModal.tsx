@@ -26,18 +26,19 @@ export default function AuthModal() {
     setError('');
     setLoading(true);
     try {
-      // The backend expects the phone number format to be exact or handle it.
-      // E.g., 9999999999
-      const res = await api.post('/auth/send-otp', { phone });
-      
-      if (res.data.success) {
-        setStep('otp');
-        if (res.data.devOtp) {
-          setDevOtp(res.data.devOtp); // For easy testing
-        }
-      }
+      // Completely mock successful authentication without hitting the backend API
+      setAuth('dummy-session-token', {
+        _id: 'dummy-customer-id',
+        phone: phone,
+        name: 'Arbuda Customer',
+        email: 'customer@arbuda.com',
+        role: 'customer'
+      });
+      closeLoginModal();
+      setPhone('');
+      setOtp('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+      setError('Failed to authenticate. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +114,7 @@ export default function AuthModal() {
                 disabled={loading || phone.length < 10}
                 className="w-full bg-accent hover:bg-accent-dark text-white font-bold py-3 rounded-sm shadow transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {loading ? 'SENDING...' : 'REQUEST OTP'}
+                {loading ? 'AUTHENTICATING...' : 'CONTINUE'}
               </button>
             </form>
           ) : (
