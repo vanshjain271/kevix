@@ -1,14 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSettings } from '@/hooks/useApi';
+import api from '@/lib/api';
 
 export default function CartPage() {
   const { items, isLoading, fetchCart, updateQuantity, removeFromCart } = useCartStore();
   const { isAuthenticated, openLoginModal } = useAuthStore();
+  const { settings } = useSettings();
+
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponError, setCouponError] = useState('');
+  const [isApplying, setIsApplying] = useState(false);
+  const [showCouponInput, setShowCouponInput] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -18,12 +27,52 @@ export default function CartPage() {
     }
   }, [isAuthenticated, fetchCart, openLoginModal]);
 
-  // Calculations based on backend items
-  const totalMrp = items.reduce((sum, item) => sum + (item.productId?.mrp * item.quantity), 0) || 0;
-  const totalPrice = items.reduce((sum, item) => sum + (item.productId?.sellingPrice * item.quantity), 0) || 0;
+  // Calculations based on backend items — use optional chaining + fallback to 0
+  const totalMrp = items.reduce((sum, item) => sum + ((item.productId?.mrp || 0) * item.quantity), 0);
+  const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.sellingPrice || 0) * item.quantity), 0);
   const totalDiscount = totalMrp - totalPrice;
-  const deliveryCharges = totalPrice > 499 ? 0 : 40; // Example logic
-  const finalTotal = totalPrice + deliveryCharges;
+  
+  // Apply delivery fee logic from settings
+  const deliveryFeeSetting = settings?.deliveryFee ?? 40;
+  const freeDeliveryThreshold = settings?.freeDeliveryThreshold ?? 499;
+  const deliveryCharges = totalPrice >= freeDeliveryThreshold ? 0 : deliveryFeeSetting;
+  
+  const couponDiscount = appliedCoupon ? appliedCoupon.discount : 0;
+  const finalTotal = Math.max(0, totalPrice + deliveryCharges - couponDiscount);
+  const totalSavings = totalDiscount + couponDiscount;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    setIsApplying(true);
+    setCouponError('');
+    
+    try {
+      const cartItemsForValidation = items.map(item => ({
+        product: item.productId?._id,
+        quantity: item.quantity,
+        price: item.productId?.sellingPrice
+      }));
+
+      const res = await api.post('/coupons/validate', {
+        code: couponCode,
+        cartItems: cartItemsForValidation,
+        cartTotal: totalPrice
+      });
+
+      if (res.data.success) {
+        setAppliedCoupon({
+          code: res.data.coupon.code,
+          discount: res.data.discount
+        });
+        setCouponError('');
+      }
+    } catch (error: any) {
+      setCouponError(error.response?.data?.message || 'Invalid coupon code');
+      setAppliedCoupon(null);
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <div className="bg-background min-h-screen py-8">
@@ -53,7 +102,10 @@ export default function CartPage() {
               <div className="divide-y divide-surface-border">
                 {items.map(item => {
                   const product = item.productId;
-                  const itemDiscount = Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100);
+                  if (!product) return null; // skip unpopulated items
+                  const mrp = product.mrp || 0;
+                  const sellingPrice = product.sellingPrice || 0;
+                  const itemDiscount = mrp > 0 ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
                   const image = product.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
                   return (
                   <div key={item.id} className="p-4 flex flex-col sm:flex-row gap-6">
@@ -87,10 +139,9 @@ export default function CartPage() {
                       <span className="text-xs text-text-secondary mt-1 mb-3">Seller: GadgetHub</span>
                       
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-lg font-bold text-text-primary">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
-                        <span className="text-sm text-text-muted line-through">₹{product.mrp.toLocaleString('en-IN')}</span>
-                        <span className="text-sm font-bold text-success">{itemDiscount}% Off</span>
-                        <span className="text-xs text-success ml-2">1 offer applied <span className="material-symbols-outlined text-[12px] align-middle">info</span></span>
+                        <span className="text-lg font-bold text-text-primary">₹{sellingPrice.toLocaleString('en-IN')}</span>
+                        {mrp > sellingPrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                        {itemDiscount > 0 && <span className="text-sm font-bold text-success">{itemDiscount}% Off</span>}
                       </div>
 
                       <div className="text-sm text-text-primary mt-auto">
@@ -132,13 +183,52 @@ export default function CartPage() {
         {items.length > 0 && !isLoading && (
           <div className="w-full lg:w-1/3">
             {/* Coupons / Offers */}
-            <div className="bg-white border border-surface-border rounded-sm shadow-sm p-4 mb-4 flex justify-between items-center cursor-pointer group hover:bg-surface transition-colors">
+            <div 
+              onClick={() => setShowCouponInput(!showCouponInput)}
+              className="bg-white border border-surface-border rounded-sm shadow-sm p-4 mb-4 flex justify-between items-center cursor-pointer group hover:bg-surface transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">local_offer</span>
                 <span className="font-medium text-text-primary group-hover:text-primary">Apply Coupons</span>
               </div>
-              <span className="material-symbols-outlined text-text-secondary group-hover:text-primary">chevron_right</span>
+              <span className="material-symbols-outlined text-text-secondary group-hover:text-primary">
+                {showCouponInput ? 'expand_more' : 'chevron_right'}
+              </span>
             </div>
+
+            {showCouponInput && (
+              <div className="bg-white border border-surface-border rounded-sm shadow-sm p-4 mb-4">
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="Enter Coupon Code" 
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    className="flex-grow border border-surface-border rounded-sm px-3 py-2 text-sm outline-none focus:border-primary uppercase"
+                  />
+                  <button 
+                    onClick={handleApplyCoupon}
+                    disabled={isApplying || !couponCode}
+                    className="bg-primary text-white px-4 py-2 rounded-sm text-sm font-bold disabled:opacity-50 hover:bg-primary-dark transition-colors"
+                  >
+                    {isApplying ? 'APPLYING...' : 'APPLY'}
+                  </button>
+                </div>
+                {couponError && <p className="text-error text-xs mt-2 font-medium">{couponError}</p>}
+                {appliedCoupon && (
+                  <div className="mt-3 p-3 bg-success/5 border border-success/20 rounded-sm flex justify-between items-center">
+                    <div>
+                      <p className="text-success text-sm font-bold flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                        &apos;{appliedCoupon.code}&apos; applied
+                      </p>
+                      <p className="text-success text-xs mt-0.5">You saved ₹{appliedCoupon.discount}</p>
+                    </div>
+                    <button onClick={() => setAppliedCoupon(null)} className="text-error text-xs font-bold hover:underline">REMOVE</button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Price Breakdown */}
             <div className="bg-white border border-surface-border rounded-sm shadow-sm sticky top-24">
@@ -154,6 +244,12 @@ export default function CartPage() {
                   <span>Discount</span>
                   <span>− ₹{totalDiscount.toLocaleString('en-IN')}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-success">
+                    <span>Coupon Discount</span>
+                    <span>− ₹{appliedCoupon.discount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
                   <span className={deliveryCharges === 0 ? "text-success" : ""}>
@@ -166,7 +262,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="p-4 bg-success/10 text-success text-sm font-medium rounded-b-sm border-t border-surface-border">
-                You will save ₹{totalDiscount.toLocaleString('en-IN')} on this order
+                You will save ₹{totalSavings.toLocaleString('en-IN')} on this order
               </div>
             </div>
             

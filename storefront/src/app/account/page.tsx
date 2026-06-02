@@ -5,13 +5,48 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useOrders } from '@/hooks/useApi';
+import { useOrders, useAddresses, useWishlist } from '@/hooks/useApi';
+import api from '@/lib/api';
+
+const getOrderStatusDisplay = (status: string) => {
+  switch (status) {
+    case 'PENDING': return { text: 'Payment Pending', color: 'text-yellow-600 bg-yellow-50 border border-yellow-200' };
+    case 'PROCESSING_PAYMENT': return { text: 'Processing Payment', color: 'text-yellow-600 bg-yellow-50 border border-yellow-200' };
+    case 'PAID':
+    case 'CONFIRMED': return { text: 'Order Confirmed', color: 'text-success bg-success/10 border border-success/20' };
+    case 'PACKED': return { text: 'Packed', color: 'text-success bg-success/10 border border-success/20' };
+    case 'SHIPPED': return { text: 'Shipped', color: 'text-primary bg-primary/10 border border-primary/20' };
+    case 'DELIVERED': return { text: 'Delivered', color: 'text-success bg-success/10 border border-success/20' };
+    case 'PAYMENT_FAILED': return { text: 'Payment Failed', color: 'text-danger bg-danger/10 border border-danger/20' };
+    case 'CANCELLED': return { text: 'Cancelled', color: 'text-text-secondary bg-surface border border-surface-border' };
+    default: return { text: status, color: 'text-text-secondary bg-surface border border-surface-border' };
+  }
+};
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, isAuthenticated, logout, openLoginModal } = useAuthStore();
+  const { user, isAuthenticated, logout, openLoginModal, updateUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState('orders');
   const { orders, isLoading: isLoadingOrders } = useOrders();
+  const { addresses, mutate: mutateAddresses } = useAddresses();
+  const { wishlist, isLoading: isLoadingWishlist, mutate: mutateWishlist } = useWishlist();
+  
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState({
+    name: '',
+    phone: '',
+    addressLine1: '',
+    addressLine2: '',
+    landmark: '',
+    city: '',
+    state: '',
+    pincode: ''
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -19,9 +54,86 @@ export default function AccountPage() {
     }
   }, [isAuthenticated, openLoginModal]);
 
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
+
   const handleLogout = () => {
     logout();
     router.push('/');
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      const res = await api.put('/users/me', { name, email });
+      if (res.data.success) {
+        alert("Profile updated successfully!");
+        updateUser({ name, email });
+      }
+    } catch (error: any) {
+      console.error("Failed to update profile", error);
+      alert(error.response?.data?.message || "Failed to update profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsSaving(true);
+      if (editingAddressId) {
+        await api.patch(`/addresses/${editingAddressId}`, addressForm);
+        alert('Address updated!');
+      } else {
+        await api.post('/addresses', addressForm);
+        alert('Address added!');
+      }
+      mutateAddresses();
+      setShowAddressForm(false);
+      setEditingAddressId(null);
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to save address');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!confirm('Delete this address?')) return;
+    try {
+      await api.delete(`/addresses/${id}`);
+      mutateAddresses();
+    } catch (error: any) {
+      alert('Failed to delete address');
+    }
+  };
+
+  const handleEditAddress = (addr: any) => {
+    setEditingAddressId(addr._id);
+    setAddressForm({
+      name: addr.name || '',
+      phone: addr.phone || '',
+      addressLine1: addr.addressLine1 || '',
+      addressLine2: addr.addressLine2 || '',
+      landmark: addr.landmark || '',
+      city: addr.city || '',
+      state: addr.state || '',
+      pincode: addr.pincode || ''
+    });
+    setShowAddressForm(true);
+  };
+  const handleRemoveFromWishlist = async (id: string) => {
+    try {
+      await api.post('/users/wishlist', { productId: id });
+      mutateWishlist();
+    } catch (error) {
+      console.error('Failed to remove from wishlist');
+    }
   };
 
   if (!isAuthenticated) {
@@ -143,11 +255,15 @@ export default function AccountPage() {
                     <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
                   </div>
                 ) : orders.length > 0 ? (
-                  orders.map((order: any) => (
+                  orders.map((order: any) => {
+                    const statusDisplay = getOrderStatusDisplay(order.status);
+                    return (
                     <div key={order._id} className="p-4 border-b border-surface-border hover:shadow-sm transition-shadow cursor-pointer">
                       <div className="flex justify-between items-center mb-4">
-                        <span className="text-xs text-text-secondary">Order ID: {order.orderNumber}</span>
-                        <span className="text-xs font-bold text-primary">{order.status}</span>
+                        <span className="text-xs text-text-secondary font-medium">Order ID: {order.orderNumber}</span>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider ${statusDisplay.color}`}>
+                          {statusDisplay.text}
+                        </span>
                       </div>
                       
                       <div className="space-y-4">
@@ -183,7 +299,8 @@ export default function AccountPage() {
                         <span className="text-xs text-text-secondary">Ordered on {new Date(order.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                  ))
+                  );
+                  })
                 ) : (
                   <div className="p-12 text-center text-text-secondary flex flex-col items-center">
                     <span className="material-symbols-outlined text-[48px] mb-4">production_quantity_limits</span>
@@ -201,28 +318,196 @@ export default function AccountPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div>
                     <label className="text-xs text-text-secondary font-medium uppercase mb-1 block">Full Name</label>
-                    <input type="text" className="w-full border border-surface-border rounded-sm px-4 py-2 bg-surface text-text-primary outline-none focus:border-primary" defaultValue={user?.name || ''} />
+                    <input 
+                      type="text" 
+                      className="w-full border border-surface-border rounded-sm px-4 py-2 bg-surface text-text-primary outline-none focus:border-primary" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
                   </div>
                 </div>
 
                 <h2 className="font-medium text-lg text-text-primary mb-6">Email Address</h2>
                 <div className="mb-8">
-                  <input type="email" className="w-full md:w-1/2 border border-surface-border rounded-sm px-4 py-2 bg-surface text-text-primary outline-none focus:border-primary" defaultValue={user?.email || ''} />
+                  <input 
+                    type="email" 
+                    className="w-full md:w-1/2 border border-surface-border rounded-sm px-4 py-2 bg-surface text-text-primary outline-none focus:border-primary" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
 
                 <h2 className="font-medium text-lg text-text-primary mb-6">Mobile Number</h2>
                 <div className="mb-8">
-                  <input type="tel" className="w-full md:w-1/2 border border-surface-border rounded-sm px-4 py-2 bg-surface text-text-primary outline-none focus:border-primary" defaultValue={user?.phone || ''} disabled />
+                  <input 
+                    type="tel" 
+                    className="w-full md:w-1/2 border border-surface-border rounded-sm px-4 py-2 bg-surface/50 text-text-secondary outline-none cursor-not-allowed" 
+                    value={user?.phone || ''} 
+                    disabled 
+                  />
                 </div>
 
-                <button className="bg-primary text-white font-bold px-8 py-3 rounded-sm shadow hover:bg-primary-dark transition-colors">
-                  SAVE CHANGES
+                <button 
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                  className="bg-primary text-white font-bold px-8 py-3 rounded-sm shadow hover:bg-primary-dark transition-colors disabled:opacity-50"
+                >
+                  {isSaving ? 'SAVING...' : 'SAVE CHANGES'}
                 </button>
               </div>
             )}
 
+            {/* Addresses View */}
+            {activeTab === 'addresses' && (
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="font-medium text-lg text-text-primary">Manage Addresses</h1>
+                  {!showAddressForm && (
+                    <button 
+                      onClick={() => {
+                        setEditingAddressId(null);
+                        setAddressForm({
+                          name: '', phone: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', pincode: ''
+                        });
+                        setShowAddressForm(true);
+                      }}
+                      className="bg-primary text-white px-4 py-2 rounded-sm text-sm font-bold shadow hover:bg-primary-dark transition-colors"
+                    >
+                      + ADD NEW ADDRESS
+                    </button>
+                  )}
+                </div>
+
+                {showAddressForm ? (
+                  <div className="bg-surface/50 border border-surface-border rounded p-6 mb-6">
+                    <h2 className="font-bold text-text-primary mb-4">{editingAddressId ? 'Edit Address' : 'Add New Address'}</h2>
+                    <form onSubmit={handleSaveAddress}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <input type="text" placeholder="Name" required value={addressForm.name} onChange={e => setAddressForm({...addressForm, name: e.target.value})} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm" />
+                        </div>
+                        <div>
+                          <input type="text" placeholder="10-digit mobile number" required value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm" />
+                        </div>
+                        <div>
+                          <input type="text" placeholder="Pincode" required value={addressForm.pincode} onChange={e => setAddressForm({...addressForm, pincode: e.target.value})} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm" />
+                        </div>
+                        <div>
+                          <input type="text" placeholder="Locality / Landmark" value={addressForm.landmark} onChange={e => setAddressForm({...addressForm, landmark: e.target.value})} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm" />
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <textarea placeholder="Address (Area and Street)" required value={addressForm.addressLine1} onChange={e => setAddressForm({...addressForm, addressLine1: e.target.value})} rows={3} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm"></textarea>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                          <input type="text" placeholder="City/District/Town" required value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm" />
+                        </div>
+                        <div>
+                          <input type="text" placeholder="State" required value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} className="w-full border border-surface-border rounded-sm px-4 py-2 outline-none focus:border-primary text-sm" />
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <button type="submit" disabled={isSaving} className="bg-primary text-white font-bold px-8 py-3 rounded-sm shadow hover:bg-primary-dark transition-colors disabled:opacity-50">
+                          {isSaving ? 'SAVING...' : 'SAVE'}
+                        </button>
+                        <button type="button" onClick={() => setShowAddressForm(false)} className="text-primary font-bold px-8 py-3 hover:bg-surface rounded-sm transition-colors">
+                          CANCEL
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {addresses.length > 0 ? addresses.map((addr: any) => (
+                      <div key={addr._id} className="border border-surface-border rounded p-4 flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-4 mb-2">
+                            <span className="font-bold text-text-primary text-sm">{addr.name}</span>
+                            <span className="font-bold text-text-primary text-sm">{addr.phone}</span>
+                          </div>
+                          <p className="text-sm text-text-secondary leading-relaxed max-w-lg">
+                            {addr.addressLine1}, {addr.addressLine2 ? addr.addressLine2 + ', ' : ''}
+                            {addr.landmark ? addr.landmark + ', ' : ''}
+                            {addr.city}, {addr.state} - <span className="font-medium text-text-primary">{addr.pincode}</span>
+                          </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 ml-4">
+                          <button onClick={() => handleEditAddress(addr)} className="text-text-secondary hover:text-primary transition-colors text-sm font-medium">EDIT</button>
+                          <button onClick={() => handleDeleteAddress(addr._id)} className="text-text-secondary hover:text-error transition-colors text-sm font-medium">DELETE</button>
+                        </div>
+                      </div>
+                    )) : (
+                      <p className="text-text-secondary">No addresses saved yet.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Wishlist View */}
+            {activeTab === 'wishlist' && (
+              <div className="p-8">
+                <h1 className="font-medium text-lg text-text-primary mb-6">My Wishlist ({wishlist?.length || 0})</h1>
+                
+                {isLoadingWishlist ? (
+                  <div className="flex justify-center p-12">
+                    <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+                  </div>
+                ) : wishlist && wishlist.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {wishlist.map((item: any) => {
+                      const image = item.images && item.images.length > 0 ? item.images[0].url : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
+                      const discount = Math.round(((item.mrp - item.sellingPrice) / item.mrp) * 100);
+                      
+                      return (
+                        <div key={item._id} className="border border-surface-border rounded-sm hover:shadow-lg transition-shadow bg-white flex flex-col group relative overflow-hidden">
+                          <button 
+                            onClick={() => handleRemoveFromWishlist(item._id)}
+                            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white border border-surface-border flex items-center justify-center text-text-muted hover:text-danger transition-colors opacity-0 group-hover:opacity-100"
+                            title="Remove from wishlist"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                          
+                          <Link href={`/product/${item._id}`} className="w-full aspect-square relative p-4 border-b border-surface-border">
+                            <Image src={image} alt={item.name} fill className="object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
+                          </Link>
+                          
+                          <div className="p-4 flex flex-col flex-grow">
+                            <Link href={`/product/${item._id}`} className="text-sm font-medium text-text-primary hover:text-primary transition-colors line-clamp-2 mb-2">
+                              {item.name}
+                            </Link>
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="bg-success text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                                {item.averageRating || 0} <span className="material-symbols-outlined text-[10px]">star</span>
+                              </div>
+                              <span className="text-text-secondary text-xs font-medium">
+                                ({item.totalReviews || 0})
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-auto pt-2">
+                              <span className="font-bold text-text-primary">₹{(item.sellingPrice || 0).toLocaleString('en-IN')}</span>
+                              <span className="text-xs text-text-muted line-through">₹{(item.mrp || 0).toLocaleString('en-IN')}</span>
+                              <span className="text-xs font-bold text-success">{discount}% off</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-12 text-center flex flex-col items-center">
+                    <span className="material-symbols-outlined text-[64px] text-surface-border mb-4">favorite_border</span>
+                    <h2 className="text-xl font-bold text-text-primary mb-2">Empty Wishlist</h2>
+                    <p className="text-text-secondary mb-6">You have no items in your wishlist. Start adding!</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Other views placeholder */}
-            {['addresses', 'wishlist', 'reviews'].includes(activeTab) && (
+            {['reviews'].includes(activeTab) && (
               <div className="p-12 text-center flex flex-col items-center justify-center h-full text-text-secondary">
                 <span className="material-symbols-outlined text-[64px] mb-4 opacity-20">construction</span>
                 <h2 className="text-xl font-bold text-text-primary mb-2">Section under construction</h2>
