@@ -73,9 +73,9 @@ export default function ProductGrid({ title, products, subtitle, timer }: Produc
               </div>
 
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-lg font-bold text-text-primary">₹{product.price.toLocaleString('en-IN')}</span>
-                <span className="text-xs text-text-muted line-through">₹{product.mrp.toLocaleString('en-IN')}</span>
-                <span className="text-xs font-bold text-success">{product.discount}% off</span>
+                <span className="text-lg font-bold text-text-primary">₹{(product.price || 0).toLocaleString('en-IN')}</span>
+                <span className="text-xs text-text-muted line-through">₹{(product.mrp || 0).toLocaleString('en-IN')}</span>
+                <span className="text-xs font-bold text-success">{product.discount || 0}% off</span>
               </div>
             </div>
           </div>
