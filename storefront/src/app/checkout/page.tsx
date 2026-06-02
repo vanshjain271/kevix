@@ -6,14 +6,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
-import { useAddresses } from '@/hooks/useApi';
+import { useAddresses, useSettings } from '@/hooks/useApi';
 import api from '@/lib/api';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, isAuthenticated, openLoginModal } = useAuthStore();
   const { items, isLoading: isCartLoading, fetchCart } = useCartStore();
-  const { addresses, isLoading: isAddressesLoading } = useAddresses();
+  const { addresses } = useAddresses();
+  const { settings } = useSettings();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [utr, setUtr] = useState('');
@@ -34,14 +35,17 @@ export default function CheckoutPage() {
     }
   }, [addresses, selectedAddress]);
 
-  // Calculations
-  const totalMrp = items.reduce((sum, item) => sum + (item.productId?.mrp * item.quantity), 0) || 0;
-  const totalPrice = items.reduce((sum, item) => sum + (item.productId?.sellingPrice * item.quantity), 0) || 0;
+  const totalMrp = items.reduce((sum, item) => sum + ((item.productId?.mrp || 0) * item.quantity), 0);
+  const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.sellingPrice || 0) * item.quantity), 0);
   const totalDiscount = totalMrp - totalPrice;
-  const deliveryCharges = totalPrice > 499 ? 0 : 40;
+  
+  const deliveryFeeSetting = settings?.deliveryFee ?? 40;
+  const freeDeliveryThreshold = settings?.freeDeliveryThreshold ?? 499;
+  const deliveryCharges = totalPrice >= freeDeliveryThreshold ? 0 : deliveryFeeSetting;
+  
   const orderTotal = totalPrice + deliveryCharges;
 
-  const upiId = 'arbuda@upi';
+  const upiId = settings?.upiId || 'arbuda@upi';
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
@@ -68,13 +72,12 @@ export default function CheckoutPage() {
           pincode: selectedAddress.pincode,
           phone: selectedAddress.phone
         },
-        paymentMode: 'UPI'
+        paymentMode: 'UPI',
+        utr: utr
       });
 
       if (res.data.success) {
-        // Order placed, maybe now initiate payment
-        // For MVP, just redirect to order success or clear cart
-        await fetchCart(); // will be empty
+        await fetchCart();
         router.push('/account');
       }
     } catch (error: any) {
@@ -179,21 +182,27 @@ export default function CheckoutPage() {
             {step === 2 && (
               <div>
                 <div className="p-4 border-t border-surface-border">
-                  {items.map(item => (
-                    <div key={item.id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
+                  {items.map(item => {
+                    const product = item.productId;
+                    if (!product) return null;
+                    const sellingPrice = product.sellingPrice || 0;
+                    const mrp = product.mrp || 0;
+                    return (
+                    <div key={item.id || item._id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
                       <div>
-                        <h3 className="font-medium text-text-primary">{item.productId.name}</h3>
+                        <h3 className="font-medium text-text-primary">{product.name}</h3>
                         <p className="text-sm text-text-secondary mt-1">Quantity: {item.quantity}</p>
                         <div className="flex items-baseline gap-2 mt-2">
-                          <span className="text-lg font-bold text-text-primary">₹{item.productId.sellingPrice.toLocaleString('en-IN')}</span>
-                          <span className="text-sm text-text-muted line-through">₹{item.productId.mrp.toLocaleString('en-IN')}</span>
+                          <span className="text-lg font-bold text-text-primary">₹{sellingPrice.toLocaleString('en-IN')}</span>
+                          {mrp > sellingPrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
                         </div>
                       </div>
                       <div className="text-sm text-text-primary text-right">
                         Delivery by <span className="font-medium">Tomorrow</span> | <span className="text-success">Free</span>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="p-4 bg-white border-t border-surface-border flex justify-between items-center">
                   <p className="text-sm text-text-primary">Order confirmation will be sent to <span className="font-medium">{user?.phone}</span></p>
@@ -233,8 +242,11 @@ export default function CheckoutPage() {
                     {/* QR Code */}
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-40 h-40 bg-surface border border-surface-border p-2 rounded-lg flex items-center justify-center">
-                        {/* Placeholder for QR Code */}
-                        <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Arbuda&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
+                        {settings?.paymentQrCode ? (
+                          <img src={settings.paymentQrCode} alt="Payment QR Code" className="w-full h-full object-contain" />
+                        ) : (
+                          <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Arbuda&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
+                        )}
                       </div>
                       <span className="text-xs text-text-secondary font-medium">Scan with any UPI app</span>
                     </div>
