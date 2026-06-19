@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /mnt/user-data/outputs/youthqit-admin
+cd /mnt/user-data/outputs/kevix-admin
 
 # DASHBOARD
 cat > src/pages/Dashboard.tsx << 'EOFILE'
@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Box>
               <Typography variant="h6" sx={{ mb: 1 }}>🏪 Your Store Link</Typography>
-              <Typography variant="body1" color="primary" sx={{ fontWeight: 500 }}>https://www.youthqit.com</Typography>
+              <Typography variant="body1" color="primary" sx={{ fontWeight: 500 }}>https://www.kevix.com</Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button variant="outlined" startIcon={<ContentCopy />}>COPY</Button>

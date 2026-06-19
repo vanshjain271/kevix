@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /mnt/user-data/outputs/youthqit-admin
+cd /mnt/user-data/outputs/kevix-admin
 
 # SIDEBAR
 cat > src/components/layout/Sidebar.tsx << 'EOFILE'
@@ -151,7 +151,7 @@ const Sidebar: React.FC = () => {
         <Box sx={{ width: 40, height: 40, borderRadius: 2, backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="h6" sx={{ color: SIDEBAR_BG, fontWeight: 700 }}>Y</Typography>
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>YouthQit</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>Kevix</Typography>
         <Typography sx={{ fontSize: 24 }}>👑</Typography>
       </Box>
 

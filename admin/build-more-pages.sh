@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /mnt/user-data/outputs/youthqit-admin
+cd /mnt/user-data/outputs/kevix-admin
 
 # CUSTOMER DETAILS
 cat > src/pages/CustomerDetails.tsx << 'EOFILE'

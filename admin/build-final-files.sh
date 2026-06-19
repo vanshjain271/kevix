@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /mnt/user-data/outputs/youthqit-admin
+cd /mnt/user-data/outputs/kevix-admin
 
 # ROUTES
 cat > src/routes.tsx << 'EOFILE'
@@ -90,7 +90,7 @@ echo "  - All Pages (Dashboard, Customers, Products, Orders, Settings)"
 echo "  - Routes and App configuration"
 echo ""
 echo "🚀 To run:"
-echo "  cd /mnt/user-data/outputs/youthqit-admin"
+echo "  cd /mnt/user-data/outputs/kevix-admin"
 echo "  npm install"
 echo "  cp .env.example .env"
 echo "  npm run dev"

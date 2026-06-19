@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "🚀 Generating Complete YouthQit Admin Panel..."
+echo "🚀 Generating Complete Kevix Admin Panel..."
 
 # Create directories
 mkdir -p src/{pages,components/{layout,customers,products,orders,settings,common},services,store/slices,theme,types,utils} public
@@ -822,7 +822,7 @@ EOF
 
 echo "✅ App setup complete!"
 echo ""
-echo "🎉 YouthQit Admin Panel Generated Successfully!"
+echo "🎉 Kevix Admin Panel Generated Successfully!"
 echo ""
 echo "📦 Next steps:"
 echo "1. npm install"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# YouthQit Admin Panel - Complete File Generator
-echo "🚀 Generating complete YouthQit Admin Panel..."
+# Kevix Admin Panel - Complete File Generator
+echo "🚀 Generating complete Kevix Admin Panel..."
 
 # Create all directories
 mkdir -p src/{pages,components/{layout,customers,products,orders,settings,common},services,store/slices,theme,types,utils}
@@ -70,7 +70,7 @@ cat > index.html << 'EOF'
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YouthQit Admin</title>
+    <title>Kevix Admin</title>
   </head>
   <body>
     <div id="root"></div>
