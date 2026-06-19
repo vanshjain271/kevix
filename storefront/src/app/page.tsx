@@ -22,7 +22,7 @@ export default function Home() {
     homepageSections: p.homepageSections || []
   }));
 
-  const dynamicSections = Array.from(new Set(formattedProducts.flatMap(p => p.homepageSections)));
+  const dynamicSections = Array.from(new Set(formattedProducts.flatMap((p: any) => p.homepageSections)));
 
   return (
     <div className="bg-background min-h-screen">
@@ -39,7 +39,7 @@ export default function Home() {
           <>
             {/* Dynamic Sections */}
             {dynamicSections.map((sectionName) => {
-              const sectionProducts = formattedProducts.filter(p => p.homepageSections.includes(sectionName));
+              const sectionProducts = formattedProducts.filter((p: any) => p.homepageSections.includes(sectionName));
               if (sectionProducts.length === 0) return null;
               
               return (
