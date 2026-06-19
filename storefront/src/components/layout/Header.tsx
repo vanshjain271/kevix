@@ -35,12 +35,12 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             {settings?.storeLogo ? (
-              <img src={settings.storeLogo} alt={settings.storeName || 'Store Logo'} className="h-8 object-contain" />
+              <img src={settings.storeLogo} alt={settings.storeName || 'Kevix'} className="h-8 object-contain" />
             ) : (
-              <span className="material-symbols-outlined text-3.5xl text-primary font-bold">devices</span>
+              <span className="material-symbols-outlined text-[32px] text-primary font-bold">diamond</span>
             )}
             <span className="text-2xl font-extrabold tracking-tight text-primary-dark">
-              {settings?.storeName || 'Arbuda'}
+              {settings?.storeName || 'Kevix'}
             </span>
           </Link>
 
@@ -68,7 +68,7 @@ export default function Header() {
             ) : (
               <button onClick={openLoginModal} className="flex flex-col items-center text-text-primary hover:text-primary transition-colors group">
                 <span className="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">person</span>
-                <span className="text-[10px] font-medium mt-1">Arbuda C...</span>
+                <span className="text-[10px] font-medium mt-1">Sign In</span>
               </button>
             )}
             
