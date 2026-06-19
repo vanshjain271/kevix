@@ -9,7 +9,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
+import { API_BASE_URL as API_BASE } from '../services/api.service';
 
 interface ImagePreview {
   id: string;

@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Visibility } from '@mui/icons-material';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
+import { API_BASE_URL as API_BASE } from '../services/api.service';
 
 interface BlogPost {
     _id: string;

@@ -20,10 +20,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import orderService from '../services/order.service';
-import apiClient from '../services/api.service';
+import apiClient, { API_BASE_URL as API_BASE } from '../services/api.service';
 import { OrderStatus } from '../types/api.types';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING: ['PROCESSING_PAYMENT', 'CANCELLED'],

@@ -5,9 +5,7 @@ import {
   CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Switch, FormControlLabel, Snackbar, MenuItem
 } from '@mui/material';
-import apiClient from '../services/api.service';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
+import apiClient, { API_BASE_URL as API_BASE } from '../services/api.service';
 
 interface Category {
   _id: string;

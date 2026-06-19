@@ -10,7 +10,7 @@ import {
 } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
+import { API_BASE_URL as API_BASE } from '../services/api.service';
 const COLORS = ['#7C3AED', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'];
 
 type DatePreset = '1w' | '1m' | '3m' | '6m' | '1y' | 'all';

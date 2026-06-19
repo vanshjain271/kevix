@@ -12,7 +12,7 @@ import {
 } from '@mui/icons-material';
 import customerService from '../services/customer.service';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
+import { API_BASE_URL as API_BASE } from '../services/api.service';
 
 const CustomerDetails: React.FC = () => {
   const { id } = useParams();
