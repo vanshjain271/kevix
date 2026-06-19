@@ -21,9 +21,11 @@ const { logActivity } = require('../services/activity.service');
 const getProducts = async (req, res) => {
   try {
     const Product = require('../models/Product');
-    const { page = 1, limit = 50, search, category, brand, status, sort } = req.query;
+    const { page = 1, limit = 50, search, category, brand, status, sort, isLot } = req.query;
 
     const query = {};
+    if (isLot === 'true') query.isLot = true;
+    if (isLot === 'false') query.isLot = { $ne: true };
 
     if (search) {
       query.$or = [
@@ -108,6 +110,9 @@ const createProduct = async (req, res) => {
     if (typeof productData.homepageSections === 'string') {
       try { productData.homepageSections = JSON.parse(productData.homepageSections); } catch (err) { console.error('Failed to parse homepageSections:', err); }
     }
+    if (typeof productData.lotDetails === 'string') {
+      try { productData.lotDetails = JSON.parse(productData.lotDetails); } catch (err) { console.error('Failed to parse lotDetails:', err); }
+    }
 
     const result = await ProductService.createProduct(productData, imageFiles);
 
@@ -161,6 +166,9 @@ const updateProduct = async (req, res) => {
     }
     if (typeof updates.homepageSections === 'string') {
       try { updates.homepageSections = JSON.parse(updates.homepageSections); } catch (err) { console.error('Failed to parse homepageSections:', err); }
+    }
+    if (typeof updates.lotDetails === 'string') {
+      try { updates.lotDetails = JSON.parse(updates.lotDetails); } catch (err) { console.error('Failed to parse lotDetails:', err); }
     }
 
     const result = await ProductService.updateProduct(productId, updates, newImageFiles);

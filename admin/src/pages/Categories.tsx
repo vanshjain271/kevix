@@ -133,8 +133,8 @@ const Categories: React.FC = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>Categories</Typography>
-        <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Category</Button>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Categories</Typography>
+        <Button variant="contained" startIcon={<Add />} onClick={openCreate} sx={{ boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.25)' }}>Add Category</Button>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

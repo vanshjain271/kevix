@@ -5,8 +5,9 @@
   "scripts": {
     "dev:backend": "npm run dev --prefix backend",
     "dev:admin": "npm run dev --prefix admin",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\"",
-    "install:all": "npm install && npm install --prefix backend && npm install --prefix admin"
+    "dev:storefront": "npm run dev --prefix storefront -- -p 3002",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\" \"npm run dev:storefront\"",
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix admin && npm install --prefix storefront"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

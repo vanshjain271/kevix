@@ -1,7 +1,7 @@
 {
-  "name": "gadgethub-backend",
+  "name": "kevix-backend",
   "version": "1.0.0",
-  "description": "GadgetHub B2B Wholesale Platform Backend",
+  "description": "Kevix B2B Wholesale Platform Backend",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

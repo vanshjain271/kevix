@@ -128,8 +128,8 @@ const Brands: React.FC = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>Brands</Typography>
-        <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Brand</Button>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Brands</Typography>
+        <Button variant="contained" startIcon={<Add />} onClick={openCreate} sx={{ boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.25)' }}>Add Brand</Button>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

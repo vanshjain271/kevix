@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Button, Typography } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Button, Typography, Avatar, Divider } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Dashboard, Receipt, ShoppingCart, Inventory, People, LocalOffer,
-  Assessment, Storefront, ExpandLess, ExpandMore,
-  SupervisedUserCircle, Language, History,
+  Assessment, ExpandLess, ExpandMore,
+  SupervisedUserCircle, Language, Settings, UnfoldMore
 } from '@mui/icons-material';
-import { SIDEBAR_WIDTH, SIDEBAR_BG, SIDEBAR_HOVER, SIDEBAR_ACTIVE } from '../../theme/theme';
+import { SIDEBAR_WIDTH, SIDEBAR_BG, SIDEBAR_HOVER, SIDEBAR_ACTIVE, SIDEBAR_ACTIVE_TEXT } from '../../theme/theme';
 
 interface NavItem {
   title: string;
@@ -17,10 +17,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: 'Dashboard', path: '/', icon: <Dashboard /> },
+  { title: 'Dashboard', path: '/', icon: <Dashboard fontSize="small" /> },
   {
     title: 'Orders',
-    icon: <ShoppingCart />,
+    icon: <ShoppingCart fontSize="small" />,
     children: [
       { title: 'Online Orders', path: '/orders/online', icon: <></> },
       { title: 'Purchase Orders', path: '/orders/purchase', icon: <></> },
@@ -28,32 +28,32 @@ const navItems: NavItem[] = [
       { title: 'Bulk Orders', path: '/bulk-orders', icon: <></> },
     ],
   },
-  { title: 'Invoices', path: '/invoices', icon: <Receipt /> },
+  { title: 'Invoices', path: '/invoices', icon: <Receipt fontSize="small" /> },
   {
     title: 'Catalog',
-    icon: <Inventory />,
+    icon: <Inventory fontSize="small" />,
     children: [
       { title: 'Products', path: '/catalog/products', icon: <></> },
+      { title: 'Product Lots', path: '/catalog/lots', icon: <></> },
       { title: 'Categories', path: '/catalog/categories', icon: <></> },
       { title: 'Brands', path: '/catalog/brands', icon: <></> },
       { title: 'Reviews', path: '/catalog/reviews', icon: <></> },
     ],
   },
-  { title: 'Customers', path: '/customers', icon: <People /> },
-  { title: 'Employees', path: '/employees', icon: <SupervisedUserCircle /> },
+  { title: 'Customers', path: '/customers', icon: <People fontSize="small" /> },
+
   {
     title: 'Promotions',
-    icon: <LocalOffer />,
+    icon: <LocalOffer fontSize="small" />,
     children: [
       { title: 'Coupons', path: '/promotions/coupons', icon: <></> },
       { title: 'Banners', path: '/promotions/banners', icon: <></> },
     ],
   },
-  { title: 'Reports', path: '/reports', icon: <Assessment /> },
-  { title: 'Activity Log', path: '/activity-log', icon: <History /> },
+  { title: 'Reports', path: '/reports', icon: <Assessment fontSize="small" /> },
   {
-    title: 'Online Store',
-    icon: <Storefront />,
+    title: 'Settings',
+    icon: <Settings fontSize="small" />,
     children: [
       { title: 'Store Settings', path: '/store/settings', icon: <></> },
       { title: 'Store Blog', path: '/store/blog', icon: <></> },
@@ -66,7 +66,6 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const { i18n } = useTranslation();
 
-  // Compute which sections should be open based on the current path
   const getInitialOpenItems = () => {
     const result: { [key: string]: boolean } = {};
     navItems.forEach((item) => {
@@ -107,25 +106,24 @@ const Sidebar: React.FC = () => {
 
     return (
       <React.Fragment key={item.title}>
-        <ListItem disablePadding>
+        <ListItem disablePadding sx={{ px: 1.5, mb: 0.5 }}>
           <ListItemButton
             onClick={() => handleItemClick(item)}
             sx={{
-              minHeight: 48,
-              px: depth === 0 ? 2.5 : 4,
-              py: 1,
-              color: active ? '#6D28D9' : '#1F2937',
+              minHeight: 36,
+              py: 0.5,
+              px: depth === 0 ? 1.5 : 4,
+              color: active ? SIDEBAR_ACTIVE_TEXT : '#475569',
               backgroundColor: active ? SIDEBAR_ACTIVE : 'transparent',
-              borderRadius: depth === 0 ? 2 : 0,
-              mx: depth === 0 ? 1 : 0,
+              borderRadius: 1.5,
               '&:hover': {
-                backgroundColor: depth === 0 ? SIDEBAR_HOVER : 'rgba(0, 0, 0, 0.04)',
-                color: '#6D28D9',
+                backgroundColor: SIDEBAR_HOVER,
+                color: SIDEBAR_ACTIVE_TEXT,
               },
             }}
           >
             {depth === 0 && (
-              <ListItemIcon sx={{ minWidth: 0, mr: 2, color: active ? '#6D28D9' : '#4B5563' }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: 1.5, color: active ? SIDEBAR_ACTIVE_TEXT : '#64748B' }}>
                 {item.icon}
               </ListItemIcon>
             )}
@@ -134,15 +132,16 @@ const Sidebar: React.FC = () => {
               primaryTypographyProps={{
                 fontSize: depth === 0 ? 14 : 13,
                 fontWeight: active ? 600 : 500,
+                color: active ? SIDEBAR_ACTIVE_TEXT : 'inherit',
               }}
             />
-            {hasChildren && (isOpen ? <ExpandLess /> : <ExpandMore />)}
+            {hasChildren && (isOpen ? <ExpandLess sx={{ fontSize: 16 }} /> : <ExpandMore sx={{ fontSize: 16, color: '#94A3B8' }} />)}
           </ListItemButton>
         </ListItem>
 
         {hasChildren && (
           <Collapse in={isOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
+            <List component="div" disablePadding sx={{ mb: 1 }}>
               {item.children!.map((child) => renderNavItem(child, depth + 1))}
             </List>
           </Collapse>
@@ -161,38 +160,62 @@ const Sidebar: React.FC = () => {
           width: SIDEBAR_WIDTH,
           boxSizing: 'border-box',
           backgroundColor: SIDEBAR_BG,
-          color: '#1F2937',
-          borderRight: '1px solid #E5E7EB',
+          color: '#0F172A',
+          borderRight: '1px solid #E2E8F0',
         },
       }}
     >
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-        <Box sx={{
-          width: 48, height: 48, borderRadius: 2,
-          background: 'linear-gradient(135deg, #A855F7 0%, #6D28D9 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          mb: 1, boxShadow: '0 4px 12px rgba(130,156,101,0.3)'
-        }}>
-          <Typography sx={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>A</Typography>
+      {/* Store Switcher */}
+      <Box sx={{ p: 2 }}>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            p: 1, 
+            borderRadius: 2, 
+            cursor: 'pointer',
+            '&:hover': { backgroundColor: SIDEBAR_HOVER }
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Avatar 
+              variant="rounded" 
+              sx={{ width: 32, height: 32, bgcolor: '#7C3AED', color: '#fff', fontWeight: 'bold', fontSize: 14 }}
+            >
+              KX
+            </Avatar>
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: 14, color: '#0F172A', lineHeight: 1.2 }}>Kevix</Typography>
+              <Typography sx={{ fontSize: 12, color: '#64748B' }}>Production Store</Typography>
+            </Box>
+          </Box>
+          <UnfoldMore sx={{ color: '#94A3B8', fontSize: 18 }} />
         </Box>
-        <Typography sx={{ color: '#1F2937', fontWeight: 700, fontSize: 14, letterSpacing: 1 }}>ARBUDA</Typography>
       </Box>
 
-      <List sx={{ px: 0, py: 1 }}>{navItems.map((item) => renderNavItem(item))}</List>
+      <List sx={{ px: 0, py: 1, flexGrow: 1 }}>{navItems.map((item) => renderNavItem(item))}</List>
 
       <Box sx={{ mt: 'auto', p: 2 }}>
+        <Divider sx={{ mb: 2, borderColor: '#E2E8F0' }} />
         {/* Language Switcher */}
         <Button
           fullWidth
+          variant="outlined"
           onClick={toggleLanguage}
-          startIcon={<Language />}
+          startIcon={<Language sx={{ fontSize: 18 }} />}
           sx={{
-            color: '#4B5563',
-            backgroundColor: '#F3F4F6',
-            '&:hover': { backgroundColor: '#E5E7EB' }
+            color: '#475569',
+            borderColor: '#E2E8F0',
+            backgroundColor: '#FFFFFF',
+            justifyContent: 'flex-start',
+            textTransform: 'none',
+            fontSize: 13,
+            fontWeight: 500,
+            '&:hover': { backgroundColor: SIDEBAR_HOVER, borderColor: '#CBD5E1' }
           }}
         >
-          {i18n.language === 'en' ? '🇮🇳 हिंदी' : '🇺🇸 English'}
+          {i18n.language === 'en' ? 'Switch to Hindi' : 'Switch to English'}
         </Button>
       </Box>
     </Drawer>

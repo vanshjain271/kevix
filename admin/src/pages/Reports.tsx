@@ -1,26 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, Tabs, Tab,
-  Paper, ToggleButtonGroup, ToggleButton, CircularProgress, Alert, Stack
+  Box, Typography, Card, CardContent, Grid, Button,
+  ToggleButtonGroup, ToggleButton, CircularProgress, Alert, Stack,
+  IconButton, Tooltip, Avatar
 } from '@mui/material';
 import {
   Download, ShoppingCart, People, Inventory,
-  TableChart, CalendarMonth, Receipt
+  CalendarMonth, Receipt, TrendingUp, ShowChart, ShoppingBag
 } from '@mui/icons-material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
-const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+const COLORS = ['#7C3AED', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'];
 
 type DatePreset = '1w' | '1m' | '3m' | '6m' | '1y' | 'all';
 
 const DATE_PRESETS: { label: string; value: DatePreset }[] = [
-  { label: '1 Week', value: '1w' },
-  { label: '1 Month', value: '1m' },
-  { label: '3 Months', value: '3m' },
-  { label: '6 Months', value: '6m' },
-  { label: '1 Year', value: '1y' },
-  { label: 'All Time', value: 'all' },
+  { label: '7D', value: '1w' },
+  { label: '1M', value: '1m' },
+  { label: '3M', value: '3m' },
+  { label: '6M', value: '6m' },
+  { label: '1Y', value: '1y' },
+  { label: 'ALL', value: 'all' },
 ];
 
 const getDateRange = (preset: DatePreset): { dateFrom?: string; dateTo?: string } => {
@@ -41,21 +42,19 @@ const getDateRange = (preset: DatePreset): { dateFrom?: string; dateTo?: string 
 };
 
 const Reports: React.FC = () => {
-  const [tab, setTab] = useState(0);
   const [datePreset, setDatePreset] = useState<DatePreset>('3m');
-  const [selectedReportType, setSelectedReportType] = useState('sales');
   const [salesByProduct, setSalesByProduct] = useState<any[]>([]);
   const [salesByCategory, setSalesByCategory] = useState<any[]>([]);
   const [summaryStats, setSummaryStats] = useState({ totalRevenue: 0, totalOrders: 0, totalCustomers: 0, productsSold: 0 });
   const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const [exportingType, setExportingType] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const reportTypes = [
-    { id: 'sales', label: 'Sales Report', icon: <ShoppingCart />, desc: 'Detailed breakdown of sales, taxes, and discounts.' },
-    { id: 'invoice', label: 'Invoice Report', icon: <Receipt />, desc: 'List of all generated invoices and their payment status.' },
-    { id: 'customer', label: 'Customer Report', icon: <People />, desc: 'Customer purchase history and acquisition data.' },
-    { id: 'inventory', label: 'Inventory Report', icon: <Inventory />, desc: 'Current stock levels, valuation, and SKU details.' },
+    { id: 'sales', label: 'Sales Data', icon: <ShoppingCart sx={{ color: '#3B82F6' }} />, color: '#EFF6FF' },
+    { id: 'invoice', label: 'Invoices', icon: <Receipt sx={{ color: '#10B981' }} />, color: '#ECFDF5' },
+    { id: 'customer', label: 'Customers', icon: <People sx={{ color: '#8B5CF6' }} />, color: '#F5F3FF' },
+    { id: 'inventory', label: 'Inventory', icon: <Inventory sx={{ color: '#F59E0B' }} />, color: '#FFFBEB' },
   ];
 
   const getAuthHeaders = () => ({
@@ -76,9 +75,8 @@ const Reports: React.FC = () => {
     setError('');
     try {
       const dateParams = buildDateParams();
-
       const [productRes, categoryRes, salesRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/reports/sales/by-product?limit=10&${dateParams}`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE}/admin/reports/sales/by-product?limit=5&${dateParams}`, { headers: getAuthHeaders() }),
         fetch(`${API_BASE}/admin/reports/sales/by-category?${dateParams}`, { headers: getAuthHeaders() }),
         fetch(`${API_BASE}/admin/reports/sales?${dateParams}`, { headers: getAuthHeaders() })
       ]);
@@ -101,172 +99,179 @@ const Reports: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load reports', err);
-      setError('Failed to load report data. Please try again.');
+      setError('Failed to load analytics data.');
     }
     setLoading(false);
   }, [buildDateParams]);
 
-  useEffect(() => {
-    loadReports();
-  }, [loadReports]);
+  useEffect(() => { loadReports(); }, [loadReports]);
 
-  const exportReport = async (type: string, format: 'csv' | 'xlsx') => {
-    setExporting(true);
+  const exportReport = async (type: string) => {
+    setExportingType(type);
     try {
       const dateParams = buildDateParams();
-      const url = `${API_BASE}/admin/reports/${type}?format=${format}&${dateParams}`;
+      const url = `${API_BASE}/admin/reports/${type}?format=xlsx&${dateParams}`;
       const response = await fetch(url, { headers: getAuthHeaders() });
       if (!response.ok) throw new Error('Export failed');
       const blob = await response.blob();
       const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      const presetLabel = DATE_PRESETS.find(p => p.value === datePreset)?.label?.replace(/\s/g, '-') || 'all';
-      a.download = `${type}-report-${presetLabel}-${new Date().toISOString().split('T')[0]}.${format === 'csv' ? 'csv' : 'xlsx'}`;
+      const presetLabel = DATE_PRESETS.find(p => p.value === datePreset)?.label || 'ALL';
+      a.download = `${type}-report-${presetLabel}-${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
     } catch (err) {
       console.error('Export failed:', err);
-      setError('Export failed. Please try again.');
+      setError(`Failed to export ${type} report.`);
     }
-    setExporting(false);
+    setExportingType(null);
   };
 
   const presetLabel = DATE_PRESETS.find(p => p.value === datePreset)?.label || '';
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>Reports & Analytics</Typography>
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" startIcon={<TableChart />}>History</Button>
-          <Button variant="contained" startIcon={<Download />}>Generate</Button>
-        </Stack>
+    <Box sx={{ pb: 4 }}>
+      {/* Top Header & Controls */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>Analytics Overview</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B', mt: 0.5 }}>Monitor your store's performance and download reports.</Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#fff', p: 0.5, borderRadius: 2, border: '1px solid #E2E8F0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', pl: 1.5, pr: 1 }}>
+            <CalendarMonth sx={{ color: '#94A3B8', fontSize: 18 }} />
+          </Box>
+          <ToggleButtonGroup
+            value={datePreset}
+            exclusive
+            onChange={(_, v) => v && setDatePreset(v)}
+            size="small"
+            sx={{
+              '& .MuiToggleButton-root': {
+                border: 'none', px: 2, py: 0.5, borderRadius: 1.5, textTransform: 'none', fontWeight: 600, color: '#64748B',
+                '&.Mui-selected': { bgcolor: '#F8FAFC', color: '#0F172A', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+                '&:hover': { bgcolor: '#F1F5F9' }
+              }
+            }}
+          >
+            {DATE_PRESETS.map(p => <ToggleButton key={p.value} value={p.value}>{p.label}</ToggleButton>)}
+          </ToggleButtonGroup>
+        </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Left Column: Report Selector & Export settings */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3, mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Select Report</Typography>
-              <Stack spacing={1}>
-                {reportTypes.map((rt) => (
-                  <Paper
-                    key={rt.id}
-                    onClick={() => setSelectedReportType(rt.id)}
-                    sx={{
-                      p: 2, borderRadius: 2, cursor: 'pointer', border: '1px solid',
-                      borderColor: selectedReportType === rt.id ? 'primary.main' : 'transparent',
-                      backgroundColor: selectedReportType === rt.id ? '#F0F9FF' : '#F8FAFC'
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-                      <Box sx={{ color: selectedReportType === rt.id ? 'primary.main' : 'text.secondary' }}>{rt.icon}</Box>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: selectedReportType === rt.id ? 'primary.main' : 'text.primary' }}>{rt.label}</Typography>
-                        <Typography variant="caption" color="text.secondary">{rt.desc}</Typography>
-                      </Box>
-                    </Box>
-                  </Paper>
-                ))}
-              </Stack>
-            </CardContent>
-          </Card>
+      {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
 
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Export Settings</Typography>
-              <Button
-                variant="contained" fullWidth startIcon={<Download />} disabled={exporting}
-                onClick={() => exportReport(selectedReportType, 'xlsx')}
-                sx={{ borderRadius: 2 }}
-              >
-                {exporting ? 'Generating...' : 'Download Excel'}
-              </Button>
+      {/* KPI Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {[
+          { label: 'Total Revenue', value: `₹${summaryStats.totalRevenue.toLocaleString()}`, icon: <TrendingUp />, color: '#7C3AED', bg: '#F5F3FF' },
+          { label: 'Total Orders', value: summaryStats.totalOrders.toLocaleString(), icon: <ShoppingBag />, color: '#3B82F6', bg: '#EFF6FF' },
+          { label: 'Unique Customers', value: summaryStats.totalCustomers.toLocaleString(), icon: <People />, color: '#10B981', bg: '#ECFDF5' },
+          { label: 'Items Sold', value: summaryStats.productsSold.toLocaleString(), icon: <Inventory />, color: '#F59E0B', bg: '#FFFBEB' },
+        ].map((stat, i) => (
+          <Grid item xs={12} sm={6} md={3} key={i}>
+            <Card sx={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative', overflow: 'visible' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ color: '#64748B', fontWeight: 600 }}>{stat.label}</Typography>
+                  <Avatar sx={{ bgcolor: stat.bg, color: stat.color, width: 36, height: 36 }}>
+                    {stat.icon}
+                  </Avatar>
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
+                  {loading ? <CircularProgress size={24} sx={{ my: 1 }} /> : stat.value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Charts Section */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={8}>
+          <Card sx={{ borderRadius: 4, height: '100%', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#0F172A' }}>Top Selling Products</Typography>
+              <Box sx={{ height: 320, width: '100%' }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={salesByProduct} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E2E8F0" />
+                      <XAxis type="number" hide />
+                      <YAxis type="category" dataKey="productName" width={150} tick={{ fontSize: 12, fill: '#475569', fontWeight: 500 }} axisLine={false} tickLine={false} />
+                      <RechartsTooltip cursor={{ fill: '#F8FAFC' }} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                      <Bar dataKey="totalRevenue" fill="#7C3AED" radius={[0, 4, 4, 0]} barSize={32} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </Box>
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Right Column: Visualization & Data */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ p: 2, mb: 3, borderRadius: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <CalendarMonth color="action" />
-              <ToggleButtonGroup
-                value={datePreset}
-                exclusive
-                onChange={(_, v) => v && setDatePreset(v)}
-                size="small"
-              >
-                {DATE_PRESETS.map(p => (
-                  <ToggleButton key={p.value} value={p.value} sx={{ px: 2, textTransform: 'none' }}>{p.label}</ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-              {loading && <CircularProgress size={20} />}
-            </Box>
+        
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 4, height: '100%', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: '#0F172A' }}>Category Share</Typography>
+              <Typography variant="caption" sx={{ color: '#64748B', mb: 2, display: 'block' }}>Revenue distribution</Typography>
+              <Box sx={{ flexGrow: 1, minHeight: 280 }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={salesByCategory} dataKey="totalRevenue" nameKey="categoryName" cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2}>
+                        {salesByCategory.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="none" />)}
+                      </Pie>
+                      <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 12, color: '#475569', paddingTop: '20px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </Box>
+            </CardContent>
           </Card>
-
-          {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
-
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            {[
-              { label: 'Revenue', value: `₹${summaryStats.totalRevenue.toLocaleString()}`, color: '#2563EB' },
-              { label: 'Orders', value: summaryStats.totalOrders, color: '#F59E0B' },
-              { label: 'Customers', value: summaryStats.totalCustomers, color: '#10B981' },
-              { label: 'Sold', value: summaryStats.productsSold, color: '#8B5CF6' },
-            ].map((stat, i) => (
-              <Grid item xs={6} sm={3} key={i}>
-                <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2, backgroundColor: '#F8FAFC' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: stat.color }}>{stat.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
-            <Tab label="Products" />
-            <Tab label="Categories" />
-          </Tabs>
-
-          {tab === 0 && (
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Top Products — {presetLabel}</Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={salesByProduct.slice(0, 5)} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" hide />
-                    <YAxis type="category" dataKey="productName" width={100} tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Bar dataKey="totalRevenue" fill="#2563EB" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {tab === 1 && (
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Category Share — {presetLabel}</Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie data={salesByCategory} dataKey="totalRevenue" nameKey="categoryName" cx="50%" cy="50%" outerRadius={80} label>
-                      {salesByCategory.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
         </Grid>
       </Grid>
+
+      {/* Export Modules Row */}
+      <Typography variant="h6" sx={{ mb: 2, mt: 1, fontWeight: 700, color: '#0F172A' }}>Export Reports (Excel)</Typography>
+      <Grid container spacing={3}>
+        {reportTypes.map((rt) => (
+          <Grid item xs={12} sm={6} md={3} key={rt.id}>
+            <Card sx={{ borderRadius: 3, border: '1px solid #E2E8F0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', '&:hover': { borderColor: '#CBD5E1', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }, transition: 'all 0.2s' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ bgcolor: rt.color, width: 40, height: 40 }}>{rt.icon}</Avatar>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0F172A' }}>{rt.label}</Typography>
+                  </Box>
+                  <Tooltip title={`Download ${rt.label}`}>
+                    <span>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => exportReport(rt.id)} 
+                        disabled={exportingType !== null}
+                        sx={{ bgcolor: '#F8FAFC', color: '#475569', border: '1px solid #E2E8F0', '&:hover': { bgcolor: '#fff', color: '#7C3AED', borderColor: '#7C3AED' } }}
+                      >
+                        {exportingType === rt.id ? <CircularProgress size={16} /> : <Download fontSize="small" />}
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
     </Box>
   );
 };

@@ -19,7 +19,10 @@ export default function Home() {
     rating: p.averageRating || 4.5,
     reviews: p.totalReviews || 0,
     isAssured: true,
+    homepageSections: p.homepageSections || []
   }));
+
+  const dynamicSections = Array.from(new Set(formattedProducts.flatMap(p => p.homepageSections)));
 
   return (
     <div className="bg-background min-h-screen">
@@ -34,6 +37,24 @@ export default function Home() {
           </div>
         ) : formattedProducts.length > 0 ? (
           <>
+            {/* Dynamic Sections */}
+            {dynamicSections.map((sectionName) => {
+              const sectionProducts = formattedProducts.filter(p => p.homepageSections.includes(sectionName));
+              if (sectionProducts.length === 0) return null;
+              
+              return (
+                <div key={sectionName as string} className="mt-6">
+                  <div className="bg-white py-2 border-y border-surface-border mb-4">
+                    <ProductGrid 
+                      title={sectionName as string} 
+                      subtitle={`Explore our ${sectionName} collection`}
+                      products={sectionProducts} 
+                    />
+                  </div>
+                </div>
+              );
+            })}
+
             {/* All Products */}
             <div className="mt-6">
               <div className="bg-white py-2 border-y border-surface-border mb-4">

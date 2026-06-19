@@ -1,4 +1,4 @@
-# Arbuda Accessories (GadgetHub)
+# Arbuda Accessories (Kevix)
 
 A customer-friendly, premium modern Indian e-commerce platform specializing in high-quality mobile accessories, chargers, cables, earbuds, neckbands, smartwatches, power banks, and other electronic gadgets.
 
@@ -48,7 +48,7 @@ The codebase is organized as a monorepo containing three core sub-applications:
 3. Configure the `.env` file (refer to `.env.example` if present, or create one):
    ```env
    PORT=5001
-   MONGODB_URI=mongodb://localhost:271017/gadgethub
+   MONGODB_URI=mongodb://localhost:271017/kevix
    JWT_SECRET=your_jwt_secret_key
    ```
 4. Start the backend in development mode:

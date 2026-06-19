@@ -32,7 +32,7 @@ const STATUS_COLORS: Record<string, any> = {
   CANCELLED: 'error',
 };
 
-const STORAGE_KEY = 'gadgethub_purchase_orders';
+const STORAGE_KEY = 'kevix_purchase_orders';
 
 const generatePONumber = () => {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');

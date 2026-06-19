@@ -16,10 +16,10 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
-const ADMIN_EMAIL = 'admin@gadgethub.com';
+const ADMIN_EMAIL = 'admin@kevix.in';
 const ADMIN_PASSWORD = 'admin123';
 const ADMIN_PHONE = '9999999999';
-const ADMIN_NAME = 'GadgetHub Admin';
+const ADMIN_NAME = 'Kevix Admin';
 
 const seedAdmin = async () => {
   try {

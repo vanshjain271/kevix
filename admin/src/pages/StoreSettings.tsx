@@ -58,8 +58,8 @@ interface StoreSettingsData {
 }
 
 const defaultSettings: StoreSettingsData = {
-  storeName: 'Arbuda Store',
-  storeEmail: 'contact@gadgethub.com',
+  storeName: 'Kevix',
+  storeEmail: 'contact@kevix.in',
   storePhone: '9876543210',
   storeAddress: 'Mumbai, India',
   storeLogo: '',
@@ -85,7 +85,7 @@ const defaultSettings: StoreSettingsData = {
   razorpayEnabled: false,
   autoConfirmOrders: false,
   orderNotes: '',
-  metaTitle: 'Arbuda - Mobile Accessories Store',
+  metaTitle: 'Kevix - Arbuda Accessories',
   metaDescription: 'Best quality mobile accessories at affordable prices',
   metaKeywords: 'mobile, accessories, phone, cases, earphones',
   smsNotifications: true,
@@ -178,8 +178,10 @@ const StoreSettings: React.FC = () => {
       case 'store':
         return (
           <>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>Store Details</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ mb: 1, fontWeight: 700, color: '#0F172A' }}>Store Details</Typography>
+              <Typography variant="body2" sx={{ mb: 3, color: '#64748B' }}>Basic information about your store that appears on your website.</Typography>
+              <Paper sx={{ p: { xs: 2.5, md: 4 }, borderRadius: 4, border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: 3.5, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.02), 0 2px 4px -2px rgb(0 0 0 / 0.02)' }}>
               <TextField
                 fullWidth
                 label="Store Name"
@@ -214,7 +216,7 @@ const StoreSettings: React.FC = () => {
                 onChange={(e) => setSettings({ ...settings, storeLogo: e.target.value })}
                 helperText="Enter URL of your store logo"
               />
-              <Divider sx={{ my: 1 }} />
+              {/* <Divider sx={{ my: 1 }} />
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Announcement Ticker</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <FormControlLabel
@@ -279,7 +281,8 @@ const StoreSettings: React.FC = () => {
                     Delete
                   </Button>
                 </Paper>
-              ))}
+              ))} */}
+              </Paper>
             </Box>
           </>
         );
@@ -768,40 +771,78 @@ const StoreSettings: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: 800 }}>Store Settings</Typography>
+      <Box sx={{ mb: 5 }}>
+        <Typography variant="h4" sx={{ 
+          fontWeight: 800, 
+          background: 'linear-gradient(135deg, #0F172A 0%, #475569 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.02em'
+        }}>
+          Store Settings
+        </Typography>
+        <Typography variant="body1" sx={{ color: '#64748B', mt: 1, fontWeight: 500 }}>Manage your store's configuration and appearance</Typography>
+      </Box>
 
       <Grid container spacing={4}>
         <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 1.5, borderRadius: 3, border: '1px solid #E2E8F0', bgcolor: '#F8FAFC' }}>
-            <List>
+          <Box sx={{ position: 'sticky', top: 88 }}>
+            <List sx={{ px: 0 }}>
               {sections.map((section) => (
-                <ListItem key={section.id} disablePadding sx={{ mb: 0.5 }}>
+                <ListItem key={section.id} disablePadding sx={{ mb: 1 }}>
                   <ListItemButton
                     selected={selectedSection === section.id}
                     onClick={() => setSelectedSection(section.id)}
                     sx={{
-                      borderRadius: 2,
-                      '&.Mui-selected': { bgcolor: 'primary.main', color: '#fff', '& .MuiListItemIcon-root': { color: '#fff' } },
-                      '&:hover': { bgcolor: selectedSection === section.id ? 'primary.main' : '#E2E8F0' }
+                      borderRadius: 3,
+                      py: 1.2,
+                      px: 2,
+                      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                      borderLeft: '4px solid transparent',
+                      '&.Mui-selected': { 
+                        bgcolor: 'rgba(124, 58, 237, 0.06)', 
+                        color: 'primary.main', 
+                        borderLeft: '4px solid #7C3AED',
+                        '& .MuiListItemIcon-root': { color: 'primary.main' } 
+                      },
+                      '&:hover': { 
+                        bgcolor: selectedSection === section.id ? 'rgba(124, 58, 237, 0.1)' : '#F8FAFC',
+                        transform: 'translateX(4px)'
+                      }
                     }}
                   >
-                    <ListItemIcon sx={{ minWidth: 36, color: selectedSection === section.id ? '#fff' : 'text.secondary' }}>{section.icon}</ListItemIcon>
-                    <ListItemText primary={section.label} primaryTypographyProps={{ fontSize: 13, fontWeight: 600 }} />
+                    <ListItemIcon sx={{ minWidth: 44, color: selectedSection === section.id ? 'primary.main' : '#94A3B8', transition: 'color 0.2s' }}>
+                      {React.cloneElement(section.icon as React.ReactElement, { fontSize: 'small' })}
+                    </ListItemIcon>
+                    <ListItemText primary={section.label} primaryTypographyProps={{ fontSize: 14, fontWeight: selectedSection === section.id ? 700 : 500 }} />
                   </ListItemButton>
                 </ListItem>
               ))}
             </List>
-          </Paper>
+          </Box>
         </Grid>
         <Grid item xs={12} md={9}>
           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Box sx={{ flex: 1 }}>
               {renderContent()}
             </Box>
-            <Divider sx={{ my: 4 }} />
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pb: 4 }}>
-              <Button variant="outlined" sx={{ borderRadius: 2, textTransform: 'none' }} onClick={loadSettings}>Discard</Button>
-              <Button variant="contained" sx={{ borderRadius: 2, textTransform: 'none', px: 4 }} onClick={handleSave} disabled={saving}>
+            <Box sx={{ 
+              position: 'sticky', 
+              bottom: 24, 
+              mt: 6,
+              p: 2.5, 
+              display: 'flex', 
+              gap: 2, 
+              justifyContent: 'flex-end',
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(226, 232, 240, 0.8)',
+              borderRadius: 4,
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+              zIndex: 10
+            }}>
+              <Button variant="outlined" sx={{ borderRadius: 2.5, textTransform: 'none', px: 3, fontWeight: 600, borderColor: '#E2E8F0', color: '#475569', '&:hover': { bgcolor: '#F8FAFC', borderColor: '#CBD5E1' } }} onClick={loadSettings}>Discard Changes</Button>
+              <Button variant="contained" sx={{ borderRadius: 2.5, textTransform: 'none', px: 5, fontWeight: 600, background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)', boxShadow: '0 4px 14px 0 rgba(124, 58, 237, 0.39)', '&:hover': { boxShadow: '0 6px 20px rgba(124, 58, 237, 0.23)' } }} onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving...' : 'Save Settings'}
               </Button>
             </Box>

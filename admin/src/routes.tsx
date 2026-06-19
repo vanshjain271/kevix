@@ -9,6 +9,8 @@ import Products from './pages/Products';
 import ProductForm from './pages/ProductForm';
 import Categories from './pages/Categories';
 import Brands from './pages/Brands';
+import LotsList from './pages/LotsList';
+import LotForm from './pages/LotForm';
 import Orders from './pages/Orders';
 import PurchaseOrders from './pages/PurchaseOrders';
 import AbandonedCarts from './pages/AbandonedCarts';
@@ -46,6 +48,10 @@ export const router = createBrowserRouter([
       { path: 'catalog/products/new', element: <ProductForm /> },
       { path: 'catalog/products/:id', element: <ProductForm /> },
       { path: 'catalog/products/edit/:id', element: <ProductForm /> },
+      { path: 'catalog/lots', element: <LotsList /> },
+      { path: 'catalog/lots/new', element: <LotForm /> },
+      { path: 'catalog/lots/:id', element: <LotForm /> },
+      { path: 'catalog/lots/edit/:id', element: <LotForm /> },
       { path: 'catalog/categories', element: <Categories /> },
       { path: 'catalog/brands', element: <Brands /> },
       { path: 'catalog/reviews', element: <Reviews /> },
@@ -55,7 +61,7 @@ export const router = createBrowserRouter([
       { path: 'customers/:id', element: <CustomerDetails /> },
 
       // Employees (RBAC)
-      { path: 'employees', element: <Employees /> },
+      // { path: 'employees', element: <Employees /> },
 
       // Promotions
       { path: 'promotions/coupons', element: <Coupons /> },
@@ -70,7 +76,7 @@ export const router = createBrowserRouter([
       { path: 'bulk-orders', element: <BulkOrders /> },
 
       // Activity Log
-      { path: 'activity-log', element: <ActivityLog /> },
+      // { path: 'activity-log', element: <ActivityLog /> },
     ],
   },
 ]);

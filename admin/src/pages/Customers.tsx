@@ -20,7 +20,7 @@ const Customers: React.FC = () => {
       field: 'type',
       headerName: 'Type',
       width: 120,
-      renderCell: (params) => <Chip label={params.value} size="small" color={params.value === 'RETAILER' ? 'primary' : 'default'} />
+      renderCell: (params) => <Chip label={params.value} size="small" color={params.value === 'RETAILER' ? 'primary' : 'default'} sx={{ fontWeight: 600 }} />
     },
     { field: 'totalOrders', headerName: 'Orders', width: 100 },
     {
@@ -35,11 +35,13 @@ const Customers: React.FC = () => {
       width: 150,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button size="small" onClick={() => navigate(`/customers/${params.row._id}`)}>View</Button>
+          <Button size="small" variant="outlined" onClick={() => navigate(`/customers/${params.row._id}`)} sx={{ bgcolor: '#fff' }}>View</Button>
           <Button
             size="small"
+            variant="contained"
             startIcon={<WhatsApp />}
             color="success"
+            sx={{ boxShadow: 'none' }}
             onClick={() => {
               const phone = (params.row.phone || '').replace(/\D/g, '');
               if (phone) window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91' + phone}`, '_blank');
@@ -58,7 +60,6 @@ const Customers: React.FC = () => {
     setLoading(true);
     try {
       const response = await customerService.getCustomers(1, 50, search) as any;
-      // Robust extraction
       const list = response?.data?.customers || response?.customers || (Array.isArray(response?.data) ? response.data : []) || (Array.isArray(response) ? response : []);
       setCustomers(list);
     } catch (error) {
@@ -95,21 +96,26 @@ const Customers: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>Customers</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Customers</Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" startIcon={<Download />} onClick={exportCustomersCSV}>Export CSV</Button>
-          <Button variant="contained" startIcon={<Add />} onClick={() => navigate('/customers/new')}>Add Customer</Button>
+          <Button variant="outlined" startIcon={<Download />} onClick={exportCustomersCSV} sx={{ bgcolor: '#fff', borderColor: '#E2E8F0', color: '#475569' }}>
+            Export CSV
+          </Button>
+          <Button variant="contained" startIcon={<Add />} onClick={() => navigate('/customers/new')} sx={{ boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.25)' }}>
+            Add Customer
+          </Button>
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
         <TextField
-          placeholder="Search customers..."
+          placeholder="Search customers by name, email or phone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
-          sx={{ width: 400 }}
+          size="small"
+          InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+          sx={{ width: 400, bgcolor: '#fff' }}
         />
       </Box>
 
@@ -121,11 +127,12 @@ const Customers: React.FC = () => {
         initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
         pageSizeOptions={[25, 50, 100]}
         disableRowSelectionOnClick
+        autoHeight
         sx={{ backgroundColor: '#fff', borderRadius: 2 }}
       />
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>{snackbar.message}</Alert>
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })} sx={{ borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );

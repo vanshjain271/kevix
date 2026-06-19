@@ -151,6 +151,18 @@ const productSchema = new mongoose.Schema({
     min: [0, 'Tax rate cannot be negative'],
     max: [100, 'Tax rate cannot exceed 100']
   },
+  // Lot Purchasing Features
+  isLot: {
+    type: Boolean,
+    default: false
+  },
+  lotDetails: {
+    fullLotQuantity: { type: Number, default: 0 },
+    fullLotPrice: { type: Number, default: 0 },
+    allowHalfLot: { type: Boolean, default: false },
+    halfLotQuantity: { type: Number, default: 0 },
+    halfLotPrice: { type: Number, default: 0 }
+  },
   // Variants
   variants: {
     type: [variantSchema],
@@ -208,7 +220,7 @@ const productSchema = new mongoose.Schema({
   // Homepage toggles
   homepageSections: [{
     type: String,
-    enum: ['TRENDING', 'NEW_ARRIVAL', 'PREMIUM_CASES', 'CABLES', 'ADAPTERS', 'FEATURED'],
+    trim: true,
     default: []
   }],
   // Bulk/Tiered Pricing

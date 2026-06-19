@@ -57,7 +57,8 @@ router.get('/dashboard', auth.adminOnly, async (req, res) => {
             totalProducts,
             recentOrders,
             lowStockProducts,
-            abandonedCartsCount,
+            wishlistStats,
+            topWishlisted,
             ordersByStatus,
             salesByDay,
         ] = await Promise.all([
@@ -78,17 +79,26 @@ router.get('/dashboard', auth.adminOnly, async (req, res) => {
                 $expr: { $lte: ['$stock', '$lowStockThreshold'] },
                 isActive: true
             }),
-            Cart.countDocuments({
-                'items.0': { $exists: true },
-                lastModified: { $gte: startDate, $lt: abandonedThreshold }
-            }),
+            User.aggregate([
+                { $unwind: "$wishlist" },
+                { $group: { _id: null, totalItems: { $sum: 1 }, uniqueProducts: { $addToSet: "$wishlist" } } }
+            ]),
+            User.aggregate([
+                { $unwind: "$wishlist" },
+                { $group: { _id: "$wishlist", count: { $sum: 1 } } },
+                { $sort: { count: -1 } },
+                { $limit: 5 },
+                { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'product' } },
+                { $unwind: "$product" },
+                { $project: { _id: 1, count: 1, name: "$product.name", category: "$product.category" } }
+            ]),
             Order.aggregate([
                 { $match: { createdAt: { $gte: startDate } } },
                 { $group: { _id: '$status', count: { $sum: 1 } } }
             ]),
             Order.aggregate([
                 { $match: { createdAt: { $gte: startDate }, status: { $in: ['DELIVERED', 'SHIPPED', 'CONFIRMED', 'PAID', 'PACKED'] } } },
-                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, amount: { $sum: '$totalAmount' } } },
+                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, amount: { $sum: '$totalAmount' }, ordersCount: { $sum: 1 } } },
                 { $sort: { _id: 1 } }
             ]),
         ]);
@@ -98,7 +108,7 @@ router.get('/dashboard', auth.adminOnly, async (req, res) => {
 
         // Fill in missing days for salesByDay to make chart look continuous
         const salesDataMap = {};
-        salesByDay.forEach(d => { salesDataMap[d._id] = Math.round(d.amount); });
+        salesByDay.forEach(d => { salesDataMap[d._id] = { amount: Math.round(d.amount), count: d.ordersCount }; });
 
         const salesData = [];
         const curr = new Date(startDate);
@@ -115,7 +125,8 @@ router.get('/dashboard', auth.adminOnly, async (req, res) => {
             const dateStr = loopDate.toISOString().split('T')[0];
             salesData.push({
                 date: dateStr,
-                amount: salesDataMap[dateStr] || 0
+                amount: salesDataMap[dateStr]?.amount || 0,
+                orders: salesDataMap[dateStr]?.count || 0
             });
             loopDate.setDate(loopDate.getDate() + 1);
         }
@@ -125,7 +136,11 @@ router.get('/dashboard', auth.adminOnly, async (req, res) => {
             totalRevenue: totalRevenue[0]?.total || 0,
             totalOrders,
             totalCustomers,
-            abandonedCarts: abandonedCartsCount,
+            wishlistData: {
+                totalItems: wishlistStats[0]?.totalItems || 0,
+                uniqueProducts: wishlistStats[0]?.uniqueProducts?.length || 0,
+                topProducts: topWishlisted || []
+            },
             recentOrders,
             ordersByStatus: statusMap,
             salesByDay: salesData,

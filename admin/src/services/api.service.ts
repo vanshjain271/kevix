@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.gadgethub.com/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.kevix.in/api/v1';
 
 class ApiClient {
   private client: AxiosInstance;

@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, CardContent, Grid, TextField, Button,
   FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel,
   IconButton, Paper, Chip, Alert, Snackbar, CircularProgress,
-  ToggleButton, ToggleButtonGroup, Tooltip,
+  ToggleButton, ToggleButtonGroup, Tooltip, Autocomplete
 } from '@mui/material';
 import {
   Delete, CloudUpload, ArrowBack, Save, Add,
@@ -480,124 +480,107 @@ const ProductForm: React.FC = () => {
     : null;
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton onClick={() => navigate('/catalog/products')}><ArrowBack /></IconButton>
-          <Typography variant="h4" sx={{ fontWeight: 600 }}>{isEdit ? 'Edit Product' : 'Add Product'}</Typography>
+    <Box sx={{ pb: 6, px: 1 }}>
+      {/* Sticky Header */}
+      <Box sx={{ 
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, 
+        position: 'sticky', top: 0, zIndex: 10, bgcolor: 'rgba(248, 250, 252, 0.9)', backdropFilter: 'blur(8px)',
+        py: 2, borderBottom: '1px solid #E2E8F0', mx: -3, px: 3
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton onClick={() => navigate('/catalog/products')} size="small" sx={{ bgcolor: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+            <ArrowBack fontSize="small" sx={{ color: '#475569' }} />
+          </IconButton>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>
+                {isEdit ? name || 'Edit Product' : 'Add New Product'}
+              </Typography>
+              {isEdit && <Chip label={isActive ? 'Active' : 'Draft'} color={isActive ? 'success' : 'default'} size="small" sx={{ fontWeight: 600, borderRadius: 1.5 }} />}
+            </Box>
+            {isEdit && <Typography variant="caption" color="text.secondary">Manage your product details and availability</Typography>}
+          </Box>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" onClick={() => navigate('/catalog/products')}>Cancel</Button>
-          {isEdit && (
-            <Button variant="outlined" color="error" startIcon={<Delete />} onClick={handleDelete} disabled={saving}>
-              Delete
-            </Button>
-          )}
-          <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />}
-            onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : isEdit ? 'Update Product' : 'Save Product'}
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          {isEdit && <Button variant="outlined" color="error" startIcon={<Delete />} onClick={handleDelete} disabled={saving} sx={{ bgcolor: '#fff' }}>Delete</Button>}
+          <Button variant="outlined" sx={{ bgcolor: '#fff', borderColor: '#E2E8F0', color: '#475569' }} onClick={() => navigate('/catalog/products')}>Discard</Button>
+          <Button variant="contained" color="primary" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />}
+            onClick={handleSave} disabled={saving} sx={{ boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.25)' }}>
+            {saving ? 'Saving...' : 'Save Product'}
           </Button>
         </Box>
       </Box>
 
       <Grid container spacing={3}>
-        {/* Left Column */}
+        {/* LEFT SIDEBAR (70%) */}
         <Grid item xs={12} md={8}>
-          {/* Basic Info */}
+          
+          {/* Section 1: Basic Information */}
           <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Basic Information</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Product Name *" value={name} onChange={(e) => setName(e.target.value)} required />
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.secondary' }}>Description</Typography>
-                  <RichEditor value={description} onChange={setDescription} placeholder="Full product description..." minHeight={140} />
-                </Grid>
-              </Grid>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700, color: '#0F172A' }}>Basic Information</Typography>
+              <TextField 
+                fullWidth 
+                label="Product Title" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+                placeholder="e.g. iPhone 15 Pro Max Clear Case"
+                variant="outlined"
+              />
             </CardContent>
           </Card>
 
-          {/* Additional Fields */}
+          {/* Section 2: Product Description */}
           <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Additional Details</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Colour" value={colour} onChange={(e) => setColour(e.target.value)} placeholder="e.g. Black, Red+Blue" />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Model / Series" value={modal} onChange={(e) => setModal(e.target.value)} placeholder="e.g. iPhone 15 Pro" />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Measuring Unit" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. Pcs, Box, Kg, Set" />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Min. Quantity" type="number" value={minQuantity}
-                    onChange={(e) => setMinQuantity(e.target.value)} />
-                </Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Payment Mode</InputLabel>
-                    <Select value={paymentMode} label="Payment Mode" onChange={(e) => setPaymentMode(e.target.value)}>
-                      <MenuItem value="default">Default</MenuItem>
-                      <MenuItem value="cod">COD Only</MenuItem>
-                      <MenuItem value="prepaid">Prepaid Only</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Youtube URL" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..." />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Warranty (Optional)" value={warranty} onChange={(e) => setWarranty(e.target.value)} placeholder="e.g. '1 Year Manufacturer Warranty'" />
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Images */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Product Images <Chip label={`${images.length}/10`} size="small" sx={{ ml: 1 }} />
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700, color: '#0F172A' }}>Product Description</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 500, mb: 1, color: '#64748B' }}>
+                Detailed description of the product features and benefits.
               </Typography>
+              <RichEditor value={description} onChange={setDescription} placeholder="Write a compelling description..." minHeight={200} />
+            </CardContent>
+          </Card>
+
+          {/* Section 3: Media Gallery */}
+          <Card sx={{ mb: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0F172A' }}>Media Gallery</Typography>
+                <Chip label={`${images.length} / 10 Images`} size="small" sx={{ bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600 }} />
+              </Box>
               <Paper
                 onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 sx={{
-                  p: 4, mb: 2, textAlign: 'center', cursor: 'pointer',
+                  p: 4, mb: 3, textAlign: 'center', cursor: 'pointer',
                   border: '2px dashed',
-                  borderColor: dragActive ? 'primary.main' : 'divider',
-                  backgroundColor: dragActive ? 'action.hover' : 'background.default',
-                  transition: 'all 0.2s',
-                  '&:hover': { borderColor: 'primary.main', backgroundColor: 'action.hover' }
+                  borderColor: dragActive ? 'primary.main' : '#CBD5E1',
+                  backgroundColor: dragActive ? '#F3E8FF' : '#F8FAFC',
+                  transition: 'all 0.2s ease',
+                  borderRadius: 2,
+                  '&:hover': { borderColor: 'primary.main', backgroundColor: '#F3E8FF' }
                 }}
               >
-                <CloudUpload sx={{ fontSize: 48, color: dragActive ? 'primary.main' : 'action.disabled', mb: 1 }} />
-                <Typography variant="body1" color="text.secondary">Drag & drop images here or click to browse</Typography>
-                <Typography variant="caption" color="text.secondary">JPEG, PNG, WebP • Max 5MB each • Up to 10 images</Typography>
+                <CloudUpload sx={{ fontSize: 40, color: dragActive ? 'primary.main' : '#94A3B8', mb: 1 }} />
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#0F172A' }}>Click to upload or drag and drop</Typography>
+                <Typography variant="caption" sx={{ color: '#64748B' }}>SVG, PNG, JPG or GIF (max. 5MB)</Typography>
               </Paper>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={handleFileSelect} />
+              
               {images.length > 0 && (
-                <Grid container spacing={1}>
+                <Grid container spacing={2}>
                   {images.map((img, idx) => (
                     <Grid item key={img.id}>
                       <Box sx={{
-                        position: 'relative', width: 120, height: 120, borderRadius: 2, overflow: 'hidden',
-                        border: idx === 0 ? '3px solid' : '1px solid',
-                        borderColor: idx === 0 ? 'primary.main' : 'divider'
+                        position: 'relative', width: 120, height: 120, borderRadius: 3, overflow: 'hidden',
+                        border: idx === 0 ? '2px solid #7C3AED' : '1px solid #E2E8F0',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                       }}>
                         <img src={img.url} alt={`Product ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        {idx === 0 && <Chip label="Main" size="small" color="primary" sx={{ position: 'absolute', top: 4, left: 4, fontSize: '0.65rem', height: 20 }} />}
-                        <IconButton size="small" onClick={() => removeImage(img.id)}
-                          sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(0,0,0,0.5)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,0,0,0.7)' }, width: 24, height: 24 }}>
+                        {idx === 0 && <Chip label="Main" size="small" sx={{ position: 'absolute', top: 6, left: 6, fontSize: '0.65rem', height: 20, bgcolor: '#7C3AED', color: '#fff', fontWeight: 600 }} />}
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); removeImage(img.id); }}
+                          sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.9)', color: '#EF4444', '&:hover': { bgcolor: '#FEE2E2' }, width: 24, height: 24, boxShadow: 1 }}>
                           <Delete sx={{ fontSize: 14 }} />
                         </IconButton>
                       </Box>
@@ -608,126 +591,175 @@ const ProductForm: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Variants */}
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">Variants</Typography>
-                <FormControlLabel control={<Switch checked={hasVariants} onChange={(e) => setHasVariants(e.target.checked)} />} label="Has Variants" />
+          {/* Section 4: Product Attributes */}
+          <Card sx={{ mb: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700, color: '#0F172A' }}>Product Attributes</Typography>
+              <Grid container spacing={2.5}>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="SKU (Stock Keeping Unit)" value={sku} onChange={(e) => setSku(e.target.value)} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="Barcode / ISBN" placeholder="Optional" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="Colour" value={colour} onChange={(e) => setColour(e.target.value)} placeholder="e.g. Midnight Black" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="Model / Series" value={modal} onChange={(e) => setModal(e.target.value)} placeholder="e.g. iPhone 15 Pro" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="Measuring Unit" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. Pcs, Box, Set" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Payment Mode</InputLabel>
+                    <Select value={paymentMode} label="Payment Mode" onChange={(e) => setPaymentMode(e.target.value)}>
+                      <MenuItem value="default">Default</MenuItem>
+                      <MenuItem value="cod">COD Only</MenuItem>
+                      <MenuItem value="prepaid">Prepaid Only</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField fullWidth label="Youtube URL" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField fullWidth label="Warranty Details" value={warranty} onChange={(e) => setWarranty(e.target.value)} placeholder="e.g. '1 Year Manufacturer Warranty'" />
+                </Grid>
+              </Grid>
+
+              <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #E2E8F0' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0F172A' }}>Product Variants</Typography>
+                  <FormControlLabel control={<Switch checked={hasVariants} onChange={(e) => setHasVariants(e.target.checked)} color="primary" />} label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Enable Variants</Typography>} />
+                </Box>
+                
+                {hasVariants && (
+                  <Box sx={{ bgcolor: '#F8FAFC', p: 2, borderRadius: 2, border: '1px solid #E2E8F0' }}>
+                    {variants.map((variant, idx) => (
+                      <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, border: '1px solid #E2E8F0', boxShadow: 'none' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#475569' }}>Variant {idx + 1}</Typography>
+                          <IconButton size="small" color="error" onClick={() => removeVariant(idx)} sx={{ bgcolor: '#FEE2E2', width: 28, height: 28 }}><Delete fontSize="small" /></IconButton>
+                        </Box>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6} sm={4}><TextField size="small" fullWidth label="Variant Name" value={variant.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} placeholder="e.g. 256GB" /></Grid>
+                          <Grid item xs={6} sm={4}><TextField size="small" fullWidth label="SKU" value={variant.sku} onChange={(e) => updateVariant(idx, 'sku', e.target.value)} /></Grid>
+                          <Grid item xs={6} sm={4}><TextField size="small" fullWidth label="Color" value={variant.color} onChange={(e) => updateVariant(idx, 'color', e.target.value)} /></Grid>
+                          <Grid item xs={6} sm={4}><TextField size="small" fullWidth label="MRP" type="number" value={variant.mrp} onChange={(e) => updateVariant(idx, 'mrp', e.target.value)} /></Grid>
+                          <Grid item xs={6} sm={4}><TextField size="small" fullWidth label="Sale Price" type="number" value={variant.salePrice} onChange={(e) => updateVariant(idx, 'salePrice', e.target.value)} /></Grid>
+                          <Grid item xs={6} sm={4}><TextField size="small" fullWidth label="Stock" type="number" value={variant.stock} onChange={(e) => updateVariant(idx, 'stock', e.target.value)} /></Grid>
+                        </Grid>
+                      </Paper>
+                    ))}
+                    <Button variant="outlined" startIcon={<Add />} onClick={addVariant} sx={{ bgcolor: '#fff', fontWeight: 600 }}>Add Variant</Button>
+                  </Box>
+                )}
               </Box>
-              {hasVariants && (
-                <>
-                  {variants.map((variant, idx) => (
-                    <Paper key={idx} sx={{ p: 2, mb: 1, border: '1px solid', borderColor: 'divider' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="subtitle2" color="text.secondary">Variant {idx + 1}</Typography>
-                        <IconButton size="small" color="error" onClick={() => removeVariant(idx)}><Delete fontSize="small" /></IconButton>
-                      </Box>
-                      <Grid container spacing={1}>
-                        <Grid item xs={4}><TextField size="small" fullWidth label="Name" value={variant.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} placeholder="e.g. Small, Red" /></Grid>
-                        <Grid item xs={4}><TextField size="small" fullWidth label="SKU" value={variant.sku} onChange={(e) => updateVariant(idx, 'sku', e.target.value)} /></Grid>
-                        <Grid item xs={4}><TextField size="small" fullWidth label="Color" value={variant.color} onChange={(e) => updateVariant(idx, 'color', e.target.value)} placeholder="e.g. Red, #000" /></Grid>
-                        <Grid item xs={4}><TextField size="small" fullWidth label="MRP" type="number" value={variant.mrp} onChange={(e) => updateVariant(idx, 'mrp', e.target.value)} placeholder="Leave blank to inherit" /></Grid>
-                        <Grid item xs={4}><TextField size="small" fullWidth label="Sale Price" type="number" value={variant.salePrice} onChange={(e) => updateVariant(idx, 'salePrice', e.target.value)} placeholder="Leave blank to inherit" /></Grid>
-                        <Grid item xs={4}><TextField size="small" fullWidth label="Stock" type="number" value={variant.stock} onChange={(e) => updateVariant(idx, 'stock', e.target.value)} placeholder="0" /></Grid>
-                      </Grid>
-                    </Paper>
+            </CardContent>
+          </Card>
+
+          {/* Section 5: Bulk Pricing */}
+          <Card sx={{ mb: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0F172A' }}>Volume Pricing / Wholesale</Typography>
+                <Button variant="outlined" size="small" startIcon={<Add />} onClick={addBulkTier} sx={{ fontWeight: 600 }}>Add Tier</Button>
+              </Box>
+              {bulkPricing.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>No volume discount tiers created.</Typography>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {bulkPricing.map((tier, idx) => (
+                    <Box key={idx} sx={{ display: 'flex', gap: 2, alignItems: 'center', bgcolor: '#F8FAFC', p: 1.5, borderRadius: 2, border: '1px solid #E2E8F0' }}>
+                      <TextField size="small" label="Min. Quantity" type="number" value={tier.minQty} onChange={(e) => updateBulkTier(idx, 'minQty', e.target.value)} sx={{ width: 120, bgcolor: '#fff' }} />
+                      <TextField size="small" label="Price per unit (₹)" type="number" value={tier.salePrice} onChange={(e) => updateBulkTier(idx, 'salePrice', e.target.value)} sx={{ flex: 1, bgcolor: '#fff' }} />
+                      <IconButton size="small" color="error" onClick={() => removeBulkTier(idx)} sx={{ bgcolor: '#FEE2E2', width: 32, height: 32 }}><Delete fontSize="small" /></IconButton>
+                    </Box>
                   ))}
-                  <Button startIcon={<Add />} onClick={addVariant} sx={{ mt: 1 }}>Add Variant</Button>
-                </>
+                </Box>
               )}
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Right Column */}
+        {/* RIGHT SIDEBAR (30%) - Sticky */}
         <Grid item xs={12} md={4}>
-          {/* Pricing + Tax */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Pricing</Typography>
-              <Grid container spacing={2}>
-                {/* Sale Price row with Tax Incl/Excl */}
-                <Grid item xs={12}>
-                  <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>Sale Price (₹)</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 0.5 }}>
-                    <TextField
-                      fullWidth type="number" value={salePrice}
-                      onChange={(e) => setSalePrice(e.target.value)} required
-                      placeholder="0"
-                      helperText={discountPct ? `${discountPct}% off MRP` : ''}
-                    />
+          <Box sx={{ position: 'sticky', top: 100, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            
+            {/* Publishing Status Card */}
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 12 }}>Status</Typography>
+                <FormControlLabel
+                  control={<Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} color="success" />}
+                  label={<Typography variant="body2" sx={{ fontWeight: 600 }}>{isActive ? 'Active' : 'Draft'}</Typography>}
+                  sx={{ mb: 1 }}
+                />
+                <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>
+                  {isActive ? 'This product will be visible to all customers on your store.' : 'This product is hidden from the storefront.'}
+                </Typography>
+              </CardContent>
+            </Card>
+
+            {/* Pricing Card */}
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 12 }}>Pricing</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  <TextField
+                    fullWidth type="number" label="Sale Price (₹)" value={salePrice}
+                    onChange={(e) => setSalePrice(e.target.value)} required
+                    helperText={discountPct ? `${discountPct}% off MRP` : ''}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ '& .MuiOutlinedInput-root': { fontWeight: 600, fontSize: 18 } }}
+                  />
+                  <TextField fullWidth label="Compare at Price / MRP (₹)" type="number" value={mrp} onChange={(e) => setMrp(e.target.value)} required InputLabelProps={{ shrink: true }} />
+                  
+                  <Box sx={{ pt: 1, borderTop: '1px solid #E2E8F0' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', mb: 1, display: 'block' }}>Tax Settings</Typography>
                     <ToggleButtonGroup
                       value={taxMode}
                       exclusive
+                      fullWidth
                       onChange={(_, v) => { if (v) setTaxMode(v); }}
                       size="small"
-                      sx={{ flexShrink: 0, mt: 0.5 }}
+                      sx={{ mb: 2 }}
                     >
-                      <ToggleButton value="included" sx={{ px: 1, py: 0.5, fontSize: 12, fontWeight: 600, '&.Mui-selected': { bgcolor: '#3B82F6', color: '#fff', '&:hover': { bgcolor: '#2563EB' } } }}>
-                        Tax Incl.
-                      </ToggleButton>
-                      <ToggleButton value="excluded" sx={{ px: 1, py: 0.5, fontSize: 12, fontWeight: 600, '&.Mui-selected': { bgcolor: '#3B82F6', color: '#fff', '&:hover': { bgcolor: '#2563EB' } } }}>
-                        Tax Excl.
-                      </ToggleButton>
+                      <ToggleButton value="excluded" sx={{ fontWeight: 600, textTransform: 'none' }}>Tax Excluded</ToggleButton>
+                      <ToggleButton value="included" sx={{ fontWeight: 600, textTransform: 'none' }}>Tax Included</ToggleButton>
                     </ToggleButtonGroup>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Tax Bracket</InputLabel>
+                      <Select value={taxPercent} label="Tax Bracket" onChange={(e) => setTaxPercent(e.target.value as any)}>
+                        <MenuItem value="">No Tax (0%)</MenuItem>
+                        <MenuItem value="5">GST 5%</MenuItem>
+                        <MenuItem value="18">GST 18%</MenuItem>
+                      </Select>
+                    </FormControl>
                   </Box>
-                </Grid>
+                </Box>
+              </CardContent>
+            </Card>
 
-                {/* MRP + Tax% */}
-                <Grid item xs={6}>
-                  <TextField fullWidth label="MRP (₹)" type="number" value={mrp} onChange={(e) => setMrp(e.target.value)} required />
-                </Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Tax %</InputLabel>
-                    <Select value={taxPercent} label="Tax %" onChange={(e) => setTaxPercent(e.target.value as any)}>
-                      <MenuItem value="">Optional (None)</MenuItem>
-                      <MenuItem value="5">5%</MenuItem>
-                      <MenuItem value="18">18%</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+            {/* Inventory Card */}
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 12 }}>Inventory</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  <TextField fullWidth label="Current Stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
+                  <TextField fullWidth label="Low Stock Alert Level" type="number" value={lowStockThreshold} onChange={(e) => setLowStockThreshold(e.target.value)} />
+                  <TextField fullWidth label="Min. Order Quantity" type="number" value={minQuantity} onChange={(e) => setMinQuantity(e.target.value)} />
+                </Box>
+              </CardContent>
+            </Card>
 
-                {/* Tax amount info */}
-                {taxPercent && salePrice && (
-                  <Grid item xs={12}>
-                    <Box sx={{ bgcolor: '#EFF6FF', borderRadius: 1, p: 1, border: '1px solid #BFDBFE' }}>
-                      <Typography variant="caption" color="primary">
-                        {taxMode === 'included' ? (
-                          `Price includes ₹${(Number(salePrice) * Number(taxPercent) / (100 + Number(taxPercent))).toFixed(2)} tax (${taxPercent}%)`
-                        ) : (
-                          `+ ₹${(Number(salePrice) * Number(taxPercent) / 100).toFixed(2)} tax (${taxPercent}%) → Total: ₹${(Number(salePrice) * (1 + Number(taxPercent) / 100)).toFixed(2)}`
-                        )}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                )}
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Inventory */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Inventory</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Low Stock Alert" type="number" value={lowStockThreshold} onChange={(e) => setLowStockThreshold(e.target.value)} />
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Organization */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Organization</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
+            {/* Organization Card */}
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 12 }}>Organization</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                   <FormControl fullWidth>
                     <InputLabel>Categories</InputLabel>
                     <Select
@@ -739,33 +771,21 @@ const ProductForm: React.FC = () => {
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                           {(selected as string[]).map((value) => {
                             const cat = categories.find(c => c._id === value);
-                            return <Chip key={value} label={cat?.name || value} size="small" />;
+                            return <Chip key={value} label={cat?.name || value} size="small" sx={{ borderRadius: 1 }} />;
                           })}
                         </Box>
                       )}
                     >
-                      {categories
-                        .filter(c => !c.parent) // Get root categories
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map(root => (
-                          [
-                            <MenuItem key={root._id} value={root._id} sx={{ fontWeight: 'bold' }}>
-                              {root.name}
-                            </MenuItem>,
-                            ...categories
-                              .filter(sub => (typeof sub.parent === 'string' ? sub.parent : sub.parent?._id) === root._id)
-                              .sort((a, b) => a.name.localeCompare(b.name))
-                              .map(sub => (
-                                <MenuItem key={sub._id} value={sub._id} sx={{ pl: 4 }}>
-                                  — {sub.name}
-                                </MenuItem>
-                              ))
-                          ]
-                        ))}
+                      {categories.filter(c => !c.parent).sort((a, b) => a.name.localeCompare(b.name)).map(root => (
+                        [
+                          <MenuItem key={root._id} value={root._id} sx={{ fontWeight: 700 }}>{root.name}</MenuItem>,
+                          ...categories.filter(sub => (typeof sub.parent === 'string' ? sub.parent : sub.parent?._id) === root._id).sort((a, b) => a.name.localeCompare(b.name)).map(sub => (
+                            <MenuItem key={sub._id} value={sub._id} sx={{ pl: 4 }}>— {sub.name}</MenuItem>
+                          ))
+                        ]
+                      ))}
                     </Select>
                   </FormControl>
-                </Grid>
-                <Grid item xs={12}>
                   <FormControl fullWidth>
                     <InputLabel>Brand</InputLabel>
                     <Select value={brand} label="Brand" onChange={(e) => setBrand(e.target.value)}>
@@ -773,84 +793,50 @@ const ProductForm: React.FC = () => {
                       {brands.map((b: any) => <MenuItem key={b._id} value={b._id}>{b.name}</MenuItem>)}
                     </Select>
                   </FormControl>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Homepage Visibility */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Homepage Visibility</Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {[
-                  { id: 'NEW_ARRIVAL', label: 'New Arrival' },
-                  { id: 'TRENDING', label: 'Trending' },
-                  { id: 'FEATURED', label: 'Featured Deal' },
-                  { id: 'PREMIUM_CASES', label: 'Premium Cases' },
-                  { id: 'CABLES', label: 'Cables' },
-                  { id: 'ADAPTERS', label: 'Adapters' },
-                ].map(section => (
-                  <Chip
-                    key={section.id}
-                    label={section.label}
-                    color={homepageSections.includes(section.id) ? 'primary' : 'default'}
-                    onClick={() => toggleHomeSection(section.id)}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Bulk Pricing / Tiered Discounts */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">Bulk Pricing (Tiered Discounts)</Typography>
-                <Button startIcon={<Add />} size="small" onClick={addBulkTier}>Add Tier</Button>
-              </Box>
-              {bulkPricing.length === 0 && (
-                <Typography variant="body2" color="text.secondary">No bulk discounts set for this product.</Typography>
-              )}
-              {bulkPricing.map((tier, idx) => (
-                <Box key={idx} sx={{ display: 'flex', gap: 2, mb: 1, alignItems: 'center' }}>
-                  <TextField
-                    size="small" label="Min Qty" type="number"
-                    value={tier.minQty} onChange={(e) => updateBulkTier(idx, 'minQty', e.target.value)}
-                    sx={{ width: 100 }}
-                  />
-                  <TextField
-                    size="small" label="Price (₹) Each" type="number"
-                    value={tier.salePrice} onChange={(e) => updateBulkTier(idx, 'salePrice', e.target.value)}
-                    sx={{ flex: 1 }}
-                  />
-                  <IconButton size="small" color="error" onClick={() => removeBulkTier(idx)}>
-                    <Delete fontSize="small" />
-                  </IconButton>
                 </Box>
-              ))}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Status */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Status</Typography>
-              <FormControlLabel
-                control={<Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} color="success" />}
-                label={isActive ? 'Active — Visible to customers' : 'Inactive — Hidden from store'}
-              />
-            </CardContent>
-          </Card>
+            {/* Visibility Card */}
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 12 }}>Storefront Visibility</Typography>
+                <Autocomplete
+                  multiple
+                  freeSolo
+                  options={[]}
+                  value={homepageSections}
+                  onChange={(_, newValue) => setHomepageSections(newValue)}
+                  renderTags={(value: readonly string[], getTagProps) =>
+                    value.map((option: string, index: number) => {
+                      const { key, ...tagProps } = getTagProps({ index });
+                      return (
+                        <Chip variant="outlined" label={option} key={key} {...tagProps} size="small" sx={{ borderRadius: 1 }} />
+                      );
+                    })
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="Add tags..."
+                      helperText="Create custom homepage sections"
+                      sx={{ '& .MuiFormHelperText-root': { ml: 0, mt: 1 } }}
+                    />
+                  )}
+                />
+              </CardContent>
+            </Card>
+          </Box>
         </Grid>
       </Grid>
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+        <Alert severity={snackbar.severity} sx={{ borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );
+
 };
 
 export default ProductForm;

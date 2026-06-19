@@ -29,7 +29,7 @@ const TopBar: React.FC = () => {
 
   const handleVisitStore = () => {
     // Open frontend in new tab
-    window.open('https://gadgethub.com', '_blank');
+    window.open('https://kevix.in', '_blank');
   };
 
   return (
@@ -50,7 +50,7 @@ const TopBar: React.FC = () => {
           onClick={handleVisitStore}
           sx={{ textTransform: 'none', color: '#1F2937' }}
         >
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>Arbuda accessories</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>Arbuda Accessories</Typography>
         </Button>
         <Box sx={{ flexGrow: 1 }} />
         <IconButton color="inherit" sx={{ mr: 1 }}>
