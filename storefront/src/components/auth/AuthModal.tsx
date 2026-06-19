@@ -141,7 +141,7 @@ export default function AuthModal() {
                 </div>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                By continuing, you agree to GadgetHub's{' '}
+                By continuing, you agree to Kevix's{' '}
                 <span className="text-primary cursor-pointer hover:underline">Terms of Use</span>
                 {' '}and{' '}
                 <span className="text-primary cursor-pointer hover:underline">Privacy Policy</span>.

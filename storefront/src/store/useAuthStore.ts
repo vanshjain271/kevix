@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
       updateUser: (userUpdates) => set((state) => ({ user: state.user ? { ...state.user, ...userUpdates } : null })),
     }),
     {
-      name: 'gadgethub-auth-storage',
+      name: 'kevix-auth-storage',
       // We only want to persist token, user, and isAuthenticated
       partialize: (state) => ({ 
         token: state.token, 
