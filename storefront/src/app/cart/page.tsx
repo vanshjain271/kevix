@@ -117,7 +117,7 @@ export default function CartPage() {
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-surface-border rounded-sm">
                         <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id!, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                           className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface disabled:opacity-50"
                         >-</button>
@@ -125,7 +125,7 @@ export default function CartPage() {
                           {item.quantity}
                         </div>
                         <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id!, item.quantity + 1)}
                           className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface"
                         >+</button>
                       </div>
@@ -151,7 +151,7 @@ export default function CartPage() {
                       {/* Item Actions */}
                       <div className="flex gap-6 mt-4 pt-4 border-t border-surface-border text-sm font-medium">
                         <button className="text-text-primary hover:text-primary transition-colors">SAVE FOR LATER</button>
-                        <button onClick={() => removeFromCart(item.id)} className="text-text-primary hover:text-primary transition-colors">REMOVE</button>
+                        <button onClick={() => removeFromCart(item.id!)} className="text-text-primary hover:text-primary transition-colors">REMOVE</button>
                       </div>
                     </div>
                   </div>
