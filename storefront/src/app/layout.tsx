@@ -12,14 +12,15 @@ const inter = Inter({
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const res = await fetch('http://localhost:5001/api/v1/settings', { 
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://13.201.30.242:5001/api/v1';
+    const res = await fetch(`${apiUrl}/settings`, { 
       next: { revalidate: 60 } // cache for 60 seconds
     });
     
     if (res.ok) {
       const { data } = await res.json();
       return {
-        title: data?.metaTitle || data?.storeName || "GadgetHub | Premium Mobile Accessories",
+        title: data?.metaTitle || data?.storeName || "Kevix | Premium Mobile Accessories",
         description: data?.metaDescription || "Shop for the best quality chargers, cables, earbuds, and more.",
         keywords: data?.metaKeywords || "",
       };
@@ -30,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   // Fallback metadata
   return {
-    title: "GadgetHub | Premium Mobile Accessories",
+    title: "Kevix | Premium Mobile Accessories",
     description: "Shop for the best quality chargers, cables, earbuds, and more.",
   };
 }
