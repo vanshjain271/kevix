@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import api from '@/lib/api';
 
 interface CartItem {
-  id: string; // the cart item _id
+  id?: string;
+  _id?: string;
   productId: {
     _id: string;
     name: string;
