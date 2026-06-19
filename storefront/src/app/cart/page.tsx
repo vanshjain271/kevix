@@ -136,7 +136,7 @@ export default function CartPage() {
                       <Link href={`/product/${product._id}`} className="text-text-primary font-medium hover:text-primary transition-colors pr-12">
                         {product.name}
                       </Link>
-                      <span className="text-xs text-text-secondary mt-1 mb-3">Seller: GadgetHub</span>
+                      <span className="text-xs text-text-secondary mt-1 mb-3">Seller: Kevix</span>
                       
                       <div className="flex items-baseline gap-2 mb-2">
                         <span className="text-lg font-bold text-text-primary">₹{sellingPrice.toLocaleString('en-IN')}</span>

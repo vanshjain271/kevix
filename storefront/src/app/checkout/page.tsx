@@ -45,7 +45,7 @@ export default function CheckoutPage() {
   
   const orderTotal = totalPrice + deliveryCharges;
 
-  const upiId = settings?.upiId || 'arbuda@upi';
+  const upiId = settings?.upiId || 'kevix@upi';
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
@@ -245,7 +245,7 @@ export default function CheckoutPage() {
                         {settings?.paymentQrCode ? (
                           <img src={settings.paymentQrCode} alt="Payment QR Code" className="w-full h-full object-contain" />
                         ) : (
-                          <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Arbuda&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
+                          <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Kevix&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
                         )}
                       </div>
                       <span className="text-xs text-text-secondary font-medium">Scan with any UPI app</span>
