@@ -37,7 +37,7 @@ export default function Footer() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-3xl text-accent">devices</span>
-            <span className="text-2xl font-bold tracking-tight">Arbuda</span>
+            <span className="text-2xl font-bold tracking-tight">Kevix</span>
           </div>
           <p className="text-white/70 text-sm leading-relaxed">
             Your trusted destination for premium mobile accessories. We provide top-quality chargers, cables, audio gear, and more at unbeatable prices.
@@ -100,7 +100,7 @@ export default function Footer() {
             <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px]">assignment_return</span> Easy Returns</span>
           </div>
           <div className="text-sm text-white/60 text-center">
-            &copy; {new Date().getFullYear()} Arbuda Accessories. All rights reserved.
+            &copy; {new Date().getFullYear()} Kevix. All rights reserved.
           </div>
         </div>
       </div>
