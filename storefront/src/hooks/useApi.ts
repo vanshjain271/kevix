@@ -93,3 +93,14 @@ export function useSettings() {
   const { data, error, isLoading } = useSWR('/settings', fetcher);
   return { settings: data || {}, error, isLoading };
 }
+
+export function useBrands() {
+  const { data, error, isLoading } = useSWR('/brands', fetcher);
+  return { brands: data?.brands || [], error, isLoading };
+}
+
+export function useProductsByBrand(brandId?: string) {
+  const url = brandId ? `/products?brandId=${brandId}` : null;
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return { products: data?.products || [], error, isLoading };
+}

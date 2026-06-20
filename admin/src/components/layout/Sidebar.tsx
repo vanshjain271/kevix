@@ -40,7 +40,14 @@ const navItems: NavItem[] = [
       { title: 'Reviews', path: '/catalog/reviews', icon: <></> },
     ],
   },
-  { title: 'Customers', path: '/customers', icon: <People fontSize="small" /> },
+  {
+    title: 'Customers',
+    icon: <People fontSize="small" />,
+    children: [
+      { title: 'All Customers', path: '/customers', icon: <></> },
+      { title: 'Wishlists ♥', path: '/customers/wishlists', icon: <></> },
+    ],
+  },
 
   {
     title: 'Promotions',

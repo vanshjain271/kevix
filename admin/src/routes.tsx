@@ -23,6 +23,7 @@ import BulkOrders from './pages/BulkOrders';
 import ActivityLog from './pages/ActivityLog';
 import Reviews from './pages/Reviews';
 import Login from './pages/Login';
+import Wishlists from './pages/Wishlists';
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
       // Customers
       { path: 'customers', element: <Customers /> },
       { path: 'customers/:id', element: <CustomerDetails /> },
+      { path: 'customers/wishlists', element: <Wishlists /> },
 
       // Employees (RBAC)
       // { path: 'employees', element: <Employees /> },

@@ -230,44 +230,39 @@ export default function CheckoutPage() {
             </div>
             {step === 3 && (
               <div className="p-0 border-t border-surface-border">
-                
-                {/* UPI Option */}
+
+                {/* UPI / QR Option */}
                 <div className="p-4 border-b border-surface-border bg-primary/5">
                   <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
                     <input type="radio" name="payment" defaultChecked className="w-4 h-4 accent-primary" />
                     UPI (Google Pay, PhonePe, Paytm)
                   </label>
-                  
                   <div className="ml-8 mt-4 bg-white p-6 rounded border border-surface-border flex flex-col md:flex-row items-center gap-8">
-                    {/* QR Code */}
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-40 h-40 bg-surface border border-surface-border p-2 rounded-lg flex items-center justify-center">
                         {settings?.paymentQrCode ? (
                           <img src={settings.paymentQrCode} alt="Payment QR Code" className="w-full h-full object-contain" />
                         ) : (
-                          <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Kevix&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
+                          <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Kevix&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
                         )}
                       </div>
                       <span className="text-xs text-text-secondary font-medium">Scan with any UPI app</span>
                     </div>
-                    
-                    {/* Instructions & UTR */}
                     <div className="flex-grow w-full">
                       <p className="text-sm text-text-primary mb-4 leading-relaxed">
                         1. Scan the QR code using any UPI app.<br/>
                         2. Pay exactly <strong className="text-lg">₹{orderTotal.toLocaleString('en-IN')}</strong>.<br/>
-                        3. Enter the 12-digit UTR / Reference number below to confirm your order.
+                        3. Enter the 12-digit UTR / Reference number below.
                       </p>
-                      
                       <div className="space-y-4">
-                        <input 
-                          type="text" 
-                          placeholder="Enter 12-digit UTR Number" 
+                        <input
+                          type="text"
+                          placeholder="Enter 12-digit UTR Number"
                           value={utr}
                           onChange={(e) => setUtr(e.target.value)}
                           className="w-full border border-surface-border rounded-sm px-4 py-3 outline-none focus:border-primary focus:ring-1 ring-primary text-sm"
                         />
-                        <button 
+                        <button
                           disabled={isPlacingOrder}
                           onClick={handlePlaceOrder}
                           className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -279,25 +274,27 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Other Payment Options (Disabled visually) */}
-                <div className="p-4 border-b border-surface-border opacity-50 cursor-not-allowed">
-                  <label className="flex items-center gap-4 font-medium text-text-primary">
+                {/* Razorpay — Coming Soon */}
+                <div className="p-4 border-b border-surface-border opacity-60 cursor-not-allowed select-none">
+                  <div className="flex items-center gap-4">
                     <input type="radio" name="payment" disabled className="w-4 h-4" />
-                    Credit / Debit / ATM Card
-                  </label>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium text-text-primary">Credit / Debit Card, Net Banking (Razorpay)</span>
+                      <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>
+                    </div>
+                  </div>
+                  <p className="ml-8 mt-2 text-xs text-text-muted">We're setting up Razorpay for cards and net banking. Use UPI for now!</p>
                 </div>
-                <div className="p-4 border-b border-surface-border opacity-50 cursor-not-allowed">
-                  <label className="flex items-center gap-4 font-medium text-text-primary">
+
+                {/* Cash on Delivery */}
+                <div className="p-4 opacity-60 cursor-not-allowed select-none">
+                  <div className="flex items-center gap-4">
                     <input type="radio" name="payment" disabled className="w-4 h-4" />
-                    Net Banking
-                  </label>
+                    <span className="font-medium text-text-primary">Cash on Delivery</span>
+                    <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>
+                  </div>
                 </div>
-                <div className="p-4 opacity-50 cursor-not-allowed">
-                  <label className="flex items-center gap-4 font-medium text-text-primary">
-                    <input type="radio" name="payment" disabled className="w-4 h-4" />
-                    Cash on Delivery
-                  </label>
-                </div>
+
               </div>
             )}
           </div>

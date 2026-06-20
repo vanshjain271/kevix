@@ -1,0 +1,130 @@
+'use client';
+
+import Link from 'next/link';
+import { useState } from 'react';
+import { useCartStore } from '@/store/useCartStore';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import { useAuthStore } from '@/store/useAuthStore';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  mrp: number;
+  discount: number;
+  image: string;
+  rating: number;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  products: Product[];
+  badgeColor?: string;
+  viewAllLink?: string;
+}
+
+function ProductCard({ product }: { product: Product }) {
+  const { addToCart } = useCartStore();
+  const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const { isAuthenticated, openLoginModal } = useAuthStore();
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const wishlisted = isWishlisted(product.id);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) { openLoginModal(); return; }
+    setAdding(true);
+    await addToCart(product.id, 1);
+    setAdding(false);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) { openLoginModal(); return; }
+    await toggleWishlist(product.id);
+  };
+
+  return (
+    <Link href={`/product/${product.id}`} className="group shrink-0 w-44 md:w-52 bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
+      <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
+        <img src={product.image} alt={product.name} className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300" />
+        {product.discount > 0 && (
+          <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            {product.discount}% OFF
+          </span>
+        )}
+        <button
+          onClick={handleWishlist}
+          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 ${wishlisted ? 'bg-red-50 text-red-500' : 'bg-white text-gray-400 hover:text-red-400'}`}
+        >
+          <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: wishlisted ? "'FILL' 1" : "'FILL' 0" }}>
+            favorite
+          </span>
+        </button>
+      </div>
+      <div className="p-3 flex flex-col flex-grow">
+        <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug flex-grow">{product.name}</p>
+        <div className="flex items-baseline gap-1.5 mt-2">
+          <span className="text-base font-bold text-gray-900">₹{product.price.toLocaleString('en-IN')}</span>
+          {product.mrp > product.price && (
+            <span className="text-xs text-gray-400 line-through">₹{product.mrp.toLocaleString('en-IN')}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 mt-1">
+          <span className="material-symbols-outlined text-amber-400 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+          <span className="text-xs text-gray-500 font-medium">{product.rating.toFixed(1)}</span>
+        </div>
+        <button
+          onClick={handleAddToCart}
+          disabled={adding}
+          className={`mt-3 w-full py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-1.5
+            ${added
+              ? 'bg-green-500 text-white scale-95'
+              : 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-md active:scale-95'
+            } disabled:opacity-70`}
+        >
+          {adding ? (
+            <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+          ) : added ? (
+            <><span className="material-symbols-outlined text-[16px]">check_circle</span> Added!</>
+          ) : (
+            <><span className="material-symbols-outlined text-[16px]">add_shopping_cart</span> Add to Cart</>
+          )}
+        </button>
+      </div>
+    </Link>
+  );
+}
+
+export default function ProductCarousel({ title, subtitle, products, viewAllLink }: Props) {
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="bg-white py-6 border-b border-purple-50">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-gray-900">{title}</h2>
+            {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+          </div>
+          {viewAllLink && (
+            <Link href={viewAllLink} className="text-sm text-purple-600 font-bold hover:underline flex items-center gap-1">
+              View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
+          )}
+        </div>
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export { ProductCard };

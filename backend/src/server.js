@@ -13,6 +13,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env'), override: true });
 
 const { connectDB } = require('./config/database');
+const adminWishlistRoutes = require('./routes/admin/wishlist.routes');
 const { requestLogger, errorLogger, performanceLogger } = require('./middleware/logger.middleware');
 
 // Routes
@@ -187,6 +188,9 @@ app.use('/api/v1/addresses', addressRoutes);
 
 // Settings (customer-facing)
 app.use('/api/v1/settings', publicSettingsRoutes);
+
+// Admin Wishlists
+app.use('/api/v1/admin/wishlists', adminWishlistRoutes);
 
 /* =========================
    Error Handler
