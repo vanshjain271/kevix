@@ -25,8 +25,17 @@ class S3Service {
     try {
       const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
       const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-      this.bucket = process.env.AWS_S3_BUCKET;
+      // Hardcode correct bucket name as fallback to prevent PM2 env-cache issues
+      this.bucket = process.env.AWS_S3_BUCKET || 'kevix-production-images';
       this.region = process.env.AWS_REGION || 'ap-south-1';
+
+      // Auto-correct common typo (kevix-production-image → kevix-production-images)
+      if (this.bucket === 'kevix-production-image') {
+        console.warn('⚠️  Correcting S3 bucket name typo: kevix-production-image → kevix-production-images');
+        this.bucket = 'kevix-production-images';
+      }
+
+      console.log(`🪣  S3 bucket: ${this.bucket} | region: ${this.region}`);
 
       if (!accessKeyId || !secretAccessKey || !this.bucket) {
         console.log('⚠️  AWS S3 not configured - uploads will use local storage');
@@ -42,7 +51,7 @@ class S3Service {
       });
 
       this.initialized = true;
-      console.log('✅ AWS S3 initialized');
+      console.log('✅ AWS S3 initialized successfully');
     } catch (error) {
       console.error('S3 initialization error:', error.message);
     }
