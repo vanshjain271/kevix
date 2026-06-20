@@ -29,9 +29,9 @@ class S3Service {
       this.bucket = process.env.AWS_S3_BUCKET || 'kevix-production-images';
       this.region = process.env.AWS_REGION || 'ap-south-1';
 
-      // Auto-correct common typo (kevix-production-image → kevix-production-images)
-      if (this.bucket === 'kevix-production-image') {
-        console.warn('⚠️  Correcting S3 bucket name typo: kevix-production-image → kevix-production-images');
+      // Auto-correct common typos
+      if (this.bucket === 'kevix-production-image' || this.bucket === 'kevix-production-imagess') {
+        console.warn(`⚠️  Correcting S3 bucket name typo: ${this.bucket} → kevix-production-images`);
         this.bucket = 'kevix-production-images';
       }
 
