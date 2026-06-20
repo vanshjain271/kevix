@@ -22,7 +22,7 @@ export default function Header() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Close suggestions on outside click
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function Header() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearch(val);
-    clearTimeout(debounceRef.current);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     if (val.length >= 2) {
       setShowSuggestions(true);
       debounceRef.current = setTimeout(() => fetchSuggestions(val), 300);
