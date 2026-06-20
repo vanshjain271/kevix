@@ -63,6 +63,11 @@ app.use(cors({
     'https://gadgethubapp-admin.vercel.app',
     'https://gadgethub.com',
     'https://www.gadgethub.com',
+    'https://kevix.in',
+    'https://www.kevix.in',
+    'https://admin.kevix.in',
+    'https://api.kevix.in',
+    /\.vercel\.app$/, // Allow all Vercel preview deployments
     'http://localhost:3000', // Storefront (Next.js default)
     'http://localhost:3001', // Admin panel
     'http://localhost:3002', // Storefront (custom port)
