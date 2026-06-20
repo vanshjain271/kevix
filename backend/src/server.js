@@ -10,7 +10,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env'), override: true });
 
 const { connectDB } = require('./config/database');
 const { requestLogger, errorLogger, performanceLogger } = require('./middleware/logger.middleware');
