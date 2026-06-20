@@ -81,28 +81,26 @@ const Categories: React.FC = () => {
       }
 
       if (editing) {
-        const response = await fetch(API_BASE + `/admin/categories/${editing._id}`, {
-          method: 'PUT',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-          body: formData
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message || 'Update failed');
+        await apiClient.put(`/admin/categories/${editing._id}`, formData);
         setSnackbar({ open: true, message: 'Category updated!', severity: 'success' });
       } else {
-        const response = await fetch(API_BASE + '/admin/categories', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-          body: formData
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message || 'Creation failed');
+        await apiClient.post('/admin/categories', formData);
         setSnackbar({ open: true, message: 'Category created!', severity: 'success' });
       }
       setDialogOpen(false);
       fetchCategories();
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Failed to save category';
+      console.error("Save category error:", err);
+      let msg = 'Failed to save category';
+      if (err.response) {
+        if (err.response.status === 413) {
+          msg = 'Image file is too large (max 4.5MB allowed by server). Please compress it.';
+        } else {
+          msg = err.response.data?.message || err.response.statusText || msg;
+        }
+      } else if (err.message) {
+        msg = err.message;
+      }
       setSnackbar({ open: true, message: msg, severity: 'error' });
     } finally {
       setSaving(false);
