@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'http://localhost:5001/api/v1/:path*', // Proxy to Backend
+        destination: process.env.NODE_ENV === 'production'
+          ? 'http://13.201.30.242:5001/api/v1/:path*'
+          : 'http://localhost:5001/api/v1/:path*', // Proxy to Backend
       },
     ]
   },
