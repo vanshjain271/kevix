@@ -7,6 +7,7 @@ import { useProductDetail, useReviews, useWishlist } from '@/hooks/useApi';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/api';
+import BulkInquiryModal from '@/components/product/BulkInquiryModal';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -16,6 +17,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { addToCart, isLoading: addingToCart } = useCartStore();
   const { isAuthenticated, openLoginModal } = useAuthStore();
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   
   const displayProduct = product ? {
     ...product,
@@ -138,6 +140,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <button disabled={displayProduct.stock <= 0} className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 md:py-4 px-2 rounded-sm font-bold text-sm md:text-lg flex items-center justify-center gap-2 transition-colors shadow-md disabled:opacity-70">
                 <span className="material-symbols-outlined">bolt</span> BUY NOW
               </button>
+              <button 
+                onClick={() => setIsInquiryModalOpen(true)}
+                className="bg-white border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white py-3 md:py-4 px-4 rounded-sm font-bold text-sm md:text-lg flex items-center justify-center gap-2 transition-colors shadow-md"
+              >
+                <span className="material-symbols-outlined">chat</span> BULK
+              </button>
             </div>
           </div>
 
@@ -230,6 +238,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+      
+      <BulkInquiryModal 
+        isOpen={isInquiryModalOpen} 
+        onClose={() => setIsInquiryModalOpen(false)} 
+        product={displayProduct} 
+      />
     </div>
   );
 }

@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
       { title: 'Online Orders', path: '/orders/online', icon: <></> },
       { title: 'Purchase Orders', path: '/orders/purchase', icon: <></> },
       { title: 'Abandoned Carts', path: '/orders/abandoned', icon: <></> },
+      { title: 'Bulk Inquiries', path: '/inquiries', icon: <></> },
       { title: 'Bulk Orders', path: '/bulk-orders', icon: <></> },
     ],
   },

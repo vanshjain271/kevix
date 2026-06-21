@@ -35,6 +35,8 @@ const adminReportRoutes = require('./routes/admin/report.routes');
 const couponRoutes = require('./routes/coupon.routes');
 const adminCouponRoutes = require('./routes/admin/coupon.routes');
 const bannerRoutes = require('./routes/banner.routes');
+const settingsRoutes = require('./routes/settings.routes');
+const inquiryRoutes = require('./routes/inquiry.routes');
 const adminBannerRoutes = require('./routes/admin/banner.routes');
 const categoryRoutes = require('./routes/category.routes');
 const adminCategoryRoutes = require('./routes/admin/category.routes');
@@ -157,6 +159,9 @@ app.use('/api/v1/admin/brands', adminBrandRoutes);
 // Banners
 app.use('/api/v1/banners', bannerRoutes);
 app.use('/api/v1/admin/banners', adminBannerRoutes);
+
+// Inquiries
+app.use('/api/v1/inquiries', inquiryRoutes);
 
 // Employees (RBAC)
 app.use('/api/v1/admin/employees', employeeRoutes);
