@@ -169,8 +169,6 @@ class AuthService {
   async firebaseLogin(idToken) {
     try {
       // 1. Verify the ID token with Firebase
-      let phone_number, uid;
-      
       if (!firebaseAdmin) {
         console.error('❌ Firebase login aborted: Admin SDK not initialized');
         return {
@@ -182,32 +180,41 @@ class AuthService {
       console.log('--- Firebase Verification Start ---');
       const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
       
-      // Log decoded token (safely) for debugging
-      console.log('Decoded Token Keys:', Object.keys(decodedToken));
-      console.log('Phone Number from Token:', decodedToken.phone_number);
-      console.log('UID from Token:', decodedToken.uid);
+      const phone_number = decodedToken.phone_number;
+      const email = decodedToken.email;
+      const name = decodedToken.name;
+      const uid = decodedToken.uid;
 
-      phone_number = decodedToken.phone_number;
-      uid = decodedToken.uid;
-
-      if (!phone_number) {
-        console.warn('⚠️ Firebase token verified but phone_number is missing.');
+      if (!phone_number && !email) {
+        console.warn('⚠️ Firebase token verified but neither phone nor email is present.');
         return {
           success: false,
-          message: 'Authentication successful, but no phone number was found in your Firebase profile.'
+          message: 'Authentication successful, but no contact information found.'
         };
       }
 
-      // Clean phone number (Firebase usually gives +91XXXXXXXXXX)
-      // Extract last 10 digits to match local format
-      const cleanedPhone = phone_number.replace(/\D/g, '').slice(-10);
-      console.log('Cleaned Phone for DB lookup:', cleanedPhone);
+      let user;
 
       // 2. Find or create user in our MongoDB
-      const user = await User.findOrCreateByPhone(cleanedPhone);
+      if (phone_number) {
+        const cleanedPhone = phone_number.replace(/\D/g, '').slice(-10);
+        user = await User.findOrCreateByPhone(cleanedPhone);
+      } else if (email) {
+        user = await User.findOne({ email });
+        if (!user) {
+          user = await User.create({
+            email,
+            name: name || '',
+            role: 'BUYER',
+            firebaseUid: uid
+          });
+        }
+      }
 
-      // 3. Mark user as verified via Firebase if needed
+      // 3. Mark user as verified via Firebase
       user.firebaseUid = uid;
+      if (name && !user.name) user.name = name;
+      if (email && !user.email) user.email = email;
       await user.save();
 
       if (!user.isActive) {

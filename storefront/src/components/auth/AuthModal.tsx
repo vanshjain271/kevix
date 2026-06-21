@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/api';
+import { auth, googleProvider } from '@/lib/firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 export default function AuthModal() {
   const { isLoginModalOpen, closeLoginModal, setAuth } = useAuthStore();
@@ -84,6 +86,29 @@ export default function AuthModal() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      
+      const res = await api.post('/auth/firebase-login', { idToken });
+      
+      if (res.data.success) {
+        setAuth(res.data.token, res.data.user);
+        handleClose();
+      } else {
+        setError(res.data.message || 'Google Login failed.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Google Login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative">
@@ -157,6 +182,22 @@ export default function AuthModal() {
                     Sending OTP...
                   </>
                 ) : 'CONTINUE'}
+              </button>
+
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-surface-border"></div>
+                <span className="flex-shrink-0 mx-4 text-text-secondary text-xs uppercase font-medium">OR</span>
+                <div className="flex-grow border-t border-surface-border"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full bg-white border border-surface-border hover:bg-surface text-text-primary font-semibold py-3.5 rounded-lg shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+                Continue with Google
               </button>
             </form>
           ) : (

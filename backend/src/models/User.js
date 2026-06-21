@@ -88,8 +88,7 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Phone number is required'],
-    unique: true,
+    sparse: true,
     trim: true,
     match: [/^[6-9]\d{9}$/, 'Invalid Indian phone number']
   },
