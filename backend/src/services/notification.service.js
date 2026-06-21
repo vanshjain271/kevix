@@ -127,7 +127,10 @@ class NotificationService {
             const user = await User.findById(userId).select('phone');
             if (user && user.phone) {
                 const SMSService = require('./sms.service');
+                const WhatsAppService = require('./whatsapp.service');
+                
                 await SMSService.sendOrderStatusUpdate(user.phone, order.orderNumber, status);
+                await WhatsAppService.sendOrderStatusUpdate(user.phone, order);
             }
         } catch (error) {
             console.error('Error sending SMS/WhatsApp status update:', error);
