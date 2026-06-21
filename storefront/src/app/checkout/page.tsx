@@ -20,6 +20,7 @@ export default function CheckoutPage() {
   const [utr, setUtr] = useState('');
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<'UPI' | 'RAZORPAY' | 'COD'>('UPI');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -72,8 +73,8 @@ export default function CheckoutPage() {
           pincode: selectedAddress.pincode,
           phone: selectedAddress.phone
         },
-        paymentMode: 'UPI',
-        utr: utr
+        paymentMode: paymentMode,
+        utr: paymentMode === 'UPI' ? utr : undefined
       });
 
       if (res.data.success) {
@@ -204,14 +205,22 @@ export default function CheckoutPage() {
                     );
                   })}
                 </div>
-                <div className="p-4 bg-white border-t border-surface-border flex justify-between items-center">
-                  <p className="text-sm text-text-primary">Order confirmation will be sent to <span className="font-medium">{user?.phone}</span></p>
-                  <button 
-                    onClick={() => setStep(3)}
-                    className="bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors"
-                  >
-                    CONTINUE
-                  </button>
+                <div className="p-4 bg-white border-t border-surface-border flex flex-col justify-between items-center gap-4">
+                  {settings?.minOrderAmount && totalPrice < settings.minOrderAmount && (
+                    <div className="w-full p-3 bg-red-50 text-red-600 rounded text-sm font-medium">
+                      Minimum order amount is ₹{settings.minOrderAmount}. Please add more items to your cart.
+                    </div>
+                  )}
+                  <div className="w-full flex justify-between items-center">
+                    <p className="text-sm text-text-primary">Order confirmation will be sent to <span className="font-medium">{user?.phone}</span></p>
+                    <button 
+                      disabled={settings?.minOrderAmount ? totalPrice < settings.minOrderAmount : false}
+                      onClick={() => setStep(3)}
+                      className="bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      CONTINUE
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -232,67 +241,100 @@ export default function CheckoutPage() {
               <div className="p-0 border-t border-surface-border">
 
                 {/* UPI / QR Option */}
-                <div className="p-4 border-b border-surface-border bg-primary/5">
+                <div className={`p-4 border-b border-surface-border ${paymentMode === 'UPI' ? 'bg-primary/5' : ''}`}>
                   <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
-                    <input type="radio" name="payment" defaultChecked className="w-4 h-4 accent-primary" />
+                    <input type="radio" name="payment" checked={paymentMode === 'UPI'} onChange={() => setPaymentMode('UPI')} className="w-4 h-4 accent-primary" />
                     UPI (Google Pay, PhonePe, Paytm)
                   </label>
-                  <div className="ml-8 mt-4 bg-white p-6 rounded border border-surface-border flex flex-col md:flex-row items-center gap-8">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-40 h-40 bg-surface border border-surface-border p-2 rounded-lg flex items-center justify-center">
-                        {settings?.paymentQrCode ? (
-                          <img src={settings.paymentQrCode} alt="Payment QR Code" className="w-full h-full object-contain" />
-                        ) : (
-                          <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Kevix&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
-                        )}
+                  {paymentMode === 'UPI' && (
+                    <div className="ml-8 mt-4 bg-white p-6 rounded border border-surface-border flex flex-col md:flex-row items-center gap-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-40 h-40 bg-surface border border-surface-border p-2 rounded-lg flex items-center justify-center">
+                          {settings?.paymentQrCode ? (
+                            <img src={settings.paymentQrCode} alt="Payment QR Code" className="w-full h-full object-contain" />
+                          ) : (
+                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Kevix&am=${orderTotal}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
+                          )}
+                        </div>
+                        <span className="text-xs text-text-secondary font-medium">Scan with any UPI app</span>
                       </div>
-                      <span className="text-xs text-text-secondary font-medium">Scan with any UPI app</span>
-                    </div>
-                    <div className="flex-grow w-full">
-                      <p className="text-sm text-text-primary mb-4 leading-relaxed">
-                        1. Scan the QR code using any UPI app.<br/>
-                        2. Pay exactly <strong className="text-lg">₹{orderTotal.toLocaleString('en-IN')}</strong>.<br/>
-                        3. Enter the 12-digit UTR / Reference number below.
-                      </p>
-                      <div className="space-y-4">
-                        <input
-                          type="text"
-                          placeholder="Enter 12-digit UTR Number"
-                          value={utr}
-                          onChange={(e) => setUtr(e.target.value)}
-                          className="w-full border border-surface-border rounded-sm px-4 py-3 outline-none focus:border-primary focus:ring-1 ring-primary text-sm"
-                        />
-                        <button
-                          disabled={isPlacingOrder}
-                          onClick={handlePlaceOrder}
-                          className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isPlacingOrder ? 'PLACING ORDER...' : 'CONFIRM ORDER'}
-                        </button>
+                      <div className="flex-grow w-full">
+                        <p className="text-sm text-text-primary mb-4 leading-relaxed">
+                          1. Scan the QR code using any UPI app.<br/>
+                          2. Pay exactly <strong className="text-lg">₹{orderTotal.toLocaleString('en-IN')}</strong>.<br/>
+                          3. Enter the 12-digit UTR / Reference number below.
+                        </p>
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            placeholder="Enter 12-digit UTR Number"
+                            value={utr}
+                            onChange={(e) => setUtr(e.target.value)}
+                            className="w-full border border-surface-border rounded-sm px-4 py-3 outline-none focus:border-primary focus:ring-1 ring-primary text-sm"
+                          />
+                          <button
+                            disabled={isPlacingOrder || !utr}
+                            onClick={handlePlaceOrder}
+                            className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isPlacingOrder ? 'PLACING ORDER...' : 'CONFIRM ORDER'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Razorpay — Coming Soon */}
-                <div className="p-4 border-b border-surface-border opacity-60 cursor-not-allowed select-none">
-                  <div className="flex items-center gap-4">
-                    <input type="radio" name="payment" disabled className="w-4 h-4" />
+                {/* Razorpay Option */}
+                <div className={`p-4 border-b border-surface-border ${!settings?.razorpayEnabled ? 'opacity-60 cursor-not-allowed' : paymentMode === 'RAZORPAY' ? 'bg-primary/5' : ''}`}>
+                  <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
+                    <input type="radio" name="payment" disabled={!settings?.razorpayEnabled} checked={paymentMode === 'RAZORPAY'} onChange={() => setPaymentMode('RAZORPAY')} className="w-4 h-4 accent-primary" />
                     <div className="flex items-center gap-3">
-                      <span className="font-medium text-text-primary">Credit / Debit Card, Net Banking (Razorpay)</span>
-                      <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>
+                      <span>Credit / Debit Card, Net Banking (Razorpay)</span>
+                      {!settings?.razorpayEnabled && <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>}
                     </div>
-                  </div>
-                  <p className="ml-8 mt-2 text-xs text-text-muted">We're setting up Razorpay for cards and net banking. Use UPI for now!</p>
+                  </label>
+                  {!settings?.razorpayEnabled && (
+                    <p className="ml-8 mt-2 text-xs text-text-muted">We're setting up Razorpay for cards and net banking. Use UPI for now!</p>
+                  )}
+                  {settings?.razorpayEnabled && paymentMode === 'RAZORPAY' && (
+                    <div className="ml-8 mt-4">
+                      <button
+                        disabled={isPlacingOrder}
+                        onClick={handlePlaceOrder}
+                        className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isPlacingOrder ? 'PLACING ORDER...' : 'PAY WITH RAZORPAY'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* Cash on Delivery */}
-                <div className="p-4 opacity-60 cursor-not-allowed select-none">
-                  <div className="flex items-center gap-4">
-                    <input type="radio" name="payment" disabled className="w-4 h-4" />
-                    <span className="font-medium text-text-primary">Cash on Delivery</span>
-                    <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>
-                  </div>
+                {/* Cash on Delivery Option */}
+                <div className={`p-4 ${!settings?.codEnabled ? 'opacity-60 cursor-not-allowed' : paymentMode === 'COD' ? 'bg-primary/5' : ''}`}>
+                  <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
+                    <input type="radio" name="payment" disabled={!settings?.codEnabled} checked={paymentMode === 'COD'} onChange={() => setPaymentMode('COD')} className="w-4 h-4 accent-primary" />
+                    <div className="flex items-center gap-3">
+                      <span>Cash on Delivery</span>
+                      {!settings?.codEnabled && <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>}
+                    </div>
+                  </label>
+                  {settings?.codEnabled && paymentMode === 'COD' && (
+                    <div className="ml-8 mt-4">
+                      {settings?.advancePartialPayment && settings?.partialPaymentPercent > 0 && (
+                         <div className="mb-4 p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded text-sm">
+                           Note: A partial advance payment of {settings.partialPaymentPercent}% (₹{Math.round(orderTotal * (settings.partialPaymentPercent / 100))}) is required for Cash on Delivery orders to prevent fake orders. You will be redirected to pay this advance amount.
+                         </div>
+                      )}
+                      <button
+                        disabled={isPlacingOrder}
+                        onClick={handlePlaceOrder}
+                        className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isPlacingOrder ? 'PLACING ORDER...' : 'PLACE COD ORDER'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
               </div>
