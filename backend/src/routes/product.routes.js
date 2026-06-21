@@ -11,7 +11,6 @@ const express = require('express');
 const router = express.Router();
 
 const ProductController = require('../controllers/product.controller');
-const { buyerOrAdmin } = require('../middleware/auth.middleware');
 const { productValidation } = require('../middleware/validation.middleware');
 
 // Cache-Control: 60 seconds for product lists, 5 min for single product
@@ -32,7 +31,6 @@ const setItemCache = (req, res, next) => {
  */
 router.get(
   '/',
-  buyerOrAdmin,
   setListCache,
   productValidation.getProducts,
   ProductController.getProducts
@@ -45,7 +43,6 @@ router.get(
  */
 router.get(
   '/:productId',
-  buyerOrAdmin,
   setItemCache,
   productValidation.getProductById,
   ProductController.getProductById
