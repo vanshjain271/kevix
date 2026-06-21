@@ -19,12 +19,9 @@ const nextConfig: NextConfig = {
         source: '/api/v1/:path*',
         destination: process.env.NODE_ENV === 'production'
           ? 'http://13.201.30.242:5001/api/v1/:path*'
-          : 'http://localhost:5001/api/v1/:path*', // Proxy to Backend
+          : 'http://localhost:5001/api/v1/:path*',
       },
     ]
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
