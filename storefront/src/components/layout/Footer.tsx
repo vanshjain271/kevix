@@ -52,11 +52,10 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-lg font-bold border-b border-white/20 pb-2 inline-block">Quick Links</h4>
           <ul className="space-y-2 text-sm text-white/80">
-            <li><Link href="#" className="hover:text-accent transition-colors">About Us</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Contact Us</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Track Order</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Bulk Inquiries</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Careers</Link></li>
+            <li><Link href="/about" className="hover:text-accent transition-colors">About Us</Link></li>
+            <li><Link href="/contact" className="hover:text-accent transition-colors">Contact Us</Link></li>
+            <li><Link href="/account" className="hover:text-accent transition-colors">Track Order</Link></li>
+            <li><Link href="/contact?subject=Bulk Inquiries" className="hover:text-accent transition-colors">Bulk Inquiries</Link></li>
           </ul>
         </div>
 
@@ -82,11 +81,11 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-lg font-bold border-b border-white/20 pb-2 inline-block">Policies</h4>
           <ul className="space-y-2 text-sm text-white/80">
-            <li><Link href="#" className="hover:text-accent transition-colors">Return & Refund Policy</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Privacy Policy</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Terms & Conditions</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Shipping Policy</Link></li>
-            <li><Link href="#" className="hover:text-accent transition-colors">Warranty Policy</Link></li>
+            <li><Link href="/policies/refund-policy" className="hover:text-accent transition-colors">Return & Refund Policy</Link></li>
+            <li><Link href="/policies/privacy-policy" className="hover:text-accent transition-colors">Privacy Policy</Link></li>
+            <li><Link href="/policies/terms-and-conditions" className="hover:text-accent transition-colors">Terms & Conditions</Link></li>
+            <li><Link href="/policies/shipping-policy" className="hover:text-accent transition-colors">Shipping Policy</Link></li>
+            <li><Link href="/policies/return-policy" className="hover:text-accent transition-colors">Return Policy</Link></li>
           </ul>
         </div>
       </div>
