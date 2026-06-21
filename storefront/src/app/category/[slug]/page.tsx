@@ -11,10 +11,14 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   // Convert slug to readable title
   const title = resolvedParams.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
-  const { categories } = useCategories();
+  const { categories, isLoading: isCategoriesLoading } = useCategories();
   const category = categories.find((c: any) => c.slug === resolvedParams.slug);
   
-  const { products, isLoading } = useProducts(category ? category._id : undefined);
+  // Pass null while loading categories to prevent eagerly fetching all products
+  const categoryId = isCategoriesLoading ? null : (category ? category._id : undefined);
+  
+  const { products, isLoading: isProductsLoading } = useProducts(categoryId);
+  const isLoading = isCategoriesLoading || isProductsLoading;
 
   // Transform backend products
   const formattedProducts = products.map((p: any) => ({

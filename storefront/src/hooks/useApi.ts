@@ -68,14 +68,17 @@ export function useBanners() {
   return { banners: data?.banners || [], error, isLoading };
 }
 
-export function useProducts(categoryId?: string, search?: string) {
+export function useProducts(categoryId?: string | null, search?: string) {
   const queryParams = new URLSearchParams();
   if (categoryId) queryParams.append('categoryId', categoryId);
   if (search) queryParams.append('search', search);
   const queryString = queryParams.toString();
   const url = queryString ? `/products?${queryString}` : '/products';
 
-  const { data, error, isLoading } = useSWR(url, fetcher);
+  // If categoryId is explicitly null, we are still waiting for it to resolve, so we pass null to SWR to prevent fetching
+  const shouldFetch = categoryId !== null;
+
+  const { data, error, isLoading } = useSWR(shouldFetch ? url : null, fetcher);
 
   return { products: data?.products || [], error, isLoading };
 }
