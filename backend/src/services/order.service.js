@@ -75,6 +75,8 @@ class OrderService {
     if (paymentMode === 'COD' && !settings.codEnabled) {
       return { success: false, message: 'Cash on Delivery is currently disabled' };
     }
+    // Only PREPAID (card/net banking via Razorpay) requires razorpayEnabled
+    // UPI_QR is manual QR — does NOT require Razorpay to be enabled
     if ((paymentMode === 'PREPAID' || paymentMode === 'FULL_PAYMENT') && !settings.razorpayEnabled) {
       return { success: false, message: 'Online Payment is currently disabled' };
     }
