@@ -16,9 +16,9 @@ function formatProduct(p: any) {
   return {
     id: p._id,
     name: p.name,
-    price: p.sellingPrice || 0,
+    price: p.salePrice || 0,
     mrp: p.mrp || 0,
-    discount: p.mrp > 0 ? Math.round(((p.mrp - p.sellingPrice) / p.mrp) * 100) : 0,
+    discount: p.mrp > 0 ? Math.round(((p.mrp - p.salePrice) / p.mrp) * 100) : 0,
     image: p.images?.[0]?.url || p.images?.[0] || DEFAULT_IMAGE,
     rating: p.averageRating || 4.5,
     reviews: p.totalReviews || 0,

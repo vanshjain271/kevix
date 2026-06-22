@@ -29,7 +29,7 @@ export default function CartPage() {
 
   // Calculations based on backend items — use optional chaining + fallback to 0
   const totalMrp = items.reduce((sum, item) => sum + ((item.productId?.mrp || 0) * item.quantity), 0);
-  const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.sellingPrice || 0) * item.quantity), 0);
+  const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.salePrice || 0) * item.quantity), 0);
   const totalDiscount = totalMrp - totalPrice;
   
   // Apply delivery fee logic from settings
@@ -50,7 +50,7 @@ export default function CartPage() {
       const cartItemsForValidation = items.map(item => ({
         product: item.productId?._id,
         quantity: item.quantity,
-        price: item.productId?.sellingPrice
+        price: item.productId?.salePrice
       }));
 
       const res = await api.post('/coupons/validate', {
@@ -104,8 +104,8 @@ export default function CartPage() {
                   const product = item.productId;
                   if (!product) return null; // skip unpopulated items
                   const mrp = product.mrp || 0;
-                  const sellingPrice = product.sellingPrice || 0;
-                  const itemDiscount = mrp > 0 ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
+                  const salePrice = product.salePrice || 0;
+                  const itemDiscount = mrp > 0 ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
                   const image = product.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
                   return (
                   <div key={item.id} className="p-4 flex flex-col sm:flex-row gap-6">
@@ -139,8 +139,8 @@ export default function CartPage() {
                       <span className="text-xs text-text-secondary mt-1 mb-3">Seller: Kevix</span>
                       
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-lg font-bold text-text-primary">₹{sellingPrice.toLocaleString('en-IN')}</span>
-                        {mrp > sellingPrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                        <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
+                        {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
                         {itemDiscount > 0 && <span className="text-sm font-bold text-success">{itemDiscount}% Off</span>}
                       </div>
 

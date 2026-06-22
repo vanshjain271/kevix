@@ -37,7 +37,7 @@ export default function CheckoutPage() {
   }, [addresses, selectedAddress]);
 
   const totalMrp = items.reduce((sum, item) => sum + ((item.productId?.mrp || 0) * item.quantity), 0);
-  const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.sellingPrice || 0) * item.quantity), 0);
+  const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.salePrice || 0) * item.quantity), 0);
   const totalDiscount = totalMrp - totalPrice;
   
   const deliveryFeeSetting = settings?.deliveryFee ?? 40;
@@ -59,7 +59,7 @@ export default function CheckoutPage() {
       const orderItems = items.map(item => ({
         product: item.productId._id,
         quantity: item.quantity,
-        price: item.productId.sellingPrice
+        price: item.productId.salePrice
       }));
 
       const res = await api.post('/orders', {
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
                   {items.map(item => {
                     const product = item.productId;
                     if (!product) return null;
-                    const sellingPrice = product.sellingPrice || 0;
+                    const salePrice = product.salePrice || 0;
                     const mrp = product.mrp || 0;
                     return (
                     <div key={item.id || item._id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
@@ -194,8 +194,8 @@ export default function CheckoutPage() {
                         <h3 className="font-medium text-text-primary">{product.name}</h3>
                         <p className="text-sm text-text-secondary mt-1">Quantity: {item.quantity}</p>
                         <div className="flex items-baseline gap-2 mt-2">
-                          <span className="text-lg font-bold text-text-primary">₹{sellingPrice.toLocaleString('en-IN')}</span>
-                          {mrp > sellingPrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                          <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
+                          {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
                         </div>
                       </div>
                       <div className="text-sm text-text-primary text-right">

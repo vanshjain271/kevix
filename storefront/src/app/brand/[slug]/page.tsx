@@ -21,7 +21,7 @@ function ProductCard({ product }: { product: any }) {
   const id = product._id || product.id;
   const wishlisted = isWishlisted(id);
   const img = product.images?.[0]?.url || product.images?.[0] || DEFAULT_IMG;
-  const price = product.sellingPrice || 0;
+  const price = product.salePrice || 0;
   const mrp = product.mrp || 0;
   const discount = mrp > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0;
 

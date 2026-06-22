@@ -21,7 +21,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   
   const displayProduct = product ? {
     ...product,
-    discount: Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100),
+    discount: Math.round(((product.mrp - product.salePrice) / product.mrp) * 100),
     images: product.images && product.images.length > 0 ? product.images.map((img: any) => img.url) : [
       'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop'
     ],
@@ -125,33 +125,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
             
-            {/* Action Buttons (Mobile: Below image, Desktop: Below image gallery) */}
-            <div className="flex gap-2 order-3 w-full mt-4 absolute md:relative bottom-0 left-0 p-4 md:p-0 bg-white border-t md:border-t-0 border-surface-border z-40 md:z-auto">
-              <button 
-                onClick={() => {
-                  let qty = 1;
-                  if (displayProduct.isLot && displayProduct.lotDetails) {
-                    if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
-                    if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
-                    if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
-                  }
-                  addToCart(displayProduct._id, qty);
-                }}
-                disabled={addingToCart || displayProduct.stock <= 0}
-                className="flex-1 bg-accent hover:bg-accent-dark text-white py-3 md:py-4 px-2 rounded-sm font-bold text-sm md:text-lg flex items-center justify-center gap-2 transition-colors shadow-md disabled:opacity-70"
-              >
-                <span className="material-symbols-outlined">{addingToCart ? 'hourglass_empty' : 'shopping_cart'}</span> 
-                {addingToCart ? 'ADDING...' : (displayProduct.stock > 0 ? 'ADD TO CART' : 'OUT OF STOCK')}
-              </button>
-              <button disabled={displayProduct.stock <= 0} className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 md:py-4 px-2 rounded-sm font-bold text-sm md:text-lg flex items-center justify-center gap-2 transition-colors shadow-md disabled:opacity-70">
-                <span className="material-symbols-outlined">bolt</span> BUY NOW
-              </button>
-              <button 
-                onClick={() => setIsInquiryModalOpen(true)}
-                className="bg-white border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white py-3 md:py-4 px-4 rounded-sm font-bold text-sm md:text-lg flex items-center justify-center gap-2 transition-colors shadow-md"
-              >
-                <span className="material-symbols-outlined">chat</span> BULK
-              </button>
             </div>
           </div>
 
@@ -224,9 +197,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             ) : (
               <div className="border-b border-surface-border pb-6">
-                <div className="text-success font-bold text-sm mb-1">Extra ₹{(displayProduct.mrp - displayProduct.sellingPrice)} off</div>
+                <div className="text-success font-bold text-sm mb-1">Extra ₹{(displayProduct.mrp - displayProduct.salePrice)} off</div>
                 <div className="mt-4 flex items-end gap-3">
-                  <span className="text-3xl font-medium text-text-primary">₹{(displayProduct.sellingPrice || 0).toLocaleString('en-IN')}</span>
+                  <span className="text-3xl font-medium text-text-primary">₹{(displayProduct.salePrice || 0).toLocaleString('en-IN')}</span>
                   <span className="text-lg text-text-muted line-through mb-1">₹{(displayProduct.mrp || 0).toLocaleString('en-IN')}</span>
                   <span className="text-sm font-bold text-success mb-1.5">{displayProduct.discount}% off</span>
                 </div>
@@ -236,6 +209,72 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   ) : (
                     <span className="text-danger font-bold">Out of Stock</span>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 mt-6 border-b border-surface-border pb-6">
+              <button 
+                onClick={() => {
+                  let qty = 1;
+                  if (displayProduct.isLot && displayProduct.lotDetails) {
+                    if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
+                    if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
+                    if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                  }
+                  addToCart(displayProduct._id, qty);
+                }}
+                disabled={addingToCart || displayProduct.stock <= 0}
+                className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
+              >
+                <span className="material-symbols-outlined text-[18px]">{addingToCart ? 'hourglass_empty' : 'shopping_cart'}</span> 
+                {addingToCart ? 'ADDING...' : 'ADD TO CART'}
+              </button>
+              <button disabled={displayProduct.stock <= 0} className="flex-1 min-w-[140px] bg-primary hover:bg-primary-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70">
+                <span className="material-symbols-outlined text-[18px]">bolt</span> BUY NOW
+              </button>
+              <button 
+                onClick={() => setIsInquiryModalOpen(true)}
+                className="flex-1 min-w-[140px] bg-white border border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow"
+              >
+                <span className="material-symbols-outlined text-[18px]">chat</span> BULK INQUIRE
+              </button>
+            </div>
+
+            {/* Variants */}
+            {displayProduct.hasVariants && displayProduct.variants?.length > 0 && (
+              <div className="border-b border-surface-border pb-6 pt-4">
+                <h3 className="text-lg font-medium text-text-primary mb-4">Available Variants</h3>
+                <div className="flex flex-col gap-3">
+                  {displayProduct.variants.map((variant: any) => (
+                    <div key={variant._id || variant.sku} className="flex items-center justify-between border border-surface-border rounded-lg p-3 hover:border-primary/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        {variant.image && (
+                          <div className="w-12 h-12 relative rounded border border-surface-border overflow-hidden shrink-0">
+                            <Image src={variant.image} alt={variant.name} fill className="object-cover" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold text-text-primary text-sm line-clamp-1">{variant.name}</div>
+                          <div className="text-xs text-text-secondary">SKU: {variant.sku}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div className="text-right hidden sm:block">
+                          <div className="font-bold text-text-primary">₹{(variant.salePrice || 0).toLocaleString('en-IN')}</div>
+                          {variant.mrp > variant.salePrice && <div className="text-[10px] text-text-muted line-through">₹{(variant.mrp || 0).toLocaleString('en-IN')}</div>}
+                        </div>
+                        <button
+                          onClick={() => addToCart(displayProduct._id, 1, variant._id)}
+                          disabled={addingToCart || variant.stock <= 0}
+                          className={`px-3 py-1.5 rounded-md font-bold text-xs flex items-center gap-1 transition-colors ${variant.stock > 0 ? 'bg-primary hover:bg-primary-dark text-white' : 'bg-gray-200 text-gray-500'}`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">{variant.stock > 0 ? 'add' : 'block'}</span> {variant.stock > 0 ? 'ADD' : 'SOLD'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

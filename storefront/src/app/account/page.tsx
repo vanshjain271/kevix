@@ -458,7 +458,7 @@ export default function AccountPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {wishlist.map((item: any) => {
                       const image = item.images && item.images.length > 0 ? item.images[0].url : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
-                      const discount = Math.round(((item.mrp - item.sellingPrice) / item.mrp) * 100);
+                      const discount = Math.round(((item.mrp - item.salePrice) / item.mrp) * 100);
                       
                       return (
                         <div key={item._id} className="border border-surface-border rounded-sm hover:shadow-lg transition-shadow bg-white flex flex-col group relative overflow-hidden">
@@ -487,7 +487,7 @@ export default function AccountPage() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2 mt-auto pt-2">
-                              <span className="font-bold text-text-primary">₹{(item.sellingPrice || 0).toLocaleString('en-IN')}</span>
+                              <span className="font-bold text-text-primary">₹{(item.salePrice || 0).toLocaleString('en-IN')}</span>
                               <span className="text-xs text-text-muted line-through">₹{(item.mrp || 0).toLocaleString('en-IN')}</span>
                               <span className="text-xs font-bold text-success">{discount}% off</span>
                             </div>

@@ -7,7 +7,7 @@ interface CartItem {
   productId: {
     _id: string;
     name: string;
-    sellingPrice: number;
+    salePrice: number;
     mrp: number;
     images?: { url: string }[];
   };
@@ -21,7 +21,7 @@ interface CartState {
   
   // Actions
   fetchCart: () => Promise<void>;
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  addToCart: (productId: string, quantity?: number, variantId?: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
 }
@@ -41,9 +41,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
 
-  addToCart: async (productId: string, quantity: number = 1) => {
+  addToCart: async (productId: string, quantity: number = 1, variantId?: string) => {
     try {
-      await api.post('/cart/items', { productId, quantity });
+      await api.post('/cart/items', { productId, quantity, variantId });
       // Re-fetch cart
       await get().fetchCart();
     } catch (error) {

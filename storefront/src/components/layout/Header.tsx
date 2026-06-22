@@ -141,7 +141,7 @@ export default function Header() {
                           )}
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">{product.name}</p>
-                            <p className="text-xs text-purple-600 font-bold">₹{(product.sellingPrice || 0).toLocaleString('en-IN')}</p>
+                            <p className="text-xs text-purple-600 font-bold">₹{(product.salePrice || 0).toLocaleString('en-IN')}</p>
                           </div>
                           <span className="material-symbols-outlined text-gray-300 text-[16px] ml-auto shrink-0">north_west</span>
                         </button>
