@@ -21,7 +21,7 @@ const { logActivity } = require('../services/activity.service');
 const getProducts = async (req, res) => {
   try {
     const Product = require('../models/Product');
-    const { page = 1, limit = 50, search, category, brand, status, sort, isLot } = req.query;
+    const { page = 1, limit = 50, search, category, status, sort, isLot } = req.query;
 
     const query = {};
     if (isLot === 'true') query.isLot = true;
@@ -38,7 +38,7 @@ const getProducts = async (req, res) => {
       const categoryIds = Array.isArray(category) ? category : category.split(',');
       query.category = { $in: categoryIds };
     }
-    if (brand) query.brand = brand;
+
     if (status === 'active') query.isActive = true;
     if (status === 'inactive') query.isActive = false;
 
@@ -59,7 +59,7 @@ const getProducts = async (req, res) => {
     const [products, total] = await Promise.all([
       Product.find(query)
         .populate('category', 'name')
-        .populate('brand', 'name')
+
         .sort(sortOptions)
         .skip(skip)
         .limit(parseInt(limit))

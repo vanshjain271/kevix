@@ -38,7 +38,7 @@ class ProductService {
   /**
    * Get products with pagination and filters (Public)
    * 
-   * @param {Object} options - { page, limit, categoryId, brandId, search, sortBy, sortOrder }
+   * @param {Object} options - { page, limit, categoryId, search, sortBy, sortOrder }
    * @returns {Promise<Object>} { success, products, pagination }
    */
   async getProducts(options = {}) {
@@ -78,8 +78,7 @@ class ProductService {
       if (cached) return cached;
 
       const product = await Product.findById(productId)
-        .populate('category', 'name slug')
-        .populate('brand', 'name slug image');
+        .populate('category', 'name slug');
 
       if (!product) {
         return { success: false, message: 'Product not found' };
@@ -170,7 +169,6 @@ class ProductService {
 
       // Populate references
       await product.populate('category', 'name slug');
-      await product.populate('brand', 'name slug image');
 
       return {
         success: true,
@@ -300,7 +298,6 @@ class ProductService {
 
       // Populate references
       await product.populate('category', 'name slug');
-      await product.populate('brand', 'name slug image');
 
       return {
         success: true,

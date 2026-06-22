@@ -293,9 +293,9 @@ class ReportService {
    */
   async generateInventoryReport() {
     try {
-      const products = await Product.find({ isActive: true })
+      const products = await Product.find()
+        .select('name sku category variants stock salePrice')
         .populate('category', 'name')
-        .populate('brand', 'name')
         .lean();
 
       const reportData = [];

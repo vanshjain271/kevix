@@ -17,13 +17,13 @@ const ProductService = require('../services/product.service');
  */
 const getProducts = async (req, res) => {
   try {
-    const { page, limit, categoryId, brandId, search, sortBy, sortOrder, homepageSection } = req.query;
+    const { page, limit, categoryId, search, sortBy, sortOrder, homepageSection } = req.query;
 
     const result = await ProductService.getProducts({
       page: page || 1,
       limit: limit || 20,
       categoryId,
-      brandId,
+
       search,
       sortBy,
       sortOrder,

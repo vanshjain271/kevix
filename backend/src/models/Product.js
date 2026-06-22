@@ -400,9 +400,7 @@ productSchema.statics.getActiveProducts = async function (options = {}) {
     query.category = { $in: [categoryId] };
   }
 
-  if (brandId) {
-    query.brand = brandId;
-  }
+
 
   if (search) {
     query.$or = [
@@ -418,7 +416,6 @@ productSchema.statics.getActiveProducts = async function (options = {}) {
   const [products, total] = await Promise.all([
     this.find(query)
       .populate('category', 'name slug')
-      .populate('brand', 'name slug image')
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit))
