@@ -34,6 +34,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [selectedLotType, setSelectedLotType] = useState<'full' | 'half' | 'mini'>('full');
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   // Update active image when product loads
   useEffect(() => {
@@ -43,7 +44,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }, [displayProduct?.images]);
 
   const inWishlist = wishlist.some((item: any) => item._id === displayProduct?._id);
-  const cartItem = items.find(i => i.productId?._id === displayProduct?._id);
+  const cartItem = items.find(i => {
+    if (selectedVariant) {
+      return i.productId?._id === displayProduct?._id && i.variantId === selectedVariant._id;
+    }
+    return i.productId?._id === displayProduct?._id && !i.variantId;
+  });
+
+  // Active price: variant price if selected, else base product price
+  const activePrice = selectedVariant?.salePrice ?? displayProduct?.salePrice ?? 0;
+  const activeMrp = selectedVariant?.mrp ?? displayProduct?.mrp ?? 0;
 
   const handleToggleWishlist = async () => {
     if (!isAuthenticated) {
@@ -199,11 +209,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             ) : (
               <div className="border-b border-surface-border pb-6">
-                <div className="text-success font-bold text-sm mb-1">Extra ₹{(displayProduct.mrp - displayProduct.salePrice)} off</div>
+                <div className="text-success font-bold text-sm mb-1">
+                  {activeMrp > activePrice ? `Extra ₹${(activeMrp - activePrice).toLocaleString('en-IN')} off` : 'Best Price'}
+                </div>
                 <div className="mt-4 flex items-end gap-3">
-                  <span className="text-3xl font-medium text-text-primary">₹{(displayProduct.salePrice || 0).toLocaleString('en-IN')}</span>
-                  <span className="text-lg text-text-muted line-through mb-1">₹{(displayProduct.mrp || 0).toLocaleString('en-IN')}</span>
-                  <span className="text-sm font-bold text-success mb-1.5">{displayProduct.discount}% off</span>
+                  <span className="text-3xl font-medium text-text-primary">₹{activePrice.toLocaleString('en-IN')}</span>
+                  {activeMrp > activePrice && <span className="text-lg text-text-muted line-through mb-1">₹{activeMrp.toLocaleString('en-IN')}</span>}
+                  {activeMrp > activePrice && <span className="text-sm font-bold text-success mb-1.5">{Math.round(((activeMrp - activePrice) / activeMrp) * 100)}% off</span>}
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
                   {displayProduct.stock > 0 ? (
@@ -234,17 +246,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               ) : (
                 <button 
                   onClick={() => {
-                    if (!isAuthenticated) {
-                      openLoginModal();
-                      return;
-                    }
+                    if (!isAuthenticated) { openLoginModal(); return; }
                     let qty = 1;
                     if (displayProduct.isLot && displayProduct.lotDetails) {
                       if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
                       if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
                       if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
                     }
-                    addToCart(displayProduct._id, qty);
+                    addToCart(displayProduct._id, qty, selectedVariant?._id);
                   }}
                   disabled={addingToCart || displayProduct.stock <= 0}
                   className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
@@ -255,17 +264,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               )}
               <button 
                 onClick={async () => {
-                  if (!isAuthenticated) {
-                    openLoginModal();
-                    return;
-                  }
+                  if (!isAuthenticated) { openLoginModal(); return; }
                   let qty = 1;
                   if (displayProduct.isLot && displayProduct.lotDetails) {
                     if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
                     if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
                     if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
                   }
-                  await addToCart(displayProduct._id, qty);
+                  await addToCart(displayProduct._id, qty, selectedVariant?._id);
                   router.push('/checkout');
                 }}
                 disabled={addingToCart || displayProduct.stock <= 0} 
@@ -284,10 +290,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Variants */}
             {displayProduct.hasVariants && displayProduct.variants?.length > 0 && (
               <div className="border-b border-surface-border pb-6 pt-4">
-                <h3 className="text-lg font-medium text-text-primary mb-4">Available Variants</h3>
+                <h3 className="text-lg font-medium text-text-primary mb-4">Available Variants
+                  {selectedVariant && (
+                    <button onClick={() => setSelectedVariant(null)} className="ml-3 text-xs text-primary underline font-normal">Clear</button>
+                  )}
+                </h3>
                 <div className="flex flex-col gap-3">
-                  {displayProduct.variants.map((variant: any) => (
-                    <div key={variant._id || variant.sku} className="flex items-center justify-between border border-surface-border rounded-lg p-3 hover:border-primary/30 transition-colors">
+                  {displayProduct.variants.map((variant: any) => {
+                    const isSelected = selectedVariant?._id === variant._id;
+                    return (
+                    <div 
+                      key={variant._id || variant.sku} 
+                      onClick={() => setSelectedVariant(isSelected ? null : variant)}
+                      className={`flex items-center justify-between border rounded-lg p-3 cursor-pointer transition-colors ${
+                        isSelected ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-surface-border hover:border-primary/30'
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         {variant.image && (
                           <div className="w-12 h-12 relative rounded border border-surface-border overflow-hidden shrink-0">
@@ -305,11 +323,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                           {variant.mrp > variant.salePrice && <div className="text-[10px] text-text-muted line-through">₹{(variant.mrp || 0).toLocaleString('en-IN')}</div>}
                         </div>
                         <button 
-                          onClick={() => {
-                            if (!isAuthenticated) {
-                              openLoginModal();
-                              return;
-                            }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isAuthenticated) { openLoginModal(); return; }
                             addToCart(displayProduct._id, 1, variant._id);
                           }}
                           disabled={addingToCart || variant.stock <= 0}
@@ -319,7 +335,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
