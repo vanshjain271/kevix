@@ -27,11 +27,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     ],
     rating: product.averageRating || 0,
     reviews: product.totalReviews || 0,
-    brand: product.brand?.name || product.brand || 'Generic',
     isAssured: true,
   } : null;
 
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [selectedLotType, setSelectedLotType] = useState<'full' | 'half' | 'mini'>('full');
 
   // Update active image when product loads
   useEffect(() => {
@@ -87,8 +87,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <Link href={`/category/${displayProduct.category?.slug || 'all'}`} className="hover:text-primary">{displayProduct.category?.name || 'Category'}</Link>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span className="hover:text-primary">{displayProduct.brand}</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span className="font-medium text-text-primary truncate max-w-[200px]">{displayProduct.name}</span>
         </div>
       </div>
@@ -130,7 +128,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Action Buttons (Mobile: Below image, Desktop: Below image gallery) */}
             <div className="flex gap-2 order-3 w-full mt-4 absolute md:relative bottom-0 left-0 p-4 md:p-0 bg-white border-t md:border-t-0 border-surface-border z-40 md:z-auto">
               <button 
-                onClick={() => addToCart(displayProduct._id)}
+                onClick={() => {
+                  let qty = 1;
+                  if (displayProduct.isLot && displayProduct.lotDetails) {
+                    if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
+                    if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
+                    if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                  }
+                  addToCart(displayProduct._id, qty);
+                }}
                 disabled={addingToCart || displayProduct.stock <= 0}
                 className="flex-1 bg-accent hover:bg-accent-dark text-white py-3 md:py-4 px-2 rounded-sm font-bold text-sm md:text-lg flex items-center justify-center gap-2 transition-colors shadow-md disabled:opacity-70"
               >
@@ -173,21 +179,66 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Price section */}
-            <div className="border-b border-surface-border pb-6">
-              <div className="text-success font-bold text-sm mb-1">Extra ₹{(displayProduct.mrp - displayProduct.sellingPrice)} off</div>
-              <div className="mt-4 flex items-end gap-3">
-                <span className="text-3xl font-medium text-text-primary">₹{(displayProduct.sellingPrice || 0).toLocaleString('en-IN')}</span>
-                <span className="text-lg text-text-muted line-through mb-1">₹{(displayProduct.mrp || 0).toLocaleString('en-IN')}</span>
-                <span className="text-sm font-bold text-success mb-1.5">{displayProduct.discount}% off</span>
+            {displayProduct.isLot ? (
+              <div className="border-b border-surface-border pb-6">
+                <div className="text-xl font-bold text-text-primary mb-4">Select Lot Size</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {displayProduct.lotDetails?.fullLotQuantity > 0 && (
+                    <div 
+                      onClick={() => setSelectedLotType('full')}
+                      className={`border p-4 rounded cursor-pointer transition-colors ${selectedLotType === 'full' ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-surface-border hover:border-primary/50'}`}
+                    >
+                      <div className="font-bold text-text-primary mb-1">Full Lot</div>
+                      <div className="text-sm text-text-secondary mb-2">{displayProduct.lotDetails.fullLotQuantity} units</div>
+                      <div className="text-xl font-bold text-primary">₹{(displayProduct.lotDetails.fullLotPrice || 0).toLocaleString('en-IN')}</div>
+                    </div>
+                  )}
+                  {displayProduct.lotDetails?.allowHalfLot && (
+                    <div 
+                      onClick={() => setSelectedLotType('half')}
+                      className={`border p-4 rounded cursor-pointer transition-colors ${selectedLotType === 'half' ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-surface-border hover:border-primary/50'}`}
+                    >
+                      <div className="font-bold text-text-primary mb-1">Half Lot</div>
+                      <div className="text-sm text-text-secondary mb-2">{displayProduct.lotDetails.halfLotQuantity} units</div>
+                      <div className="text-xl font-bold text-primary">₹{(displayProduct.lotDetails.halfLotPrice || 0).toLocaleString('en-IN')}</div>
+                    </div>
+                  )}
+                  {displayProduct.lotDetails?.allowMiniLot && (
+                    <div 
+                      onClick={() => setSelectedLotType('mini')}
+                      className={`border p-4 rounded cursor-pointer transition-colors ${selectedLotType === 'mini' ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-surface-border hover:border-primary/50'}`}
+                    >
+                      <div className="font-bold text-text-primary mb-1">Mini Lot</div>
+                      <div className="text-sm text-text-secondary mb-2">{displayProduct.lotDetails.miniLotQuantity} units</div>
+                      <div className="text-xl font-bold text-primary">₹{(displayProduct.lotDetails.miniLotPrice || 0).toLocaleString('en-IN')}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="text-xs text-text-secondary mt-4">
+                  {displayProduct.stock > 0 ? (
+                    <span className="text-success font-bold">In Stock ({displayProduct.stock} units available)</span>
+                  ) : (
+                    <span className="text-danger font-bold">Out of Stock</span>
+                  )}
+                </div>
               </div>
-              <div className="text-xs text-text-secondary mt-1">
-                {displayProduct.stock > 0 ? (
-                  <span className="text-success font-bold">In Stock ({displayProduct.stock} units available)</span>
-                ) : (
-                  <span className="text-danger font-bold">Out of Stock</span>
-                )}
+            ) : (
+              <div className="border-b border-surface-border pb-6">
+                <div className="text-success font-bold text-sm mb-1">Extra ₹{(displayProduct.mrp - displayProduct.sellingPrice)} off</div>
+                <div className="mt-4 flex items-end gap-3">
+                  <span className="text-3xl font-medium text-text-primary">₹{(displayProduct.sellingPrice || 0).toLocaleString('en-IN')}</span>
+                  <span className="text-lg text-text-muted line-through mb-1">₹{(displayProduct.mrp || 0).toLocaleString('en-IN')}</span>
+                  <span className="text-sm font-bold text-success mb-1.5">{displayProduct.discount}% off</span>
+                </div>
+                <div className="text-xs text-text-secondary mt-1">
+                  {displayProduct.stock > 0 ? (
+                    <span className="text-success font-bold">In Stock ({displayProduct.stock} units available)</span>
+                  ) : (
+                    <span className="text-danger font-bold">Out of Stock</span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Description */}
             <div>

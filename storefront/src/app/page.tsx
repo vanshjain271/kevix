@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import CategoryNav from '@/components/home/CategoryNav';
 import HeroCarousel from '@/components/home/HeroCarousel';
-import BrandRow from '@/components/home/BrandRow';
 import ProductCarousel from '@/components/home/ProductCarousel';
 import { useProducts } from '@/hooks/useApi';
 import { useCartStore } from '@/store/useCartStore';
@@ -24,6 +23,8 @@ function formatProduct(p: any) {
     rating: p.averageRating || 4.5,
     reviews: p.totalReviews || 0,
     homepageSections: p.homepageSections || [],
+    isLot: p.isLot || false,
+    lotDetails: p.lotDetails || null,
   };
 }
 
@@ -106,6 +107,7 @@ export default function Home() {
   const { products, isLoading } = useProducts();
   const formattedProducts = products.map(formatProduct);
   const allSections = Array.from(new Set(formattedProducts.flatMap((p: any) => p.homepageSections as string[])));
+  const lotProducts = formattedProducts.filter((p: any) => p.isLot);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -131,7 +133,14 @@ export default function Home() {
         </div>
       </section>
 
-      <BrandRow />
+      {!isLoading && lotProducts.length > 0 && (
+        <ProductCarousel
+          title="Premium Lots"
+          subtitle="Buy in bulk and save more"
+          products={lotProducts}
+          viewAllLink="/search"
+        />
+      )}
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
