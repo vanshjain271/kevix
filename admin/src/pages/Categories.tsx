@@ -12,7 +12,7 @@ interface Category {
   name: string;
   slug: string;
   description?: string;
-  image?: string;
+  icon?: string;
   isActive: boolean;
   parent?: string | { _id: string; name: string } | null;
   level?: number;
@@ -27,10 +27,7 @@ const Categories: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState<{ name: string; description: string; isActive: boolean; parent: string }>({ ...emptyForm, parent: '' });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string>('');
   const [saving, setSaving] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   useEffect(() => { fetchCategories(); }, []);
@@ -51,8 +48,6 @@ const Categories: React.FC = () => {
   const openCreate = () => {
     setEditing(null);
     setForm({ ...emptyForm, parent: '' });
-    setImageFile(null);
-    setPreviewImage('');
     setDialogOpen(true);
   };
 
@@ -60,8 +55,6 @@ const Categories: React.FC = () => {
     setEditing(cat);
     const parentId = typeof cat.parent === 'string' ? cat.parent : cat.parent?._id || '';
     setForm({ name: cat.name, description: cat.description || '', isActive: cat.isActive, parent: parentId });
-    setImageFile(null);
-    setPreviewImage(cat.image || '');
     setDialogOpen(true);
   };
 
@@ -69,22 +62,18 @@ const Categories: React.FC = () => {
     if (!form.name.trim()) return;
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append('name', form.name.trim());
-      formData.append('description', form.description);
-      formData.append('isActive', String(form.isActive));
-      formData.append('parent', form.parent || '');
-      if (imageFile) {
-        formData.append('image', imageFile);
-      } else if (previewImage && editing) {
-        formData.append('image', previewImage);
-      }
+      const payload = {
+        name: form.name.trim(),
+        description: form.description,
+        isActive: form.isActive,
+        parent: form.parent || ''
+      };
 
       if (editing) {
-        await apiClient.put(`/admin/categories/${editing._id}`, formData);
+        await apiClient.put(`/admin/categories/${editing._id}`, payload);
         setSnackbar({ open: true, message: 'Category updated!', severity: 'success' });
       } else {
-        await apiClient.post('/admin/categories', formData);
+        await apiClient.post('/admin/categories', payload);
         setSnackbar({ open: true, message: 'Category created!', severity: 'success' });
       }
       setDialogOpen(false);
@@ -93,11 +82,7 @@ const Categories: React.FC = () => {
       console.error("Save category error:", err);
       let msg = 'Failed to save category';
       if (err.response) {
-        if (err.response.status === 413) {
-          msg = 'Image file is too large (max 4.5MB allowed by server). Please compress it.';
-        } else {
-          msg = err.response.data?.message || err.response.statusText || msg;
-        }
+        msg = err.response.data?.message || err.response.statusText || msg;
       } else if (err.message) {
         msg = err.message;
       }
@@ -168,7 +153,10 @@ const Categories: React.FC = () => {
                             SUB OF: {parentName?.toUpperCase()}
                           </Typography>
                         )}
-                        <Typography variant="h6" sx={{ fontSize: isSub ? '1.1rem' : '1.25rem' }}>{category.name}</Typography>
+                        <Typography variant="h6" sx={{ fontSize: isSub ? '1.1rem' : '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{category.icon || 'category'}</span>
+                          {category.name}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">{category.slug}</Typography>
                       </Box>
                       <Box sx={{ display: 'flex' }}>
@@ -203,31 +191,6 @@ const Categories: React.FC = () => {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editing ? 'Edit Category' : 'Add Category'}</DialogTitle>
         <DialogContent>
-          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-            <Box
-              sx={{ width: 120, height: 120, border: '2px dashed #CBD5E1', borderRadius: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', cursor: 'pointer', mb: 1, position: 'relative' }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {previewImage ? (
-                <img src={previewImage} alt="Category" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <CloudUpload sx={{ fontSize: 40, color: '#94A3B8' }} />
-              )}
-            </Box>
-            <Button size="small" variant="outlined" startIcon={<CloudUpload />} onClick={() => fileInputRef.current?.click()}>
-              Upload Photo
-            </Button>
-            <input
-              ref={fileInputRef} type="file" hidden accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setImageFile(file);
-                  setPreviewImage(URL.createObjectURL(file));
-                }
-              }}
-            />
-          </Box>
           <TextField
             autoFocus
             fullWidth
