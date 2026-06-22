@@ -21,9 +21,12 @@ export function useCart() {
 
 export function useAddresses() {
   const { data, error, isLoading, mutate } = useSWR('/addresses', fetcher);
-
+  // Backend: { success, count, data: [...addresses] }
+  // fetcher strips outer to data = { count, data: [...] } — but wait:
+  // fetcher does res.data?.data || res.data
+  // res.data = { success, count, data: [...] }, so res.data?.data = [...addresses]
   return {
-    addresses: data?.data || [],
+    addresses: Array.isArray(data) ? data : (data?.data || []),
     isLoading,
     isError: error,
     mutate
@@ -32,9 +35,10 @@ export function useAddresses() {
 
 export function useOrders() {
   const { data, error, isLoading, mutate } = useSWR('/orders/my', fetcher);
-
+  // Backend: { success, orders: [...], total, page }
+  // fetcher does res.data?.data || res.data — res.data has no .data field, so it returns the whole object
   return {
-    orders: data?.data || [],
+    orders: data?.orders || [],
     isLoading,
     isError: error,
     mutate
