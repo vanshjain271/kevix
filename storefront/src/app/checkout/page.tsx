@@ -9,11 +9,23 @@ import { useCartStore } from '@/store/useCartStore';
 import { useAddresses, useSettings } from '@/hooks/useApi';
 import api from '@/lib/api';
 
+interface AddressForm {
+  name: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+const EMPTY_FORM: AddressForm = { name: '', phone: '', addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' };
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, isAuthenticated, openLoginModal } = useAuthStore();
-  const { items, isLoading: isCartLoading, fetchCart } = useCartStore();
-  const { addresses } = useAddresses();
+  const { items, isLoading: isCartLoading, fetchCart, clearLocalCart } = useCartStore();
+  const { addresses, mutate: mutateAddresses } = useAddresses();
   const { settings } = useSettings();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -21,6 +33,12 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'UPI' | 'RAZORPAY' | 'COD'>('UPI');
+
+  // New address form state
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [addressForm, setAddressForm] = useState<AddressForm>(EMPTY_FORM);
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [addressError, setAddressError] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -49,12 +67,33 @@ export default function CheckoutPage() {
 
   const upiId = settings?.upiId || 'kevix@upi';
 
-  const handlePlaceOrder = async () => {
-    if (!selectedAddress) {
-      alert("Please select a delivery address.");
+  const handleSaveAddress = async () => {
+    if (!addressForm.name || !addressForm.phone || !addressForm.addressLine1 || !addressForm.city || !addressForm.state || !addressForm.pincode) {
+      setAddressError('Please fill all required fields');
       return;
     }
-    
+    setIsSavingAddress(true);
+    setAddressError('');
+    try {
+      const res = await api.post('/addresses', addressForm);
+      if (res.data.success) {
+        await mutateAddresses();
+        setSelectedAddress(res.data.data);
+        setShowAddressForm(false);
+        setAddressForm(EMPTY_FORM);
+      }
+    } catch (err: any) {
+      setAddressError(err.response?.data?.message || 'Failed to save address');
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      alert('Please select a delivery address.');
+      return;
+    }
     if (totalPrice < minOrderAmount) {
       alert(`Minimum order value is ₹${minOrderAmount}`);
       return;
@@ -63,33 +102,31 @@ export default function CheckoutPage() {
     setIsPlacingOrder(true);
     try {
       const orderItems = items.map(item => ({
-        product: item.productId._id,
+        productId: item.productId._id,
+        variantId: item.variantId || undefined,
         quantity: item.quantity,
-        price: item.productId.salePrice
+        price: item.productId.salePrice,
       }));
+
+      // Map frontend payment mode to backend accepted values
+      const backendPaymentMode = paymentMode === 'UPI' ? 'UPI_QR' : paymentMode;
 
       const res = await api.post('/orders', {
         items: orderItems,
-        shippingAddress: {
-          name: selectedAddress.name,
-          addressLine1: selectedAddress.addressLine1,
-          addressLine2: selectedAddress.addressLine2,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          pincode: selectedAddress.pincode,
-          phone: selectedAddress.phone
-        },
-        paymentMode: paymentMode,
-        utr: paymentMode === 'UPI' ? utr : undefined
+        // Backend expects shippingAddressId (the _id of the saved address)
+        shippingAddress: selectedAddress._id,
+        paymentMode: backendPaymentMode,
+        utr: paymentMode === 'UPI' ? utr : undefined,
       });
 
       if (res.data.success) {
+        clearLocalCart();
         await fetchCart();
         router.push('/account');
       }
     } catch (error: any) {
-      console.error("Failed to place order", error);
-      alert(error.response?.data?.message || "Failed to place order.");
+      console.error('Failed to place order', error);
+      alert(error.response?.data?.message || 'Failed to place order. Please try again.');
     } finally {
       setIsPlacingOrder(false);
     }
@@ -119,7 +156,7 @@ export default function CheckoutPage() {
         {/* Left: Checkout Steps */}
         <div className="w-full lg:w-2/3 space-y-4">
           
-          {/* Step 1: Login (Completed State) */}
+          {/* Step 1: Login (Completed) */}
           <div className="bg-white border border-surface-border rounded-sm shadow-sm">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -129,7 +166,6 @@ export default function CheckoutPage() {
                   <p className="text-sm text-text-secondary mt-1 font-medium">{user?.name || 'User'} <span className="mx-2">{user?.phone || ''}</span></p>
                 </div>
               </div>
-              <button className="text-primary text-sm font-medium border border-surface-border px-4 py-1 rounded-sm hover:shadow-sm">CHANGE</button>
             </div>
           </div>
 
@@ -141,41 +177,115 @@ export default function CheckoutPage() {
             </div>
             
             {step === 1 && (
-              <div className="p-6 border-t border-surface-border">
-                {addresses && addresses.length > 0 ? (
-                  <div className="flex gap-4 items-start bg-primary/5 border border-primary/20 rounded p-4 relative cursor-pointer">
-                    <input type="radio" name="address" checked readOnly className="mt-1 accent-primary" />
-                    <div>
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-text-primary">{selectedAddress?.name}</span>
-                        <span className="font-bold text-text-primary">{selectedAddress?.phone}</span>
-                      </div>
-                      <p className="text-sm text-text-primary mt-2 leading-relaxed">
-                        {selectedAddress?.addressLine1}, {selectedAddress?.addressLine2 ? selectedAddress.addressLine2 + ', ' : ''}
-                        {selectedAddress?.city}, {selectedAddress?.state} - {selectedAddress?.pincode}
-                      </p>
-                      <button 
-                        onClick={() => setStep(2)}
-                        className="mt-4 bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors"
-                      >
-                        DELIVER HERE
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-surface text-text-secondary rounded text-sm mb-4">
-                    You have no saved addresses. Please add one below.
+              <div className="p-6 border-t border-surface-border space-y-4">
+                {/* Existing addresses */}
+                {addresses && addresses.length > 0 && (
+                  <div className="space-y-3">
+                    {addresses.map((addr: any) => (
+                      <label key={addr._id} className={`flex gap-4 items-start border rounded p-4 cursor-pointer transition-colors ${selectedAddress?._id === addr._id ? 'bg-primary/5 border-primary/30' : 'border-surface-border hover:border-primary/20'}`}>
+                        <input 
+                          type="radio" 
+                          name="address" 
+                          checked={selectedAddress?._id === addr._id}
+                          onChange={() => setSelectedAddress(addr)}
+                          className="mt-1 accent-primary" 
+                        />
+                        <div className="flex-grow">
+                          <div className="flex items-center gap-4">
+                            <span className="font-bold text-text-primary">{addr.name}</span>
+                            <span className="text-sm text-text-secondary">{addr.phone}</span>
+                          </div>
+                          <p className="text-sm text-text-primary mt-1 leading-relaxed">
+                            {addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}, {addr.city}, {addr.state} - {addr.pincode}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
                   </div>
                 )}
 
-                <div className="mt-4 border border-surface-border rounded p-4 flex items-center gap-4 text-primary font-medium cursor-pointer hover:bg-surface">
-                  <span className="material-symbols-outlined">add</span> Add a new address
-                </div>
+                {/* Add address button */}
+                {!showAddressForm ? (
+                  <button
+                    onClick={() => setShowAddressForm(true)}
+                    className="w-full border border-dashed border-primary/40 rounded p-4 flex items-center gap-3 text-primary font-medium cursor-pointer hover:bg-primary/5 transition-colors"
+                  >
+                    <span className="material-symbols-outlined">add</span> Add a new address
+                  </button>
+                ) : (
+                  <div className="border border-surface-border rounded p-4 space-y-3">
+                    <h3 className="font-medium text-text-primary">New Delivery Address</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <input
+                        type="text" placeholder="Full Name *" value={addressForm.name}
+                        onChange={e => setAddressForm(f => ({ ...f, name: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                      <input
+                        type="tel" placeholder="Phone Number *" value={addressForm.phone}
+                        onChange={e => setAddressForm(f => ({ ...f, phone: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                      <input
+                        type="text" placeholder="Address Line 1 *" value={addressForm.addressLine1}
+                        onChange={e => setAddressForm(f => ({ ...f, addressLine1: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary sm:col-span-2"
+                      />
+                      <input
+                        type="text" placeholder="Address Line 2 (optional)" value={addressForm.addressLine2}
+                        onChange={e => setAddressForm(f => ({ ...f, addressLine2: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary sm:col-span-2"
+                      />
+                      <input
+                        type="text" placeholder="City *" value={addressForm.city}
+                        onChange={e => setAddressForm(f => ({ ...f, city: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                      <input
+                        type="text" placeholder="State *" value={addressForm.state}
+                        onChange={e => setAddressForm(f => ({ ...f, state: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                      <input
+                        type="text" placeholder="Pincode *" value={addressForm.pincode}
+                        onChange={e => setAddressForm(f => ({ ...f, pincode: e.target.value }))}
+                        className="border border-surface-border rounded px-3 py-2 text-sm outline-none focus:border-primary"
+                      />
+                    </div>
+                    {addressError && <p className="text-red-500 text-xs">{addressError}</p>}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleSaveAddress}
+                        disabled={isSavingAddress}
+                        className="bg-primary text-white px-6 py-2 rounded font-bold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
+                      >
+                        {isSavingAddress ? 'SAVING...' : 'SAVE ADDRESS'}
+                      </button>
+                      <button
+                        onClick={() => { setShowAddressForm(false); setAddressForm(EMPTY_FORM); setAddressError(''); }}
+                        className="text-text-secondary text-sm font-medium hover:text-text-primary px-4 py-2"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAddress && !showAddressForm && (
+                  <button 
+                    onClick={() => setStep(2)}
+                    className="mt-2 bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors"
+                  >
+                    DELIVER HERE
+                  </button>
+                )}
               </div>
             )}
             {step > 1 && (
               <div className="px-14 pb-4">
-                <p className="text-sm text-text-primary font-medium">{selectedAddress?.name} <span className="font-normal text-text-secondary mx-2">{selectedAddress?.city}, {selectedAddress?.state} - {selectedAddress?.pincode}</span></p>
+                <p className="text-sm text-text-primary font-medium">
+                  {selectedAddress?.name} <span className="font-normal text-text-secondary mx-2">{selectedAddress?.city}, {selectedAddress?.state} - {selectedAddress?.pincode}</span>
+                </p>
               </div>
             )}
           </div>
@@ -191,21 +301,22 @@ export default function CheckoutPage() {
                 <div className="p-4 border-t border-surface-border">
                   {items.map(item => {
                     const product = item.productId;
-                    if (!product) return null;
+                    if (!product?._id) return null;
                     const salePrice = product.salePrice || 0;
                     const mrp = product.mrp || 0;
                     return (
-                    <div key={item.id || item._id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
+                    <div key={item.id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
                       <div>
                         <h3 className="font-medium text-text-primary">{product.name}</h3>
-                        <p className="text-sm text-text-secondary mt-1">Quantity: {item.quantity}</p>
+                        {item.variantName && <p className="text-xs text-primary mt-0.5">Variant: {item.variantName}</p>}
+                        <p className="text-sm text-text-secondary mt-1">Qty: {item.quantity}</p>
                         <div className="flex items-baseline gap-2 mt-2">
                           <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
                           {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
                         </div>
                       </div>
-                      <div className="text-sm text-text-primary text-right">
-                        Delivery by <span className="font-medium">Tomorrow</span> | <span className="text-success">Free</span>
+                      <div className="text-sm font-medium text-text-primary text-right">
+                        ₹{(salePrice * item.quantity).toLocaleString('en-IN')}
                       </div>
                     </div>
                     );
@@ -213,14 +324,15 @@ export default function CheckoutPage() {
                 </div>
                 <div className="p-4 bg-white border-t border-surface-border flex flex-col justify-between items-center gap-4">
                   {settings?.minOrderAmount && totalPrice < settings.minOrderAmount && (
-                    <div className="w-full p-3 bg-red-50 text-red-600 rounded text-sm font-medium">
-                      Minimum order amount is ₹{settings.minOrderAmount}. Please add more items to your cart.
+                    <div className="w-full p-3 bg-red-50 text-red-600 rounded text-sm font-medium flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">warning</span>
+                      Minimum order amount is ₹{settings.minOrderAmount}. Please add more items.
                     </div>
                   )}
                   <div className="w-full flex justify-between items-center">
-                    <p className="text-sm text-text-primary">Order confirmation will be sent to <span className="font-medium">{user?.phone}</span></p>
+                    <p className="text-sm text-text-primary">Order confirmation sent to <span className="font-medium">{user?.phone}</span></p>
                     <button 
-                      disabled={settings?.minOrderAmount ? totalPrice < settings.minOrderAmount : false}
+                      disabled={!!(settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                       onClick={() => setStep(3)}
                       className="bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -232,7 +344,7 @@ export default function CheckoutPage() {
             )}
             {step > 2 && (
               <div className="px-14 pb-4">
-                <p className="text-sm text-text-primary font-medium">{items.length} Items</p>
+                <p className="text-sm text-text-primary font-medium">{items.length} Items · <span className="text-text-secondary">₹{orderTotal.toLocaleString('en-IN')}</span></p>
               </div>
             )}
           </div>
@@ -279,7 +391,7 @@ export default function CheckoutPage() {
                             className="w-full border border-surface-border rounded-sm px-4 py-3 outline-none focus:border-primary focus:ring-1 ring-primary text-sm"
                           />
                           <button
-                            disabled={isPlacingOrder || !utr || (settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
+                            disabled={isPlacingOrder || !utr || !!(settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                             onClick={handlePlaceOrder}
                             className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
@@ -306,7 +418,7 @@ export default function CheckoutPage() {
                   {settings?.razorpayEnabled && paymentMode === 'RAZORPAY' && (
                     <div className="ml-8 mt-4">
                       <button
-                        disabled={isPlacingOrder || (settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
+                        disabled={isPlacingOrder || !!(settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                         onClick={handlePlaceOrder}
                         className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -328,20 +440,18 @@ export default function CheckoutPage() {
                   {settings?.codEnabled && paymentMode === 'COD' && (
                     <div className="ml-8 mt-4">
                       {settings?.advancePartialPayment && settings?.partialPaymentPercent > 0 && (
-                         <div className="mb-4 p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded text-sm">
-                           Note: A partial advance payment of {settings.partialPaymentPercent}% (₹{Math.round(orderTotal * (settings.partialPaymentPercent / 100))}) is required for Cash on Delivery orders to prevent fake orders. You will be redirected to pay this advance amount.
-                         </div>
+                        <div className="mb-4 p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded text-sm">
+                          Note: A partial advance of {settings.partialPaymentPercent}% (₹{Math.round(orderTotal * (settings.partialPaymentPercent / 100))}) is required to prevent fake orders.
+                        </div>
                       )}
-                      
                       {settings?.minOrderAmount && totalPrice < settings.minOrderAmount && (
                         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-sm text-sm text-red-700 font-medium flex items-start gap-2">
                           <span className="material-symbols-outlined text-[18px]">warning</span>
-                          <span>Minimum order value is ₹{settings.minOrderAmount}. Please add more items to checkout.</span>
+                          <span>Minimum order value is ₹{settings.minOrderAmount}. Please add more items.</span>
                         </div>
                       )}
-
                       <button
-                        disabled={isPlacingOrder || (settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
+                        disabled={isPlacingOrder || !!(settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                         onClick={handlePlaceOrder}
                         className="w-full md:w-auto mt-4 bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -368,19 +478,26 @@ export default function CheckoutPage() {
                 <span>Price ({items.length} items)</span>
                 <span>₹{totalMrp.toLocaleString('en-IN')}</span>
               </div>
-              <div className="flex justify-between text-success">
-                <span>Discount</span>
-                <span>− ₹{totalDiscount.toLocaleString('en-IN')}</span>
-              </div>
+              {totalDiscount > 0 && (
+                <div className="flex justify-between text-success">
+                  <span>Discount</span>
+                  <span>− ₹{totalDiscount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Delivery Charges</span>
-                <span className={deliveryCharges === 0 ? "text-success" : ""}>{deliveryCharges === 0 ? 'Free' : `₹${deliveryCharges}`}</span>
+                <span className={deliveryCharges === 0 ? 'text-success' : ''}>{deliveryCharges === 0 ? 'Free' : `₹${deliveryCharges}`}</span>
               </div>
               <div className="flex justify-between border-t border-dashed border-surface-border pt-4 text-lg font-bold">
                 <span>Amount Payable</span>
                 <span>₹{orderTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
+            {totalDiscount > 0 && (
+              <div className="p-4 bg-success/10 text-success text-sm font-medium rounded-b-sm border-t border-surface-border">
+                You will save ₹{totalDiscount.toLocaleString('en-IN')} on this order
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-3 p-4 mt-4 text-text-secondary text-sm">
