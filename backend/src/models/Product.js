@@ -90,11 +90,7 @@ const productSchema = new mongoose.Schema({
     ref: 'Category',
     required: [true, 'At least one category is required']
   }],
-  // Brand reference
-  brand: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Brand'
-  },
+  // Brand reference (Removed per requirements)
   // Base SKU (used when no variants)
   sku: {
     type: String,
@@ -161,7 +157,10 @@ const productSchema = new mongoose.Schema({
     fullLotPrice: { type: Number, default: 0 },
     allowHalfLot: { type: Boolean, default: false },
     halfLotQuantity: { type: Number, default: 0 },
-    halfLotPrice: { type: Number, default: 0 }
+    halfLotPrice: { type: Number, default: 0 },
+    allowMiniLot: { type: Boolean, default: false },
+    miniLotQuantity: { type: Number, default: 0 },
+    miniLotPrice: { type: Number, default: 0 }
   },
   // Variants
   variants: {
@@ -246,7 +245,6 @@ const productSchema = new mongoose.Schema({
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });
 productSchema.index({ slug: 1 }, { unique: true });
 productSchema.index({ category: 1 });
-productSchema.index({ brand: 1 });
 productSchema.index({ isActive: 1 });
 productSchema.index({ salePrice: 1 });
 productSchema.index({ createdAt: -1 });

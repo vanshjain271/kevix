@@ -20,10 +20,10 @@ class CartService {
     try {
       let cart = await Cart.findOrCreateByUser(userId);
       
-      // Populate product details including taxRate and minOrderQty
+      // Populate product details including taxRate, minOrderQty, and lotDetails
       await cart.populate({
         path: 'items.product',
-        select: 'name slug images salePrice mrp stock hasVariants variants isActive bulkPricing taxRate minOrderQty'
+        select: 'name slug images salePrice mrp stock hasVariants variants isActive bulkPricing taxRate minOrderQty isLot lotDetails'
       });
 
       // Enrich cart items with latest pricing and availability
@@ -73,7 +73,26 @@ class CartService {
         }
 
         const itemQuantity = Number(item.quantity) || 0;
-        const itemSubtotal = price * itemQuantity;
+        let itemSubtotal = 0;
+
+        // Apply Lot Pricing if product is a lot
+        if (product.isLot && product.lotDetails) {
+          if (product.lotDetails.allowHalfLot && itemQuantity === product.lotDetails.halfLotQuantity) {
+            itemSubtotal = product.lotDetails.halfLotPrice;
+            price = itemQuantity > 0 ? itemSubtotal / itemQuantity : 0;
+            mrp = price; // Override MRP for lot items to avoid weird discounts
+          } else if (product.lotDetails.allowMiniLot && itemQuantity === product.lotDetails.miniLotQuantity) {
+            itemSubtotal = product.lotDetails.miniLotPrice;
+            price = itemQuantity > 0 ? itemSubtotal / itemQuantity : 0;
+            mrp = price;
+          } else if (product.lotDetails.fullLotQuantity > 0) {
+            price = product.lotDetails.fullLotPrice / product.lotDetails.fullLotQuantity;
+            itemSubtotal = price * itemQuantity;
+            mrp = price;
+          }
+        } else {
+          itemSubtotal = price * itemQuantity;
+        }
 
         enrichedItems.push({
           _id: item._id,
