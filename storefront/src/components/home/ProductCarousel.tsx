@@ -25,12 +25,14 @@ interface Props {
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const { addToCart } = useCartStore();
+  const { addToCart, items, updateQuantity } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const { isAuthenticated, openLoginModal } = useAuthStore();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const wishlisted = isWishlisted(product.id);
+
+  const cartItem = items.find(i => i.productId?._id === product.id);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -78,23 +80,41 @@ function ProductCard({ product }: { product: Product }) {
           <span className="material-symbols-outlined text-amber-400 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
           <span className="text-xs text-gray-500 font-medium">{product.rating.toFixed(1)}</span>
         </div>
-        <button
-          onClick={handleAddToCart}
-          disabled={adding}
-          className={`mt-3 w-full py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-1.5
-            ${added
-              ? 'bg-green-500 text-white scale-95'
-              : 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-md active:scale-95'
-            } disabled:opacity-70`}
-        >
-          {adding ? (
-            <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-          ) : added ? (
-            <><span className="material-symbols-outlined text-[16px]">check_circle</span> Added!</>
+        <div className="mt-3 h-10 w-full">
+          {cartItem ? (
+            <div className="flex items-center justify-between w-full h-full border border-purple-600 rounded-xl overflow-hidden">
+              <button 
+                onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity - 1); }}
+                className="w-1/3 h-full flex items-center justify-center bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold text-lg"
+              >-</button>
+              <span className="w-1/3 h-full flex items-center justify-center font-bold text-gray-800 text-sm">
+                {cartItem.quantity}
+              </span>
+              <button 
+                onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity + 1); }}
+                className="w-1/3 h-full flex items-center justify-center bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold text-lg"
+              >+</button>
+            </div>
           ) : (
-            <><span className="material-symbols-outlined text-[16px]">add_shopping_cart</span> Add to Cart</>
+            <button
+              onClick={handleAddToCart}
+              disabled={adding}
+              className={`w-full h-full rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-1.5
+                ${added
+                  ? 'bg-green-500 text-white scale-95'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-md active:scale-95'
+                } disabled:opacity-70`}
+            >
+              {adding ? (
+                <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+              ) : added ? (
+                <><span className="material-symbols-outlined text-[16px]">check_circle</span> Added!</>
+              ) : (
+                <><span className="material-symbols-outlined text-[16px]">add_shopping_cart</span> Add to Cart</>
+              )}
+            </button>
           )}
-        </button>
+        </div>
       </div>
     </Link>
   );

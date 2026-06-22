@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrders, useAddresses, useWishlist } from '@/hooks/useApi';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 
 const getOrderStatusDisplay = (status: string) => {
   switch (status) {
@@ -261,9 +261,18 @@ export default function AccountPage() {
                     <div key={order._id} className="p-4 border-b border-surface-border hover:shadow-sm transition-shadow cursor-pointer">
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-xs text-text-secondary font-medium">Order ID: {order.orderNumber}</span>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider ${statusDisplay.color}`}>
-                          {statusDisplay.text}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); window.open(`${API_BASE_URL}/invoices/public-pdf/${order._id}`, '_blank'); }}
+                            className="text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-[12px]">download</span>
+                            Invoice
+                          </button>
+                          <span className={`text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider ${statusDisplay.color}`}>
+                            {statusDisplay.text}
+                          </span>
+                        </div>
                       </div>
                       
                       <div className="space-y-4">

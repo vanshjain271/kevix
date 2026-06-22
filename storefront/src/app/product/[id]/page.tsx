@@ -15,7 +15,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { product, isLoading } = useProductDetail(resolvedParams.id);
   const { reviews, isLoading: isLoadingReviews } = useReviews(resolvedParams.id);
   const { wishlist, mutate: mutateWishlist } = useWishlist();
-  const { addToCart, isLoading: addingToCart } = useCartStore();
+  const { addToCart, items, updateQuantity, isLoading: addingToCart } = useCartStore();
   const { isAuthenticated, openLoginModal } = useAuthStore();
   const router = useRouter();
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
@@ -43,6 +43,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }, [displayProduct?.images]);
 
   const inWishlist = wishlist.some((item: any) => item._id === displayProduct?._id);
+  const cartItem = items.find(i => i.productId?._id === displayProduct?._id);
 
   const handleToggleWishlist = async () => {
     if (!isAuthenticated) {
@@ -216,26 +217,42 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3 mt-6 border-b border-surface-border pb-6">
-              <button 
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    openLoginModal();
-                    return;
-                  }
-                  let qty = 1;
-                  if (displayProduct.isLot && displayProduct.lotDetails) {
-                    if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
-                    if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
-                    if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
-                  }
-                  addToCart(displayProduct._id, qty);
-                }}
-                disabled={addingToCart || displayProduct.stock <= 0}
-                className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
-              >
-                <span className="material-symbols-outlined text-[18px]">{addingToCart ? 'hourglass_empty' : 'shopping_cart'}</span> 
-                {addingToCart ? 'ADDING...' : 'ADD TO CART'}
-              </button>
+              {cartItem ? (
+                <div className="flex-1 min-w-[140px] flex items-center justify-between border-2 border-accent rounded-lg overflow-hidden h-[42px]">
+                  <button 
+                    onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity - 1); }}
+                    className="w-1/3 h-full flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 font-bold text-xl"
+                  >-</button>
+                  <span className="w-1/3 h-full flex items-center justify-center font-bold text-text-primary">
+                    {cartItem.quantity}
+                  </span>
+                  <button 
+                    onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity + 1); }}
+                    className="w-1/3 h-full flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 font-bold text-xl"
+                  >+</button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      openLoginModal();
+                      return;
+                    }
+                    let qty = 1;
+                    if (displayProduct.isLot && displayProduct.lotDetails) {
+                      if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
+                      if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
+                      if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                    }
+                    addToCart(displayProduct._id, qty);
+                  }}
+                  disabled={addingToCart || displayProduct.stock <= 0}
+                  className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
+                >
+                  <span className="material-symbols-outlined text-[18px]">{addingToCart ? 'hourglass_empty' : 'shopping_cart'}</span> 
+                  {addingToCart ? 'ADDING...' : 'ADD TO CART'}
+                </button>
+              )}
               <button 
                 onClick={async () => {
                   if (!isAuthenticated) {

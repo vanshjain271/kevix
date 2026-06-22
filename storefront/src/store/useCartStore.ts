@@ -34,7 +34,13 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await api.get('/cart');
-      set({ items: res.data.data.cart.items || [], isLoading: false });
+      const fetchedItems = res.data.cart?.items || res.data.data?.cart?.items || [];
+      const normalizedItems = fetchedItems.map((item: any) => ({
+        ...item,
+        id: item._id,
+        productId: item.product || item.productId
+      }));
+      set({ items: normalizedItems, isLoading: false });
     } catch (error) {
       console.error('Failed to fetch cart:', error);
       set({ isLoading: false });
@@ -53,6 +59,10 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   updateQuantity: async (itemId: string, quantity: number) => {
     try {
+      if (quantity <= 0) {
+        await get().removeFromCart(itemId);
+        return;
+      }
       await api.put(`/cart/items/${itemId}`, { quantity });
       await get().fetchCart();
     } catch (error) {
