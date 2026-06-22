@@ -125,7 +125,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
             
-            </div>
           </div>
 
           {/* Right: Product Info */}
