@@ -54,19 +54,15 @@ export default function CategoryNav() {
             const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
             return (
               <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 relative">
-                <div className="w-14 h-14 rounded-full bg-accent-light border border-transparent flex items-center justify-center overflow-hidden group-hover:border-primary group-hover:bg-primary/10 transition-all duration-300 relative shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-primary/10 border border-transparent flex items-center justify-center overflow-hidden group-hover:bg-primary/20 transition-all duration-300 relative">
                   {isDeal && (
-                    <span className="absolute top-0.5 right-0.5 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider scale-95 shadow-sm">
+                    <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
                       NEW
                     </span>
                   )}
-                  {cat.image ? (
-                    <Image src={cat.image} alt={cat.name} width={56} height={56} className="object-cover w-full h-full" />
-                  ) : (
-                    <span className="material-symbols-outlined text-[26px] text-primary group-hover:text-primary-dark transition-colors duration-300">
-                      {getCategoryIcon(cat.name, cat.slug)}
-                    </span>
-                  )}
+                  <span className="material-symbols-outlined text-[26px] text-primary group-hover:scale-110 transition-transform duration-300">
+                    {getCategoryIcon(cat.name, cat.slug)}
+                  </span>
                 </div>
                 <span className="text-xs font-semibold text-text-primary group-hover:text-primary transition-colors duration-300 capitalize text-center max-w-[80px] truncate">{cat.name}</span>
               </Link>
