@@ -4,23 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCategories } from '@/hooks/useApi';
 
-const getCategoryIcon = (name: string, slug: string) => {
-  const n = (name || '').toLowerCase();
-  const s = (slug || '').toLowerCase();
-  
-  if (n.includes('mobile') || s.includes('mobile') || n.includes('phone') || s.includes('phone')) return 'smartphone';
-  if (n.includes('charger') || s.includes('charger')) return 'bolt';
-  if (n.includes('cable') || s.includes('cable') || n.includes('wire') || s.includes('wire')) return 'settings_input_hdmi';
-  if (n.includes('earbud') || s.includes('earbud') || n.includes('tws') || s.includes('tws') || n.includes('audio') || s.includes('audio')) return 'headset';
-  if (n.includes('neckband') || s.includes('neckband')) return 'headphones';
-  if (n.includes('watch') || s.includes('watch') || n.includes('wearable') || s.includes('wearable')) return 'watch';
-  if (n.includes('power') || s.includes('power') || n.includes('bank') || s.includes('bank')) return 'battery_charging_full';
-  if (n.includes('cover') || s.includes('cover') || n.includes('case') || s.includes('case')) return 'phone_android';
-  if (n.includes('laptop') || s.includes('laptop') || n.includes('computer') || s.includes('computer')) return 'laptop';
-  if (n.includes('deal') || s.includes('deal') || n.includes('offer') || s.includes('offer') || n.includes('sale') || s.includes('sale')) return 'local_offer';
-  
-  return 'category';
-};
 
 export default function CategoryNav() {
   const { categories, isLoading } = useCategories();
@@ -61,7 +44,7 @@ export default function CategoryNav() {
                     </span>
                   )}
                   <span className="material-symbols-outlined text-[26px] text-primary group-hover:scale-110 transition-transform duration-300">
-                    {getCategoryIcon(cat.name, cat.slug)}
+                    {cat.icon || 'category'}
                   </span>
                 </div>
                 <span className="text-xs font-semibold text-text-primary group-hover:text-primary transition-colors duration-300 capitalize text-center max-w-[80px] truncate">{cat.name}</span>
