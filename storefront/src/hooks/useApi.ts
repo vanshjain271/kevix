@@ -94,7 +94,9 @@ export function useProductDetail(productId: string) {
 
 export function useSettings() {
   const { data, error, isLoading } = useSWR('/settings', fetcher);
-  return { settings: data || {}, error, isLoading };
+  // Backend sends { success, data: settings }, fetcher strips to `data` = settings object
+  const settings = data || {};
+  return { settings, error, isLoading };
 }
 
 export function useBrands() {

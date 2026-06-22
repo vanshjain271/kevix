@@ -216,7 +216,7 @@ const StoreSettings: React.FC = () => {
                 onChange={(e) => setSettings({ ...settings, storeLogo: e.target.value })}
                 helperText="Enter URL of your store logo"
               />
-              {/* <Divider sx={{ my: 1 }} />
+              <Divider sx={{ my: 1 }} />
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Announcement Ticker</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <FormControlLabel
@@ -229,59 +229,34 @@ const StoreSettings: React.FC = () => {
                 label="Ticker Text"
                 value={settings.tickerText}
                 onChange={(e) => setSettings({ ...settings, tickerText: e.target.value })}
-                helperText="This text will scroll horizontally at the top of the mobile home screen."
+                helperText="This text will scroll continuously at the top of the storefront. Use emojis and spaces for better style."
                 disabled={!settings.tickerEnabled}
+                multiline
+                rows={2}
               />
+              {settings.tickerEnabled && settings.tickerText && (
+                <Box sx={{ p: 1.5, bgcolor: '#4C1D95', borderRadius: 2, overflow: 'hidden' }}>
+                  <Typography variant="caption" sx={{ color: '#DDD6FE', display: 'block', mb: 0.5, fontWeight: 600 }}>Live Preview:</Typography>
+                  <Box sx={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        color: 'white',
+                        fontSize: 12,
+                        display: 'inline-block',
+                        animation: 'adminMarquee 15s linear infinite',
+                        '@keyframes adminMarquee': {
+                          '0%': { transform: 'translateX(100%)' },
+                          '100%': { transform: 'translateX(-100%)' },
+                        }
+                      }}
+                    >
+                      📢 &nbsp;{settings.tickerText}&nbsp;&nbsp;&nbsp;📢 &nbsp;{settings.tickerText}
+                    </Box>
+                  </Box>
+                </Box>
+              )}
               <Divider sx={{ my: 1 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Store Features Banner</Typography>
-                <Button 
-                  variant="outlined" 
-                  size="small" 
-                  onClick={() => setSettings({
-                    ...settings,
-                    storeFeatures: [...(settings.storeFeatures || []), { title: '', subtitle: '', iconName: 'star' }]
-                  })}
-                >
-                  + Add Feature
-                </Button>
-              </Box>
-              {(settings.storeFeatures || []).map((feature, idx) => (
-                <Paper key={idx} sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', border: '1px solid #E2E8F0', borderRadius: 2 }}>
-                  <TextField
-                    size="small"
-                    label="Title"
-                    value={feature.title}
-                    onChange={(e) => {
-                      const newFeatures = [...settings.storeFeatures];
-                      newFeatures[idx].title = e.target.value;
-                      setSettings({ ...settings, storeFeatures: newFeatures });
-                    }}
-                    sx={{ flex: 1 }}
-                  />
-                  <TextField
-                    size="small"
-                    label="Subtitle"
-                    value={feature.subtitle}
-                    onChange={(e) => {
-                      const newFeatures = [...settings.storeFeatures];
-                      newFeatures[idx].subtitle = e.target.value;
-                      setSettings({ ...settings, storeFeatures: newFeatures });
-                    }}
-                    sx={{ flex: 1 }}
-                  />
-                  <Button 
-                    color="error" 
-                    onClick={() => {
-                      const newFeatures = [...settings.storeFeatures];
-                      newFeatures.splice(idx, 1);
-                      setSettings({ ...settings, storeFeatures: newFeatures });
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </Paper>
-              ))} */}
               </Paper>
             </Box>
           </>

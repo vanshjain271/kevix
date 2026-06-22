@@ -79,9 +79,16 @@ export default function Header() {
     <header className="w-full sticky top-0 z-50 shadow-md">
       {/* Announcement Ticker */}
       {settings?.tickerEnabled && settings?.tickerText && (
-        <div className="bg-purple-900 text-white text-xs py-2 px-4 text-center font-medium overflow-hidden">
-          <div className="animate-marquee whitespace-nowrap inline-block">
-            📢 &nbsp;{settings.tickerText}&nbsp;&nbsp;&nbsp;📢 &nbsp;{settings.tickerText}
+        <div className="bg-purple-900 text-white text-xs py-2 overflow-hidden relative">
+          <div className="ticker-track flex whitespace-nowrap">
+            {/* Render the text multiple times so it wraps seamlessly */}
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="inline-flex items-center gap-3 px-6 shrink-0">
+                <span>📢</span>
+                <span className="font-medium tracking-wide">{settings.tickerText}</span>
+                <span className="text-purple-400 mx-2">•</span>
+              </span>
+            ))}
           </div>
         </div>
       )}
