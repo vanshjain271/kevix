@@ -112,9 +112,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
             
             {/* Main Image */}
-            <div className="order-1 md:order-2 flex-grow aspect-square md:aspect-auto md:h-[450px] relative border border-surface-border rounded-sm p-4 group cursor-crosshair">
+            <div className="order-1 md:order-2 flex-grow aspect-square md:aspect-auto md:h-[450px] relative border border-surface-border rounded-sm p-4 group cursor-crosshair overflow-hidden">
               {activeImage && (
-                <Image src={activeImage} alt={displayProduct.name} fill className="object-contain p-4 group-hover:scale-125 transition-transform duration-500 origin-center" />
+                <Image key={activeImage} src={activeImage} alt={displayProduct.name} fill className="object-contain p-4 group-hover:scale-125 transition-transform duration-500 origin-center" />
               )}
               <button 
                 onClick={handleToggleWishlist}
