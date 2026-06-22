@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useProductDetail, useReviews, useWishlist } from '@/hooks/useApi';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import BulkInquiryModal from '@/components/product/BulkInquiryModal';
 
@@ -16,6 +17,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { wishlist, mutate: mutateWishlist } = useWishlist();
   const { addToCart, isLoading: addingToCart } = useCartStore();
   const { isAuthenticated, openLoginModal } = useAuthStore();
+  const router = useRouter();
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   
@@ -216,6 +218,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <div className="flex flex-wrap gap-3 mt-6 border-b border-surface-border pb-6">
               <button 
                 onClick={() => {
+                  if (!isAuthenticated) {
+                    openLoginModal();
+                    return;
+                  }
                   let qty = 1;
                   if (displayProduct.isLot && displayProduct.lotDetails) {
                     if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
@@ -230,7 +236,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <span className="material-symbols-outlined text-[18px]">{addingToCart ? 'hourglass_empty' : 'shopping_cart'}</span> 
                 {addingToCart ? 'ADDING...' : 'ADD TO CART'}
               </button>
-              <button disabled={displayProduct.stock <= 0} className="flex-1 min-w-[140px] bg-primary hover:bg-primary-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70">
+              <button 
+                onClick={async () => {
+                  if (!isAuthenticated) {
+                    openLoginModal();
+                    return;
+                  }
+                  let qty = 1;
+                  if (displayProduct.isLot && displayProduct.lotDetails) {
+                    if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
+                    if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
+                    if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                  }
+                  await addToCart(displayProduct._id, qty);
+                  router.push('/checkout');
+                }}
+                disabled={addingToCart || displayProduct.stock <= 0} 
+                className="flex-1 min-w-[140px] bg-primary hover:bg-primary-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
+              >
                 <span className="material-symbols-outlined text-[18px]">bolt</span> BUY NOW
               </button>
               <button 
@@ -264,8 +287,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                           <div className="font-bold text-text-primary">₹{(variant.salePrice || 0).toLocaleString('en-IN')}</div>
                           {variant.mrp > variant.salePrice && <div className="text-[10px] text-text-muted line-through">₹{(variant.mrp || 0).toLocaleString('en-IN')}</div>}
                         </div>
-                        <button
-                          onClick={() => addToCart(displayProduct._id, 1, variant._id)}
+                        <button 
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              openLoginModal();
+                              return;
+                            }
+                            addToCart(displayProduct._id, 1, variant._id);
+                          }}
                           disabled={addingToCart || variant.stock <= 0}
                           className={`px-3 py-1.5 rounded-md font-bold text-xs flex items-center gap-1 transition-colors ${variant.stock > 0 ? 'bg-primary hover:bg-primary-dark text-white' : 'bg-gray-200 text-gray-500'}`}
                         >

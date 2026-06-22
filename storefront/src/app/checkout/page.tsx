@@ -42,6 +42,7 @@ export default function CheckoutPage() {
   
   const deliveryFeeSetting = settings?.deliveryFee ?? 40;
   const freeDeliveryThreshold = settings?.freeDeliveryThreshold ?? 499;
+  const minOrderAmount = settings?.minOrderAmount ?? 0;
   const deliveryCharges = totalPrice >= freeDeliveryThreshold ? 0 : deliveryFeeSetting;
   
   const orderTotal = totalPrice + deliveryCharges;
@@ -51,6 +52,11 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       alert("Please select a delivery address.");
+      return;
+    }
+    
+    if (totalPrice < minOrderAmount) {
+      alert(`Minimum order value is ₹${minOrderAmount}`);
       return;
     }
     
@@ -273,7 +279,7 @@ export default function CheckoutPage() {
                             className="w-full border border-surface-border rounded-sm px-4 py-3 outline-none focus:border-primary focus:ring-1 ring-primary text-sm"
                           />
                           <button
-                            disabled={isPlacingOrder || !utr}
+                            disabled={isPlacingOrder || !utr || (settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                             onClick={handlePlaceOrder}
                             className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
@@ -300,7 +306,7 @@ export default function CheckoutPage() {
                   {settings?.razorpayEnabled && paymentMode === 'RAZORPAY' && (
                     <div className="ml-8 mt-4">
                       <button
-                        disabled={isPlacingOrder}
+                        disabled={isPlacingOrder || (settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                         onClick={handlePlaceOrder}
                         className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -326,10 +332,18 @@ export default function CheckoutPage() {
                            Note: A partial advance payment of {settings.partialPaymentPercent}% (₹{Math.round(orderTotal * (settings.partialPaymentPercent / 100))}) is required for Cash on Delivery orders to prevent fake orders. You will be redirected to pay this advance amount.
                          </div>
                       )}
+                      
+                      {settings?.minOrderAmount && totalPrice < settings.minOrderAmount && (
+                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-sm text-sm text-red-700 font-medium flex items-start gap-2">
+                          <span className="material-symbols-outlined text-[18px]">warning</span>
+                          <span>Minimum order value is ₹{settings.minOrderAmount}. Please add more items to checkout.</span>
+                        </div>
+                      )}
+
                       <button
-                        disabled={isPlacingOrder}
+                        disabled={isPlacingOrder || (settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
                         onClick={handlePlaceOrder}
-                        className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full md:w-auto mt-4 bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isPlacingOrder ? 'PLACING ORDER...' : 'PLACE COD ORDER'}
                       </button>
