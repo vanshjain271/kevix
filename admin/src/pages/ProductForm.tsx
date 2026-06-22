@@ -191,7 +191,6 @@ const ProductForm: React.FC = () => {
   const [description, setDescription] = useState('');
   const [sku, setSku] = useState('');
   const [category, setCategory] = useState<string[]>([]);
-  const [brand, setBrand] = useState('');
   const [colour, setColour] = useState('');
   const [modal, setModal] = useState('');
   const [warranty, setWarranty] = useState('');
@@ -225,7 +224,6 @@ const ProductForm: React.FC = () => {
 
   // UI
   const [categories, setCategories] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -237,22 +235,13 @@ const ProductForm: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [catRes, brandRes] = await Promise.all([
-          fetch(`${API_BASE}/categories`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }),
-          fetch(`${API_BASE}/admin/brands`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }).catch(() => null)
-        ]);
+        const catRes = await fetch(`${API_BASE}/categories`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
         const catData = await catRes.json();
         if (catData.success || catData.data) {
           setCategories(catData.data?.categories || catData.categories || catData.data || []);
         }
-        if (brandRes?.ok) {
-          const brandData = await brandRes.json();
-          if (brandData.success || brandData.data) {
-            setBrands(brandData.data?.brands || brandData.brands || brandData.data || []);
-          }
-        }
       } catch (err) {
-        console.error('Failed to load categories/brands', err);
+        console.error('Failed to load categories', err);
       }
     };
     load();
@@ -273,7 +262,6 @@ const ProductForm: React.FC = () => {
           setDescription(product.description || '');
           setSku(product.sku || '');
           setCategory(Array.isArray(product.category) ? product.category.map((c: any) => c._id || c) : (product.category ? [product.category._id || product.category] : []));
-          setBrand(product.brand?._id || product.brand || '');
           setColour(product.colour || '');
           setModal(product.modal || '');
           setYoutubeUrl(product.youtubeUrl || '');
@@ -379,7 +367,6 @@ const ProductForm: React.FC = () => {
       if (category && category.length > 0) {
         category.forEach(catId => formData.append('category', catId));
       }
-      if (brand) formData.append('brand', brand);
       if (colour) formData.append('colour', colour);
       if (modal) formData.append('modal', modal);
       if (youtubeUrl) formData.append('youtubeUrl', youtubeUrl);
@@ -784,13 +771,6 @@ const ProductForm: React.FC = () => {
                           ))
                         ]
                       ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel>Brand</InputLabel>
-                    <Select value={brand} label="Brand" onChange={(e) => setBrand(e.target.value)}>
-                      <MenuItem value="">None</MenuItem>
-                      {brands.map((b: any) => <MenuItem key={b._id} value={b._id}>{b.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Box>

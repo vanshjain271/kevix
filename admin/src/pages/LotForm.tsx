@@ -29,7 +29,6 @@ const LotForm: React.FC = () => {
   const [description, setDescription] = useState('');
   const [sku, setSku] = useState('');
   const [category, setCategory] = useState<string[]>([]);
-  const [brand, setBrand] = useState('');
 
   // Lot Details
   const [fullLotQuantity, setFullLotQuantity] = useState('');
@@ -37,6 +36,9 @@ const LotForm: React.FC = () => {
   const [allowHalfLot, setAllowHalfLot] = useState(false);
   const [halfLotQuantity, setHalfLotQuantity] = useState('');
   const [halfLotPrice, setHalfLotPrice] = useState('');
+  const [allowMiniLot, setAllowMiniLot] = useState(false);
+  const [miniLotQuantity, setMiniLotQuantity] = useState('');
+  const [miniLotPrice, setMiniLotPrice] = useState('');
 
   // Status & Images
   const [isActive, setIsActive] = useState(true);
@@ -45,7 +47,6 @@ const LotForm: React.FC = () => {
 
   // UI
   const [categories, setCategories] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -57,22 +58,13 @@ const LotForm: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [catRes, brandRes] = await Promise.all([
-          fetch(`${API_BASE}/categories`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }),
-          fetch(`${API_BASE}/admin/brands`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }).catch(() => null)
-        ]);
+        const catRes = await fetch(`${API_BASE}/categories`, { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
         const catData = await catRes.json();
         if (catData.success || catData.data) {
           setCategories(catData.data?.categories || catData.categories || catData.data || []);
         }
-        if (brandRes?.ok) {
-          const brandData = await brandRes.json();
-          if (brandData.success || brandData.data) {
-            setBrands(brandData.data?.brands || brandData.brands || brandData.data || []);
-          }
-        }
       } catch (err) {
-        console.error('Failed to load categories/brands', err);
+        console.error('Failed to load categories', err);
       }
     };
     load();
@@ -93,7 +85,6 @@ const LotForm: React.FC = () => {
           setDescription(product.description || '');
           setSku(product.sku || '');
           setCategory(Array.isArray(product.category) ? product.category.map((c: any) => c._id || c) : (product.category ? [product.category._id || product.category] : []));
-          setBrand(product.brand?._id || product.brand || '');
           setIsActive(product.isActive !== false);
 
           if (product.lotDetails) {
@@ -102,6 +93,9 @@ const LotForm: React.FC = () => {
             setAllowHalfLot(Boolean(product.lotDetails.allowHalfLot));
             setHalfLotQuantity(String(product.lotDetails.halfLotQuantity || ''));
             setHalfLotPrice(String(product.lotDetails.halfLotPrice || ''));
+            setAllowMiniLot(Boolean(product.lotDetails.allowMiniLot));
+            setMiniLotQuantity(String(product.lotDetails.miniLotQuantity || ''));
+            setMiniLotPrice(String(product.lotDetails.miniLotPrice || ''));
           }
 
           if (product.images?.length > 0) {
@@ -169,7 +163,6 @@ const LotForm: React.FC = () => {
       if (category && category.length > 0) {
         category.forEach(catId => formData.append('category', catId));
       }
-      if (brand) formData.append('brand', brand);
       formData.append('isActive', String(isActive));
 
       const lotDetails = {
@@ -178,6 +171,9 @@ const LotForm: React.FC = () => {
         allowHalfLot,
         halfLotQuantity: allowHalfLot ? parseInt(halfLotQuantity || '0') : 0,
         halfLotPrice: allowHalfLot ? parseFloat(halfLotPrice || '0') : 0,
+        allowMiniLot,
+        miniLotQuantity: allowMiniLot ? parseInt(miniLotQuantity || '0') : 0,
+        miniLotPrice: allowMiniLot ? parseFloat(miniLotPrice || '0') : 0,
       };
       formData.append('lotDetails', JSON.stringify(lotDetails));
 
@@ -376,6 +372,24 @@ const LotForm: React.FC = () => {
                     </Grid>
                   </>
                 )}
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={<Switch checked={allowMiniLot} onChange={(e) => setAllowMiniLot(e.target.checked)} color="primary" />}
+                    label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Allow purchasing mini lot</Typography>}
+                  />
+                </Grid>
+
+                {allowMiniLot && (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <TextField fullWidth type="number" label="Mini Lot Quantity (Units)" value={miniLotQuantity} onChange={(e) => setMiniLotQuantity(e.target.value)} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField fullWidth type="number" label="Mini Lot Price (₹)" value={miniLotPrice} onChange={(e) => setMiniLotPrice(e.target.value)} />
+                    </Grid>
+                  </>
+                )}
               </Grid>
             </CardContent>
           </Card>
@@ -427,13 +441,6 @@ const LotForm: React.FC = () => {
                           ))
                         ]
                       ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel>Brand</InputLabel>
-                    <Select value={brand} label="Brand" onChange={(e) => setBrand(e.target.value)}>
-                      <MenuItem value="">None</MenuItem>
-                      {brands.map((b: any) => <MenuItem key={b._id} value={b._id}>{b.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Box>

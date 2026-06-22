@@ -37,7 +37,6 @@ const navItems: NavItem[] = [
       { title: 'Products', path: '/catalog/products', icon: <></> },
       { title: 'Product Lots', path: '/catalog/lots', icon: <></> },
       { title: 'Categories', path: '/catalog/categories', icon: <></> },
-      { title: 'Brands', path: '/catalog/brands', icon: <></> },
       { title: 'Reviews', path: '/catalog/reviews', icon: <></> },
     ],
   },
