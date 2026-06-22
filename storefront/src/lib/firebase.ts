@@ -10,9 +10,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
+// Initialize Firebase gracefully
+let app;
+let auth;
+let googleProvider;
+
+try {
+  if (firebaseConfig.apiKey) {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+  }
+} catch (error) {
+  console.warn("Firebase initialization skipped (missing/invalid config):", error);
+}
 
 export { app, auth, googleProvider, RecaptchaVerifier, signInWithPhoneNumber };
