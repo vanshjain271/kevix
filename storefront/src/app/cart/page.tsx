@@ -106,7 +106,7 @@ export default function CartPage() {
                   const mrp = product.mrp || 0;
                   const salePrice = product.salePrice || 0;
                   const itemDiscount = mrp > 0 ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
-                  const image = product.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
+                  const image = product.images && product.images.length > 0 ? (product.images[0].url || product.images[0]) : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
                   return (
                   <div key={item.id} className="p-4 flex flex-col sm:flex-row gap-6">
                     {/* Item Image */}

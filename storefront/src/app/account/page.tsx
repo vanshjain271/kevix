@@ -269,7 +269,7 @@ export default function AccountPage() {
                       <div className="space-y-4">
                         {order.items.map((item: any) => {
                           const product = item.product;
-                          const image = product?.images && product.images.length > 0 ? product.images[0].url : 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800&auto=format&fit=crop';
+                          const image = product?.images && product.images.length > 0 ? (product.images[0].url || product.images[0]) : 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800&auto=format&fit=crop';
                           return (
                             <div key={item._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div className="flex items-start gap-4">
@@ -457,7 +457,7 @@ export default function AccountPage() {
                 ) : wishlist && wishlist.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {wishlist.map((item: any) => {
-                      const image = item.images && item.images.length > 0 ? item.images[0].url : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
+                      const image = item.images && item.images.length > 0 ? (item.images[0].url || item.images[0]) : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
                       const discount = Math.round(((item.mrp - item.salePrice) / item.mrp) * 100);
                       
                       return (

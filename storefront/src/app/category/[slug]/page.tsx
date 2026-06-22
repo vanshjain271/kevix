@@ -27,7 +27,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     price: p.salePrice,
     mrp: p.mrp,
     discount: Math.round(((p.mrp - p.salePrice) / p.mrp) * 100),
-    image: p.images && p.images.length > 0 ? p.images[0].url : 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop',
+    image: p.images && p.images.length > 0 ? (p.images[0].url || p.images[0]) : 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop',
     rating: p.averageRating || 4.5,
     reviews: p.totalReviews || 0,
     brand: p.brand?.name || p.brand || 'Generic',

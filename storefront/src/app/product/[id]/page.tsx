@@ -22,7 +22,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const displayProduct = product ? {
     ...product,
     discount: Math.round(((product.mrp - product.salePrice) / product.mrp) * 100),
-    images: product.images && product.images.length > 0 ? product.images.map((img: any) => img.url) : [
+    images: product.images && product.images.length > 0 ? product.images.map((img: any) => img.url || img) : [
       'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop'
     ],
     rating: product.averageRating || 0,
