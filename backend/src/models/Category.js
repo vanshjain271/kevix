@@ -18,9 +18,9 @@ const categorySchema = new mongoose.Schema({
     unique: true,
     lowercase: true
   },
-  image: {
+  icon: {
     type: String,
-    default: ''
+    default: 'category'
   },
   description: {
     type: String,
@@ -78,6 +78,24 @@ categorySchema.pre('save', async function(next) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  }
+
+  // Generate icon
+  if (this.isModified('name') || !this.icon || this.icon === 'category') {
+    const n = (this.name || '').toLowerCase();
+    const s = (this.slug || '').toLowerCase();
+    
+    if (n.includes('mobile') || s.includes('mobile') || n.includes('phone') || s.includes('phone')) this.icon = 'smartphone';
+    else if (n.includes('charger') || s.includes('charger')) this.icon = 'bolt';
+    else if (n.includes('cable') || s.includes('cable') || n.includes('wire') || s.includes('wire')) this.icon = 'settings_input_hdmi';
+    else if (n.includes('earbud') || s.includes('earbud') || n.includes('tws') || s.includes('tws') || n.includes('audio') || s.includes('audio')) this.icon = 'headset';
+    else if (n.includes('neckband') || s.includes('neckband')) this.icon = 'headphones';
+    else if (n.includes('watch') || s.includes('watch') || n.includes('wearable') || s.includes('wearable')) this.icon = 'watch';
+    else if (n.includes('power') || s.includes('power') || n.includes('bank') || s.includes('bank')) this.icon = 'battery_charging_full';
+    else if (n.includes('cover') || s.includes('cover') || n.includes('case') || s.includes('case')) this.icon = 'phone_android';
+    else if (n.includes('laptop') || s.includes('laptop') || n.includes('computer') || s.includes('computer')) this.icon = 'laptop';
+    else if (n.includes('deal') || s.includes('deal') || n.includes('offer') || s.includes('offer') || n.includes('sale') || s.includes('sale')) this.icon = 'local_offer';
+    else this.icon = 'category';
   }
   
   // Set level based on parent

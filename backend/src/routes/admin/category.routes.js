@@ -7,7 +7,6 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../../models/Category');
 const { authenticate } = require('../../middleware/auth.middleware');
-const { handleSingleUpload } = require('../../middleware/upload.middleware');
 const S3Service = require('../../services/s3.service');
 
 // All routes require authentication
@@ -40,24 +39,14 @@ router.get('/', async (req, res) => {
  * POST /api/v1/admin/categories
  * Create new category
  */
-router.post('/', handleSingleUpload, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        let { name, description, parent, image, isActive, sortOrder } = req.body;
-
-        if (req.file) {
-            const uploadResult = await S3Service.uploadFile(req.file, 'categories');
-            if (uploadResult.success) {
-                image = uploadResult.url;
-            } else {
-                return res.status(400).json({ success: false, message: 'Image upload failed' });
-            }
-        }
+        let { name, description, parent, isActive, sortOrder } = req.body;
 
         const category = new Category({
             name,
             description,
             parent: parent || null,
-            image,
             isActive: isActive !== 'false' && isActive !== false,
             sortOrder: sortOrder || 0
         });
@@ -90,18 +79,9 @@ router.post('/', handleSingleUpload, async (req, res) => {
  * PUT /api/v1/admin/categories/:id
  * Update category
  */
-router.put('/:id', handleSingleUpload, async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
-        let { name, description, parent, image, isActive, sortOrder } = req.body;
-
-        if (req.file) {
-            const uploadResult = await S3Service.uploadFile(req.file, 'categories');
-            if (uploadResult.success) {
-                image = uploadResult.url;
-            } else {
-                return res.status(400).json({ success: false, message: 'Image upload failed' });
-            }
-        }
+        let { name, description, parent, isActive, sortOrder } = req.body;
 
         const category = await Category.findById(req.params.id);
 
@@ -112,11 +92,10 @@ router.put('/:id', handleSingleUpload, async (req, res) => {
             });
         }
 
-        category.name = name;
-        category.description = description;
-        category.parent = parent || null;
-        if (image) category.image = image;
-        category.isActive = isActive !== 'false' && isActive !== false;
+        category.name = name || category.name;
+        if (description !== undefined) category.description = description;
+        if (parent !== undefined) category.parent = parent || null;
+        if (isActive !== undefined) category.isActive = isActive !== 'false' && isActive !== false;
         if (sortOrder !== undefined) category.sortOrder = sortOrder;
 
         await category.save();
