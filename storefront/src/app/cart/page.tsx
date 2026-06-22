@@ -102,11 +102,14 @@ export default function CartPage() {
               <div className="divide-y divide-surface-border">
                 {items.map(item => {
                   const product = item.productId;
-                  if (!product) return null; // skip unpopulated items
+                  if (!product?._id) return null;
                   const mrp = product.mrp || 0;
                   const salePrice = product.salePrice || 0;
-                  const itemDiscount = mrp > 0 ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
-                  const image = product.images && product.images.length > 0 ? (product.images[0].url || product.images[0]) : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
+                  const minQty = product.minOrderQty || 1;
+                  const itemDiscount = mrp > 0 && mrp > salePrice ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
+                  const image = product.images && product.images.length > 0
+                    ? (product.images[0].url || (product.images[0] as any))
+                    : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
                   return (
                   <div key={item.id} className="p-4 flex flex-col sm:flex-row gap-6">
                     {/* Item Image */}
@@ -117,16 +120,26 @@ export default function CartPage() {
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-surface-border rounded-sm">
                         <button 
-                          onClick={() => updateQuantity(item.id!, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                          className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface disabled:opacity-50"
-                        >-</button>
+                          onClick={() => {
+                            if (item.quantity <= minQty) {
+                              removeFromCart(item.id);
+                            } else {
+                              updateQuantity(item.id, item.quantity - 1);
+                            }
+                          }}
+                          className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface text-danger"
+                          title={item.quantity <= minQty ? 'Remove item' : 'Decrease quantity'}
+                        >
+                          {item.quantity <= minQty ? (
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                          ) : '-'}
+                        </button>
                         <div className="w-10 h-8 flex items-center justify-center text-sm font-medium border-x border-surface-border">
                           {item.quantity}
                         </div>
                         <button 
-                          onClick={() => updateQuantity(item.id!, item.quantity + 1)}
-                          className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface text-primary"
                         >+</button>
                       </div>
                     </div>
@@ -136,6 +149,9 @@ export default function CartPage() {
                       <Link href={`/product/${product._id}`} className="text-text-primary font-medium hover:text-primary transition-colors pr-12">
                         {product.name}
                       </Link>
+                      {item.variantName && (
+                        <span className="text-xs text-primary font-medium mt-0.5">Variant: {item.variantName}</span>
+                      )}
                       <span className="text-xs text-text-secondary mt-1 mb-3">Seller: Kevix</span>
                       
                       <div className="flex items-baseline gap-2 mb-2">
@@ -143,19 +159,24 @@ export default function CartPage() {
                         {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
                         {itemDiscount > 0 && <span className="text-sm font-bold text-success">{itemDiscount}% Off</span>}
                       </div>
-
-                      <div className="text-sm text-text-primary mt-auto">
-                        Delivery by Tomorrow | <span className="text-success">Free</span>
+                      <div className="text-xs text-text-secondary">
+                        Subtotal: <span className="font-bold text-text-primary">₹{(salePrice * item.quantity).toLocaleString('en-IN')}</span>
                       </div>
 
                       {/* Item Actions */}
                       <div className="flex gap-6 mt-4 pt-4 border-t border-surface-border text-sm font-medium">
-                        <button className="text-text-primary hover:text-primary transition-colors">SAVE FOR LATER</button>
-                        <button onClick={() => removeFromCart(item.id!)} className="text-text-primary hover:text-primary transition-colors">REMOVE</button>
+                        <button 
+                          onClick={() => removeFromCart(item.id)} 
+                          className="text-danger hover:text-red-700 transition-colors flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                          REMOVE
+                        </button>
                       </div>
                     </div>
                   </div>
-                )})}
+                  );
+                })}
               </div>
             ) : (
               <div className="p-12 text-center flex flex-col items-center">
