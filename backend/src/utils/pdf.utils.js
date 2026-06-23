@@ -4,18 +4,10 @@
  */
 
 const PDFDocument = require('pdfkit');
+const StoreSettings = require('../models/StoreSettings');
 
-// ── Company config ────────────────────────────────────────────────
-const COMPANY = {
-  name: 'GadgetHub Wholesale Mobile Accessories',
-  tradeName: 'Arbuda accessories',
-  address: 'Shop No. 481, 4th Floor, D-Block, Hubtown Building,',
-  address2: 'Gita Mandir, S.T. Stand, Ahmedabad - 380022, Gujarat',
-  phone: '9549289191',
-  email: 'Arbudaaccessories2024@gmail.com',
-};
-
-const RED = '#D32F2F';
+// ── Theme config ────────────────────────────────────────────────
+const PURPLE = '#7c3aed';
 const DARK = '#1E293B';
 const GREY = '#64748B';
 const LIGHT = '#F8FAFC';
@@ -95,7 +87,18 @@ const normalize = (raw) => {
 };
 
 // ── Main generator ────────────────────────────────────────────────
-const generateInvoicePDF = (rawInvoice) => {
+const generateInvoicePDF = async (rawInvoice) => {
+  // Fetch dynamic company details
+  const settings = await StoreSettings.findOne() || {};
+  const companyConfig = {
+    name: settings.storeName || 'Kevix',
+    tradeName: settings.companyTradeName || 'Arbuda accessories',
+    address: settings.companyAddress || 'Shop No. 481, 4th Floor, D-Block, Hubtown Building,',
+    address2: `${settings.companyCity || 'Ahmedabad'} - ${settings.companyPincode || '380022'}, ${settings.companyState || 'Gujarat'}`,
+    phone: settings.companyPhone || '9549289191',
+    email: settings.companyEmail || 'info@gadgethub.com',
+  };
+
   return new Promise((resolve, reject) => {
     try {
       const inv = normalize(rawInvoice);
@@ -106,7 +109,7 @@ const generateInvoicePDF = (rawInvoice) => {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
       doc.on('error', reject);
 
-      drawPage(doc, inv);
+      drawPage(doc, inv, companyConfig);
       doc.end();
     } catch (err) {
       reject(err);
@@ -115,24 +118,24 @@ const generateInvoicePDF = (rawInvoice) => {
 };
 
 // ── Page drawing ──────────────────────────────────────────────────
-const drawPage = (doc, inv) => {
+const drawPage = (doc, inv, companyConfig) => {
   const W = 595; // A4 width
 
-  // ── Red header bar ──────────────────────────────────────────────
-  doc.rect(0, 0, W, 10).fill(RED);
+  // ── Purple header bar ──────────────────────────────────────────────
+  doc.rect(0, 0, W, 10).fill(PURPLE);
 
   // ── Company block (left) ────────────────────────────────────────
-  doc.fillColor(RED).fontSize(15).font('Helvetica-Bold')
-     .text(COMPANY.name, 40, 20, { width: 280 });
+  doc.fillColor(PURPLE).fontSize(15).font('Helvetica-Bold')
+     .text(companyConfig.name, 40, 20, { width: 280 });
   doc.fillColor(GREY).fontSize(8).font('Helvetica')
-     .text(COMPANY.tradeName, 40, 42)
-     .text(COMPANY.address,   40, 53)
-     .text(COMPANY.address2,  40, 63)
-     .text(`Phone: ${COMPANY.phone}`, 40, 73)
-     .text(`Email: ${COMPANY.email}`,  40, 83);
+     .text(companyConfig.tradeName, 40, 42)
+     .text(companyConfig.address,   40, 53)
+     .text(companyConfig.address2,  40, 63)
+     .text(`Phone: ${companyConfig.phone}`, 40, 73)
+     .text(`Email: ${companyConfig.email}`,  40, 83);
 
   // ── INVOICE title + meta (right) ────────────────────────────────
-  doc.fillColor(RED).fontSize(26).font('Helvetica-Bold')
+  doc.fillColor(PURPLE).fontSize(26).font('Helvetica-Bold')
      .text('INVOICE', 360, 18, { width: 195, align: 'right' });
 
   const metaY = 50;
@@ -150,11 +153,11 @@ const drawPage = (doc, inv) => {
   });
 
   // ── Divider ─────────────────────────────────────────────────────
-  doc.rect(40, 100, W - 80, 1).fill(RED);
+  doc.rect(40, 100, W - 80, 1).fill(PURPLE);
 
   // ── BILL TO ─────────────────────────────────────────────────────
   const billY = 110;
-  doc.fillColor(RED).fontSize(7.5).font('Helvetica-Bold')
+  doc.fillColor(PURPLE).fontSize(7.5).font('Helvetica-Bold')
      .text('BILL TO', 40, billY);
   doc.fillColor(DARK).fontSize(11).font('Helvetica-Bold')
      .text(inv.customerName, 40, billY + 11);
@@ -179,7 +182,7 @@ const drawPage = (doc, inv) => {
   const tableW = cols.reduce((s, c) => s + c.width, 0); // 555
 
   // Header row
-  doc.rect(40, tableTop, tableW, 22).fill(RED);
+  doc.rect(40, tableTop, tableW, 22).fill(PURPLE);
   let cx = 40;
   cols.forEach(col => {
     doc.fillColor(WHITE).fontSize(8.5).font('Helvetica-Bold')
@@ -220,7 +223,7 @@ const drawPage = (doc, inv) => {
     // Page break if needed
     if (rowY > 700) {
       doc.addPage({ size: 'A4', margin: 0 });
-      doc.rect(0, 0, W, 10).fill(RED);
+      doc.rect(0, 0, W, 10).fill(PURPLE);
       rowY = 20;
     }
   });
@@ -248,7 +251,7 @@ const drawPage = (doc, inv) => {
   });
 
   // Balance due — big red row
-  doc.rect(sumX, sumY, sumW, 26).fill(RED);
+  doc.rect(sumX, sumY, sumW, 26).fill(PURPLE);
   doc.fillColor(WHITE).fontSize(10).font('Helvetica-Bold')
      .text('Balance Due', sumX + 5, sumY + 8, { width: 90 });
   doc.text(fmt(inv.roundedBalance), sumX + 100, sumY + 8, { width: sumW - 110, align: 'right' });
@@ -270,7 +273,7 @@ const drawPage = (doc, inv) => {
   }
 
   // Payment status chip
-  let chipColor = RED;
+  let chipColor = PURPLE;
   let chipLabel = 'UNPAID';
   if (inv.roundedBalance === 0) { chipColor = '#059669'; chipLabel = 'PAID'; }
   else if (inv.tokenReceived > 0) { chipColor = '#D97706'; chipLabel = 'PART PAID'; }
@@ -284,7 +287,7 @@ const drawPage = (doc, inv) => {
   doc.rect(0, footerY, W, 1).fill(BORDER);
   doc.fillColor(GREY).fontSize(7.5).font('Helvetica')
      .text('Thank you for your business!', 40, footerY + 6, { width: W - 80, align: 'center' });
-  doc.text(COMPANY.name + ' | ' + COMPANY.phone, 40, footerY + 16, { width: W - 80, align: 'center' });
+  doc.text(companyConfig.name + ' | ' + companyConfig.phone, 40, footerY + 16, { width: W - 80, align: 'center' });
 };
 
-module.exports = { generateInvoicePDF, COMPANY };
+module.exports = { generateInvoicePDF };
