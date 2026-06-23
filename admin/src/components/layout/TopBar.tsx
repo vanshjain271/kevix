@@ -23,8 +23,7 @@ const TopBar: React.FC = () => {
 
   const handleProfile = () => {
     handleClose();
-    // Profile page doesn't exist yet, can link to settings or show a placeholder
-    navigate('/store/settings');
+    navigate('/profile');
   };
 
   const handleVisitStore = () => {

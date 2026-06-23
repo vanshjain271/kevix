@@ -25,6 +25,7 @@ import Reviews from './pages/Reviews';
 import Login from './pages/Login';
 import Wishlists from './pages/Wishlists';
 import Inquiries from './pages/Inquiries';
+import Profile from './pages/Profile';
 
 export const router = createBrowserRouter([
   {
@@ -78,6 +79,7 @@ export const router = createBrowserRouter([
       { path: 'store/blog', element: <Blog /> },
       { path: 'bulk-orders', element: <BulkOrders /> },
       { path: 'inquiries', element: <Inquiries /> },
+      { path: 'profile', element: <Profile /> },
 
       // Activity Log
       // { path: 'activity-log', element: <ActivityLog /> },
