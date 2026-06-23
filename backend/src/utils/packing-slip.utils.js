@@ -1,12 +1,9 @@
-/**
  * Packing Slip PDF Utility
  *
- * Generates a minimal packing slip containing ONLY:
- * - Order ID
- * - Order Date
+ * Generates a packing slip containing:
+ * - Order ID & Date
+ * - Customer Details (Name, Phone, Address)
  * - Product table (Name, Variant, SKU, Qty)
- *
- * NO customer details (name, phone, address) are included.
  */
 
 const PDFDocument = require('pdfkit');
@@ -45,17 +42,35 @@ const generatePackingSlipPDF = async (order) => {
             doc.font('Helvetica-Bold').text('Order Date:', 40, infoY + 18);
             doc.font('Helvetica').text(formatDate(order.createdAt), 160, infoY + 18);
 
-            doc.font('Helvetica-Bold').text('Status:', 40, infoY + 36);
-            doc.font('Helvetica').text(order.status || 'PACKED', 160, infoY + 36);
-
-            doc.font('Helvetica-Bold').text('Total Items:', 350, infoY);
+            doc.font('Helvetica-Bold').text('Total Items:', 40, infoY + 36);
             const totalQty = (order.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-            doc.font('Helvetica').text(totalQty.toString(), 440, infoY);
+            doc.font('Helvetica').text(totalQty.toString(), 160, infoY + 36);
 
-            doc.moveTo(40, infoY + 60).lineTo(555, infoY + 60).stroke('#ccc');
+            // ── Customer Details ──
+            const rightColX = 320;
+            doc.font('Helvetica-Bold').text('Ship To:', rightColX, infoY);
+            
+            let customerY = infoY + 18;
+            const sa = order.shippingAddress || {};
+            const customerName = sa.name || order.customer?.name || order.user?.name || '-';
+            const customerPhone = sa.phone || order.customer?.phone || order.user?.phone || '-';
+            
+            doc.font('Helvetica-Bold').text(customerName, rightColX, customerY);
+            customerY += 15;
+            doc.font('Helvetica').text(`Phone: ${customerPhone}`, rightColX, customerY);
+            customerY += 15;
+            
+            const addressParts = [sa.addressLine1, sa.addressLine2, sa.landmark, sa.city, sa.state, sa.pincode].filter(Boolean);
+            if (addressParts.length > 0) {
+              doc.text(addressParts.join(', '), rightColX, customerY, { width: 220 });
+            } else {
+              doc.text('No Address Provided', rightColX, customerY);
+            }
+
+            doc.moveTo(40, infoY + 90).lineTo(555, infoY + 90).stroke('#ccc');
 
             // ── Items Table ──
-            const tableTop = infoY + 75;
+            const tableTop = infoY + 105;
             const colWidths = [30, 220, 120, 80, 65];
             const headers = ['#', 'Product Name', 'Variant', 'SKU', 'Qty'];
 
@@ -114,7 +129,7 @@ const generatePackingSlipPDF = async (order) => {
             doc.moveTo(40, footerY).lineTo(555, footerY).stroke('#ccc');
 
             doc.fontSize(8).font('Helvetica')
-                .text('This is an auto-generated packing slip. No customer details are included for privacy.', 40, footerY + 8, {
+                .text('This is an auto-generated packing slip.', 40, footerY + 8, {
                     align: 'center',
                     width: 515,
                 });
