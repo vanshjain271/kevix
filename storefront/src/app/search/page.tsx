@@ -73,14 +73,10 @@ function SearchResults() {
     discount: p.mrp > 0 && p.salePrice < p.mrp ? Math.round(((p.mrp - p.salePrice) / p.mrp) * 100) : 0,
   }));
 
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minDiscount, setMinDiscount] = useState<number | null>(null);
   const [priceRange, setPriceRange] = useState<{min: number, max: number} | null>(null);
 
-  const uniqueBrands = Array.from(new Set(formattedProducts.map((p: any) => p.brandName).filter(Boolean)));
-
   const displayProducts = formattedProducts.filter((p: any) => {
-    if (selectedBrands.length > 0 && !selectedBrands.includes(p.brandName)) return false;
     if (minDiscount && p.discount < minDiscount) return false;
     if (priceRange) {
       if ((p.salePrice || 0) < priceRange.min || (p.salePrice || 0) > priceRange.max) return false;
@@ -89,13 +85,8 @@ function SearchResults() {
   });
 
   const clearFilters = () => {
-    setSelectedBrands([]);
     setMinDiscount(null);
     setPriceRange(null);
-  };
-
-  const handleBrandChange = (brand: string) => {
-    setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
   };
 
   return (
@@ -119,26 +110,7 @@ function SearchResults() {
                 <button onClick={clearFilters} className="text-xs text-purple-600 font-bold hover:underline">CLEAR ALL</button>
               </div>
               
-              {/* Brand Filter */}
-              {uniqueBrands.length > 0 && (
-                <div className="p-4 border-b border-gray-100">
-                  <h3 className="font-semibold text-sm mb-3 uppercase text-gray-700 tracking-wider">Brand</h3>
-                  <div className="space-y-2.5 max-h-48 overflow-y-auto scrollbar-hide">
-                    {uniqueBrands.map((brand: any) => (
-                      <label key={brand} className="flex items-center gap-3 cursor-pointer group">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedBrands.includes(brand)}
-                          onChange={() => handleBrandChange(brand)}
-                          className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500" 
-                        />
-                        <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium truncate">{brand}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              {/* Brand Filter removed */}
               {/* Price Filter */}
               <div className="p-4 border-b border-gray-100">
                 <h3 className="font-semibold text-sm mb-3 uppercase text-gray-700 tracking-wider">Price</h3>

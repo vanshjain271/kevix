@@ -123,17 +123,18 @@ const AbandonedCarts: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [timeframe, setTimeframe] = useState('all');
+  const [threshold, setThreshold] = useState('0'); // Default to 0 hours (all carts)
   const [selectedCart, setSelectedCart] = useState<AbandonedCart | null>(null);
 
   useEffect(() => {
     fetchCarts();
-  }, [timeframe]);
+  }, [timeframe, threshold]);
 
   const fetchCarts = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await apiClient.get<any>(`/admin/carts/abandoned?thresholdHours=2&timeframe=${timeframe}`);
+      const response = await apiClient.get<any>(`/admin/carts/abandoned?thresholdHours=${threshold}&timeframe=${timeframe}`);
       setCarts(response.data?.carts || response.carts || []);
     } catch (err: any) {
       setError('Failed to fetch abandoned carts');
@@ -281,6 +282,21 @@ const AbandonedCarts: React.FC = () => {
               <MenuItem value="month">This Month</MenuItem>
               <MenuItem value="6months">Last 6 Months</MenuItem>
               <MenuItem value="all">All Time</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel id="threshold-label">Time Idle</InputLabel>
+            <Select
+              labelId="threshold-label"
+              value={threshold}
+              label="Time Idle"
+              onChange={(e) => setThreshold(e.target.value)}
+              sx={{ borderRadius: 2, bgcolor: 'background.paper' }}
+            >
+              <MenuItem value="0">Show All Carts</MenuItem>
+              <MenuItem value="1">1+ Hour</MenuItem>
+              <MenuItem value="2">2+ Hours</MenuItem>
+              <MenuItem value="24">24+ Hours</MenuItem>
             </Select>
           </FormControl>
           <Button variant="outlined" startIcon={<Refresh />} onClick={fetchCarts} disabled={loading}>

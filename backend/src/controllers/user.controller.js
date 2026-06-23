@@ -125,7 +125,7 @@ const toggleWishlist = async (req, res) => {
   try {
     const { productId } = req.body;
     const user = await require('../models/User').findById(req.user.userId);
-    const index = user.wishlist.indexOf(productId);
+    const index = user.wishlist.findIndex(id => id.toString() === productId.toString());
     if (index === -1) {
       user.wishlist.push(productId);
     } else {

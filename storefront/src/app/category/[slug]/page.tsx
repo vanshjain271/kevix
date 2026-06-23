@@ -34,15 +34,12 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     isAssured: true,
   }));
 
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+
   const [minDiscount, setMinDiscount] = useState<number | null>(null);
   const [priceRange, setPriceRange] = useState<{min: number, max: number} | null>(null);
 
-  // Extract unique brands dynamically from products
-  const uniqueBrands = Array.from(new Set(formattedProducts.map((p: any) => p.brand).filter(Boolean)));
-
+  // Brand filtering removed as per user request
   const displayProducts = formattedProducts.filter((p: any) => {
-    if (selectedBrands.length > 0 && !selectedBrands.includes(p.brand)) return false;
     if (minDiscount && p.discount < minDiscount) return false;
     if (priceRange) {
       if (p.price < priceRange.min || p.price > priceRange.max) return false;
@@ -51,13 +48,8 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   });
 
   const clearFilters = () => {
-    setSelectedBrands([]);
     setMinDiscount(null);
     setPriceRange(null);
-  };
-
-  const handleBrandChange = (brand: string) => {
-    setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
   };
 
   return (
@@ -83,25 +75,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               <button onClick={clearFilters} className="text-xs text-primary font-medium hover:underline">CLEAR ALL</button>
             </div>
             
-            {/* Brand Filter */}
-            {uniqueBrands.length > 0 && (
-              <div className="p-4 border-b border-surface-border">
-                <h3 className="font-medium text-sm mb-3 uppercase text-text-primary">Brand</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-hide">
-                  {uniqueBrands.map((brand: any) => (
-                    <label key={brand} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedBrands.includes(brand)}
-                        onChange={() => handleBrandChange(brand)}
-                        className="w-4 h-4 text-primary rounded border-surface-border focus:ring-primary accent-primary" 
-                      />
-                      <span className="text-sm text-text-secondary group-hover:text-text-primary truncate">{brand}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Brand Filter removed */}
 
             {/* Price Filter */}
             <div className="p-4 border-b border-surface-border">
