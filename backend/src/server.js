@@ -13,7 +13,6 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env'), override: true });
 
 const { connectDB } = require('./config/database');
-const adminWishlistRoutes = require('./routes/admin/wishlist.routes');
 const { requestLogger, errorLogger, performanceLogger } = require('./middleware/logger.middleware');
 
 // Routes
@@ -27,8 +26,6 @@ const orderRoutes = require('./routes/order.routes');
 const adminOrderRoutes = require('./routes/admin/order.routes');
 const invoiceRoutes = require('./routes/invoice.routes');
 const adminInvoiceRoutes = require('./routes/admin/invoice.routes');
-const wishlistRoutes = require('./routes/wishlist.routes');
-const adminWishlistRoutes = require('./routes/admin/wishlist.routes');
 const adminProfileRoutes = require('./routes/admin/profile.routes');
 const adminAnalyticsRoutes = require('./routes/admin/analytics.routes');
 const notificationRoutes = require('./routes/notification.routes');
@@ -137,9 +134,6 @@ app.use('/api/v1/admin/orders', adminOrderRoutes);
 app.use('/api/v1/invoices', invoiceRoutes);
 app.use('/api/v1/admin/invoices', adminInvoiceRoutes);
 
-app.use('/api/v1/wishlists', wishlistRoutes);
-app.use('/api/v1/admin/wishlists', adminWishlistRoutes);
-
 app.use('/api/v1/admin/profile', adminProfileRoutes);
 
 // Analytics
@@ -201,9 +195,6 @@ app.use('/api/v1/addresses', addressRoutes);
 
 // Settings (customer-facing)
 app.use('/api/v1/settings', publicSettingsRoutes);
-
-// Admin Wishlists
-app.use('/api/v1/admin/wishlists', adminWishlistRoutes);
 
 /* =========================
    Error Handler
