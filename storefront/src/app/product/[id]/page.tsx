@@ -37,12 +37,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedLotType, setSelectedLotType] = useState<'full' | 'half' | 'mini'>('full');
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
-  // Update active image when product loads
+  // Update active image and default variant when product loads
   useEffect(() => {
-    if (displayProduct && displayProduct.images && displayProduct.images.length > 0) {
-      setActiveImage(displayProduct.images[0]);
+    if (displayProduct) {
+      if (displayProduct.images && displayProduct.images.length > 0) {
+        setActiveImage(displayProduct.images[0]);
+      }
+      if (!displayProduct.isLot && displayProduct.hasVariants && displayProduct.variants?.length > 0 && !selectedVariant) {
+        setSelectedVariant(displayProduct.variants[0]);
+      }
     }
-  }, [displayProduct?.images]);
+  }, [displayProduct?.images, displayProduct?.variants, displayProduct?.hasVariants, displayProduct?.isLot]);
 
   const inWishlist = wishlist.some((item: any) => item._id === displayProduct?._id);
   const cartItem = items.find(i => {
@@ -111,18 +116,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           {/* Left: Image Gallery (Sticky on Desktop) */}
           <div className="w-full md:w-2/5 p-4 md:p-8 flex flex-col md:flex-row gap-4 border-b md:border-b-0 md:border-r border-surface-border md:sticky top-0 h-max">
             {/* Thumbnails */}
-            <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto md:overflow-visible">
-              {displayProduct.images.map((img: string, idx: number) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setActiveImage(img)}
-                  className={`w-16 h-16 border rounded-sm overflow-hidden shrink-0 transition-all ${activeImage === img ? 'border-primary ring-1 ring-primary' : 'border-surface-border hover:border-text-muted'}`}
-                >
-                  <div className="relative w-full h-full">
-                    <Image src={img} alt={`Thumbnail ${idx}`} fill className="object-cover" />
-                  </div>
-                </button>
-              ))}
+            <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto md:overflow-visible scrollbar-hide">
+              {displayProduct.images.map((imgObj: any, idx: number) => {
+                const imgStr = typeof imgObj === 'string' ? imgObj : imgObj?.url;
+                if (!imgStr) return null;
+                return (
+                  <button 
+                    key={idx} 
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveImage(imgStr); }}
+                    className={`w-16 h-16 border rounded-sm overflow-hidden shrink-0 transition-all ${activeImage === imgStr ? 'border-primary ring-1 ring-primary' : 'border-surface-border hover:border-text-muted'}`}
+                  >
+                    <div className="relative w-full h-full">
+                      <Image src={imgStr} alt={`Thumbnail ${idx}`} fill className="object-cover" />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
             
             {/* Main Image */}
@@ -219,11 +228,33 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   {activeMrp > activePrice && <span className="text-sm font-bold text-success mb-1.5">{Math.round(((activeMrp - activePrice) / activeMrp) * 100)}% off</span>}
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
-                  {displayProduct.stock > 0 ? (
-                    <span className="text-success font-bold">In Stock ({displayProduct.stock} units available)</span>
+                  {(selectedVariant ? selectedVariant.stock : displayProduct.stock) > 0 ? (
+                    <span className="text-success font-bold">In Stock ({(selectedVariant ? selectedVariant.stock : displayProduct.stock)} units available)</span>
                   ) : (
                     <span className="text-danger font-bold">Out of Stock</span>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Variants */}
+            {!displayProduct.isLot && displayProduct.hasVariants && displayProduct.variants && displayProduct.variants.length > 0 && (
+              <div className="border-b border-surface-border pb-6">
+                <div className="text-sm font-bold text-text-primary mb-3">Available Options</div>
+                <div className="flex flex-wrap gap-3">
+                  {displayProduct.variants.map((variant: any) => (
+                    <button
+                      key={variant._id || variant.name}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`px-4 py-2 border rounded-sm text-sm font-medium transition-all ${
+                        selectedVariant?._id === variant._id || selectedVariant?.name === variant.name
+                          ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary'
+                          : 'border-surface-border text-text-primary hover:border-primary/50'
+                      }`}
+                    >
+                      {variant.name} {variant.color && `- ${variant.color}`}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -264,7 +295,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       setIsAdding(false);
                     }
                   }}
-                  disabled={addingToCart || isAdding || (!displayProduct.isLot && displayProduct.stock <= 0)}
+                  disabled={addingToCart || isAdding || (!displayProduct.isLot && (selectedVariant ? selectedVariant.stock : displayProduct.stock) <= 0)}
                   className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
                 >
                   <span className="material-symbols-outlined text-[18px]">{(addingToCart || isAdding) ? 'hourglass_empty' : 'shopping_cart'}</span> 
@@ -305,8 +336,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Variants */}
-            {displayProduct.hasVariants && displayProduct.variants?.length > 0 && (
-              <div className="border-b border-surface-border pb-6 pt-4">
+            {!displayProduct.isLot && displayProduct.hasVariants && displayProduct.variants?.length > 0 && (
+              <div className="border-b border-surface-border pb-6 mt-6">
                 <h3 className="text-lg font-medium text-text-primary mb-4">Available Variants
                   {selectedVariant && (
                     <button onClick={() => setSelectedVariant(null)} className="ml-3 text-xs text-primary underline font-normal">Clear</button>
