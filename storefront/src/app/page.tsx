@@ -162,21 +162,6 @@ export default function Home() {
             );
           })}
 
-          <section className="bg-white py-6 pb-12">
-            <div className="max-w-7xl mx-auto px-4 md:px-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-extrabold text-gray-900">All Products</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">Explore our complete catalog</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {formattedProducts.map((product: any) => (
-                  <ProductCardGrid key={product.id} product={product} />
-                ))}
-              </div>
-            </div>
-          </section>
         </>
       ) : (
         <div className="flex flex-col justify-center items-center h-64 gap-3">
