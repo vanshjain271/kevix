@@ -287,7 +287,15 @@ const OrderDetailDrawer: React.FC<{
           {order.payment?.amountPaid > 0 && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
               <Typography variant="body2" color="text.secondary">Amount Paid</Typography>
-              <Typography variant="body2" sx={{ color: 'success.main' }}>₹{order.payment.amountPaid?.toLocaleString()}</Typography>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography variant="body2" sx={{ color: 'success.main' }}>₹{order.payment.amountPaid?.toLocaleString()}</Typography>
+                {order.payment?.referenceId && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>UTR: {order.payment.referenceId}</Typography>
+                )}
+                {order.transactionId && !order.payment?.referenceId && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Ref: {order.transactionId}</Typography>
+                )}
+              </Box>
             </Box>
           )}
           {(order.totalAmount - (order.payment?.amountPaid || 0)) > 0 && (
@@ -607,6 +615,16 @@ const Orders: React.FC = () => {
     }
   };
 
+  const printInvoice = async (order: any) => {
+    if (!order) return;
+    try {
+      await orderService.printInvoicePDF(order._id);
+      setSnackbar({ open: true, message: 'Opening print dialog...', severity: 'success' });
+    } catch (error: any) {
+      setSnackbar({ open: true, message: error.message || 'Failed to print invoice', severity: 'error' });
+    }
+  };
+
   const clearDateFilter = () => {
     setDateFrom('');
     setDateTo('');
@@ -833,7 +851,7 @@ const Orders: React.FC = () => {
         onClose={() => setDetailOpen(false)}
         onEditStatus={() => openStatusDialog(detailOrder)}
         onEditOrder={() => openEditDialog(detailOrder)}
-        onPrint={() => downloadInvoice(detailOrder!)}
+        onPrint={() => printInvoice(detailOrder!)}
         onRecordPayment={() => openPaymentDialog(detailOrder)}
       />
 

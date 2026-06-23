@@ -62,6 +62,38 @@ class OrderService {
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
   }
+
+  async printInvoicePDF(orderId: string): Promise<void> {
+    const token = localStorage.getItem('admin_token');
+    const endpoint = `${API_BASE_URL}/admin/orders/${orderId}/invoice-pdf`;
+
+    const response = await fetch(endpoint, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+      let msg = 'Failed to fetch invoice for printing';
+      try { msg = (await response.json()).message || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+
+    const blob = await response.blob();
+    if (blob.size === 0) throw new Error('PDF is empty — please try again');
+
+    const blobUrl = URL.createObjectURL(blob);
+    
+    // Open in a new hidden iframe to print
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = blobUrl;
+    document.body.appendChild(iframe);
+    
+    iframe.onload = () => {
+      setTimeout(() => {
+        iframe.contentWindow?.print();
+      }, 500); // Give it a little time to load the PDF
+    };
+  }
 }
 
 export default new OrderService();
