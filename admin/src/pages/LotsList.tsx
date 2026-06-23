@@ -79,22 +79,7 @@ const LotsList: React.FC = () => {
       width: 130, 
       renderCell: (params) => params.row.lotDetails?.allowHalfLot ? `₹${params.row.lotDetails?.halfLotPrice || 0}` : 'Not Allowed' 
     },
-    {
-      field: 'stock',
-      headerName: 'Inventory (Lots)',
-      width: 140,
-      renderCell: (params) => {
-        const isLow = (params.value || 0) <= (params.row.lowStockThreshold || 5);
-        return (
-          <Stack direction="row" spacing={0.5} alignItems="center">
-            <Typography variant="body2" sx={{ fontWeight: 600, color: isLow ? 'error.main' : 'text.primary' }}>
-              {params.value || 0} in stock
-            </Typography>
-            {isLow && <Warning sx={{ fontSize: 14, color: 'error.main' }} />}
-          </Stack>
-        );
-      }
-    },
+
     {
       field: 'isActive',
       headerName: 'Status',
@@ -173,7 +158,6 @@ const LotsList: React.FC = () => {
           >
             <option value="recent">Recently Added</option>
             <option value="name_asc">Name: A-Z</option>
-            <option value="stock_asc">Stock: Low to High</option>
           </TextField>
         </Box>
       </Stack>
