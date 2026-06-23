@@ -40,14 +40,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   // Update active image and default variant when product loads
   useEffect(() => {
     if (displayProduct) {
-      if (displayProduct.images && displayProduct.images.length > 0) {
+      if (displayProduct.images && displayProduct.images.length > 0 && !activeImage) {
         setActiveImage(displayProduct.images[0]);
       }
       if (!displayProduct.isLot && displayProduct.hasVariants && displayProduct.variants?.length > 0 && !selectedVariant) {
         setSelectedVariant(displayProduct.variants[0]);
       }
     }
-  }, [displayProduct?.images, displayProduct?.variants, displayProduct?.hasVariants, displayProduct?.isLot]);
+  }, [product?._id]);
 
   const inWishlist = wishlist.some((item: any) => item._id === displayProduct?._id);
   const cartItem = items.find(i => {
