@@ -18,6 +18,7 @@ const cartItemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     default: null
   },
+  lotType: { type: String, enum: ["full", "half", "mini", "none"], default: "none" },
   quantity: {
     type: Number,
     required: true,
@@ -85,7 +86,7 @@ cartSchema.pre('save', function(next) {
 /**
  * Instance Method: Add item to cart
  */
-cartSchema.methods.addItem = function(productId, variantId, quantity) {
+cartSchema.methods.addItem = function(productId, variantId, quantity, lotType = 'none') {
   const variantIdStr = variantId ? variantId.toString() : null;
   
   // Check if item already exists
@@ -93,7 +94,8 @@ cartSchema.methods.addItem = function(productId, variantId, quantity) {
     const itemProductId = item.product.toString();
     const itemVariantId = item.variant ? item.variant.toString() : null;
     
-    return itemProductId === productId.toString() && itemVariantId === variantIdStr;
+    const itemLotType = item.lotType || 'none';
+    return itemProductId === productId.toString() && itemVariantId === variantIdStr && itemLotType === lotType;
   });
 
   if (existingItem) {
@@ -104,7 +106,8 @@ cartSchema.methods.addItem = function(productId, variantId, quantity) {
     this.items.push({
       product: productId,
       variant: variantId,
-      quantity
+      quantity,
+      lotType
     });
   }
 

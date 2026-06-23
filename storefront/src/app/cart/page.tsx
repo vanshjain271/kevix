@@ -19,6 +19,17 @@ export default function CartPage() {
   const [isApplying, setIsApplying] = useState(false);
   const [showCouponInput, setShowCouponInput] = useState(false);
 
+  const getStepQty = (product: any, currentQty: number) => {
+    if (product.isLot && product.lotDetails) {
+      const { fullLotQuantity, halfLotQuantity, miniLotQuantity, allowHalfLot, allowMiniLot } = product.lotDetails;
+      if (allowMiniLot && miniLotQuantity && currentQty % miniLotQuantity === 0) return miniLotQuantity;
+      if (allowHalfLot && halfLotQuantity && currentQty % halfLotQuantity === 0) return halfLotQuantity;
+      if (fullLotQuantity && currentQty % fullLotQuantity === 0) return fullLotQuantity;
+      return fullLotQuantity || 1;
+    }
+    return product.minOrderQty || 1;
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
@@ -110,6 +121,13 @@ export default function CartPage() {
                   const image = product.images && product.images.length > 0
                     ? (product.images[0].url || (product.images[0] as any))
                     : 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop';
+                  
+                  const stepQty = getStepQty(product, item.quantity);
+                  const isLot = product.isLot;
+                  const displayQty = isLot ? item.quantity / stepQty : item.quantity;
+                  const displayPrice = isLot ? salePrice * stepQty : salePrice;
+                  const displayMrp = isLot ? mrp * stepQty : mrp;
+
                   return (
                   <div key={item.id} className="p-4 flex flex-col sm:flex-row gap-6">
                     {/* Item Image */}
@@ -121,24 +139,28 @@ export default function CartPage() {
                       <div className="flex items-center border border-surface-border rounded-sm">
                         <button 
                           onClick={() => {
-                            if (item.quantity <= minQty) {
+                            const step = getStepQty(product, item.quantity);
+                            if (item.quantity <= step) {
                               removeFromCart(item.id);
                             } else {
-                              updateQuantity(item.id, item.quantity - 1);
+                              updateQuantity(item.id, item.quantity - step);
                             }
                           }}
                           className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface text-danger"
-                          title={item.quantity <= minQty ? 'Remove item' : 'Decrease quantity'}
+                          title={item.quantity <= stepQty ? 'Remove item' : 'Decrease quantity'}
                         >
-                          {item.quantity <= minQty ? (
+                          {item.quantity <= stepQty ? (
                             <span className="material-symbols-outlined text-[16px]">delete</span>
                           ) : '-'}
                         </button>
                         <div className="w-10 h-8 flex items-center justify-center text-sm font-medium border-x border-surface-border">
-                          {item.quantity}
+                          {displayQty}
                         </div>
                         <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => {
+                            const step = getStepQty(product, item.quantity);
+                            updateQuantity(item.id, item.quantity + step);
+                          }}
                           className="w-8 h-8 flex items-center justify-center font-bold text-lg hover:bg-surface text-primary"
                         >+</button>
                       </div>
@@ -152,15 +174,18 @@ export default function CartPage() {
                       {item.variantName && (
                         <span className="text-xs text-primary font-medium mt-0.5">Variant: {item.variantName}</span>
                       )}
+                      {isLot && (
+                        <span className="text-xs text-accent font-medium mt-0.5">Lot Size: {stepQty} units</span>
+                      )}
                       <span className="text-xs text-text-secondary mt-1 mb-3">Seller: Kevix</span>
                       
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
-                        {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                        <span className="text-lg font-bold text-text-primary">₹{displayPrice.toLocaleString('en-IN')}</span>
+                        {displayMrp > displayPrice && <span className="text-sm text-text-muted line-through">₹{displayMrp.toLocaleString('en-IN')}</span>}
                         {itemDiscount > 0 && <span className="text-sm font-bold text-success">{itemDiscount}% Off</span>}
                       </div>
                       <div className="text-xs text-text-secondary">
-                        Subtotal: <span className="font-bold text-text-primary">₹{(salePrice * item.quantity).toLocaleString('en-IN')}</span>
+                        Subtotal: <span className="font-bold text-text-primary">₹{(displayPrice * displayQty).toLocaleString('en-IN')}</span>
                       </div>
 
                       {/* Item Actions */}

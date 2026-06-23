@@ -34,11 +34,11 @@ const getCart = async (req, res) => {
  * @desc    Add item to cart
  * @route   POST /api/v1/cart/items
  * @access  Buyer
- * @body    { productId, variantId?, quantity }
+ * @body    { productId, variantId?, quantity, lotType }
  */
 const addItem = async (req, res) => {
   try {
-    const { productId, variantId, quantity } = req.body;
+    const { productId, variantId, quantity, lotType } = req.body;
 
     if (!productId) {
       return res.status(400).json({
@@ -58,7 +58,8 @@ const addItem = async (req, res) => {
       req.user.userId,
       productId,
       variantId || null,
-      parseInt(quantity)
+      parseInt(quantity),
+      lotType
     );
 
     if (!result.success) {

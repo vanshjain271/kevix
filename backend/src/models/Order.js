@@ -43,6 +43,7 @@ const orderItemSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    lotType: { type: String, enum: ["full", "half", "mini", "none"], default: "none" },
     quantity: {
       type: Number,
       required: true,

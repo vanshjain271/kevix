@@ -11,6 +11,8 @@ export interface CartItem {
     images: { url: string }[];
     slug?: string;
     minOrderQty?: number;
+    isLot?: boolean;
+    lotDetails?: any;
   };
   variantId?: string;
   variantName?: string;
@@ -44,6 +46,8 @@ function normalizeItem(raw: any): CartItem {
       images: image ? [{ url: image }] : [],
       slug: raw.product?.slug || raw.productId?.slug,
       minOrderQty: Number(raw.product?.minOrderQty ?? raw.productId?.minOrderQty ?? 1),
+      isLot: raw.product?.isLot || raw.productId?.isLot,
+      lotDetails: raw.product?.lotDetails || raw.productId?.lotDetails,
     },
     variantId: raw.variant?._id || raw.variantId,
     variantName: raw.variant?.name,

@@ -37,6 +37,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedLotType, setSelectedLotType] = useState<'full' | 'half' | 'mini'>('full');
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
+  const getStepQty = (product: any, currentQty: number) => {
+    if (product.isLot && product.lotDetails) {
+      const { fullLotQuantity, halfLotQuantity, miniLotQuantity, allowHalfLot, allowMiniLot } = product.lotDetails;
+      if (allowMiniLot && miniLotQuantity && currentQty % miniLotQuantity === 0) return miniLotQuantity;
+      if (allowHalfLot && halfLotQuantity && currentQty % halfLotQuantity === 0) return halfLotQuantity;
+      if (fullLotQuantity && currentQty % fullLotQuantity === 0) return fullLotQuantity;
+      return fullLotQuantity || 1;
+    }
+    return product.minOrderQty || 1;
+  };
+
   // Update active image and default variant when product loads
   useEffect(() => {
     if (displayProduct) {
@@ -121,15 +132,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 const imgStr = typeof imgObj === 'string' ? imgObj : imgObj?.url;
                 if (!imgStr) return null;
                 return (
-                  <button 
+                  <div 
                     key={idx} 
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveImage(imgStr); }}
-                    className={`w-16 h-16 border rounded-sm overflow-hidden shrink-0 transition-all ${activeImage === imgStr ? 'border-primary ring-1 ring-primary' : 'border-surface-border hover:border-text-muted'}`}
+                    onClick={() => setActiveImage(imgStr)}
+                    className={`w-16 h-16 border rounded-sm overflow-hidden shrink-0 transition-all cursor-pointer ${activeImage === imgStr ? 'border-primary ring-1 ring-primary' : 'border-surface-border hover:border-text-muted'}`}
                   >
-                    <div className="relative w-full h-full">
+                    <div className="relative w-full h-full pointer-events-none">
                       <Image src={imgStr} alt={`Thumbnail ${idx}`} fill className="object-cover" />
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -264,14 +275,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {cartItem ? (
                 <div className="flex-1 min-w-[140px] flex items-center justify-between border-2 border-accent rounded-lg overflow-hidden h-[42px]">
                   <button 
-                    onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity - 1); }}
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      const step = getStepQty(displayProduct, cartItem.quantity);
+                      updateQuantity(cartItem.id!, cartItem.quantity - step); 
+                    }}
                     className="w-1/3 h-full flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 font-bold text-xl"
                   >-</button>
                   <span className="w-1/3 h-full flex items-center justify-center font-bold text-text-primary">
                     {cartItem.quantity}
                   </span>
                   <button 
-                    onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity + 1); }}
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      const step = getStepQty(displayProduct, cartItem.quantity);
+                      updateQuantity(cartItem.id!, cartItem.quantity + step); 
+                    }}
                     className="w-1/3 h-full flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 font-bold text-xl"
                   >+</button>
                 </div>

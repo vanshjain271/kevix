@@ -58,6 +58,17 @@ export default function CheckoutPage() {
   const totalPrice = items.reduce((sum, item) => sum + ((item.productId?.salePrice || 0) * item.quantity), 0);
   const totalDiscount = totalMrp - totalPrice;
   
+  const getStepQty = (product: any, currentQty: number) => {
+    if (product.isLot && product.lotDetails) {
+      const { fullLotQuantity, halfLotQuantity, miniLotQuantity, allowHalfLot, allowMiniLot } = product.lotDetails;
+      if (allowMiniLot && miniLotQuantity && currentQty % miniLotQuantity === 0) return miniLotQuantity;
+      if (allowHalfLot && halfLotQuantity && currentQty % halfLotQuantity === 0) return halfLotQuantity;
+      if (fullLotQuantity && currentQty % fullLotQuantity === 0) return fullLotQuantity;
+      return fullLotQuantity || 1;
+    }
+    return product.minOrderQty || 1;
+  };
+
   const deliveryFeeSetting = settings?.deliveryFee ?? 40;
   const freeDeliveryThreshold = settings?.freeDeliveryThreshold ?? 499;
   const minOrderAmount = settings?.minOrderAmount ?? 0;
@@ -311,6 +322,13 @@ export default function CheckoutPage() {
                     if (!product?._id) return null;
                     const salePrice = product.salePrice || 0;
                     const mrp = product.mrp || 0;
+                    
+                    const stepQty = getStepQty(product, item.quantity);
+                    const isLot = product.isLot;
+                    const displayQty = isLot ? item.quantity / stepQty : item.quantity;
+                    const displayPrice = isLot ? salePrice * stepQty : salePrice;
+                    const displayMrp = isLot ? mrp * stepQty : mrp;
+
                     return (
                     <div key={item.id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
                       <div className="flex gap-4">
@@ -324,15 +342,16 @@ export default function CheckoutPage() {
                         <div>
                           <h3 className="font-medium text-text-primary">{product.name}</h3>
                           {item.variantName && <p className="text-xs text-primary mt-0.5">Variant: {item.variantName}</p>}
-                          <p className="text-sm text-text-secondary mt-1">Qty: {item.quantity}</p>
+                          {isLot && <p className="text-xs text-accent mt-0.5">Lot Size: {stepQty} units</p>}
+                          <p className="text-sm text-text-secondary mt-1">Qty: {displayQty}</p>
                           <div className="flex items-baseline gap-2 mt-2">
-                            <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
-                            {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                            <span className="text-lg font-bold text-text-primary">₹{displayPrice.toLocaleString('en-IN')}</span>
+                            {displayMrp > displayPrice && <span className="text-sm text-text-muted line-through">₹{displayMrp.toLocaleString('en-IN')}</span>}
                           </div>
                         </div>
                       </div>
                       <div className="text-sm font-medium text-text-primary text-right">
-                        ₹{(salePrice * item.quantity).toLocaleString('en-IN')}
+                        ₹{(displayPrice * displayQty).toLocaleString('en-IN')}
                       </div>
                     </div>
                     );
