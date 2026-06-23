@@ -412,31 +412,6 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* Razorpay Option */}
-                <div className={`p-4 border-b border-surface-border ${!settings?.razorpayEnabled ? 'opacity-60 cursor-not-allowed' : paymentMode === 'RAZORPAY' ? 'bg-primary/5' : ''}`}>
-                  <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
-                    <input type="radio" name="payment" disabled={!settings?.razorpayEnabled} checked={paymentMode === 'RAZORPAY'} onChange={() => setPaymentMode('RAZORPAY')} className="w-4 h-4 accent-primary" />
-                    <div className="flex items-center gap-3">
-                      <span>Credit / Debit Card, Net Banking (Razorpay)</span>
-                      {!settings?.razorpayEnabled && <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Coming Soon</span>}
-                    </div>
-                  </label>
-                  {!settings?.razorpayEnabled && (
-                    <p className="ml-8 mt-2 text-xs text-text-muted">We're setting up Razorpay for cards and net banking. Use UPI for now!</p>
-                  )}
-                  {settings?.razorpayEnabled && paymentMode === 'RAZORPAY' && (
-                    <div className="ml-8 mt-4">
-                      <button
-                        disabled={isPlacingOrder || !!(settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
-                        onClick={handlePlaceOrder}
-                        className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isPlacingOrder ? 'PLACING ORDER...' : 'PAY WITH RAZORPAY'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
                 {/* Cash on Delivery Option */}
                 <div className={`p-4 ${!settings?.codEnabled ? 'opacity-60 cursor-not-allowed' : paymentMode === 'COD' ? 'bg-primary/5' : ''}`}>
                   <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
