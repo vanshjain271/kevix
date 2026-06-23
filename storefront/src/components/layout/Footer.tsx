@@ -11,26 +11,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-foreground text-white mt-auto">
-      {/* Newsletter Section */}
-      <div className="bg-primary-dark border-b border-white/10 py-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left">
-            <h3 className="text-xl font-bold mb-1">Subscribe to our Newsletter</h3>
-            <p className="text-white/80 text-sm">Get updates on new products, flash sales, and exclusive offers.</p>
-          </div>
-          <div className="flex w-full md:w-auto max-w-md">
-            <input 
-              type="email" 
-              placeholder="Enter your email address" 
-              className="w-full px-4 py-2.5 rounded-l-md text-text-primary outline-none focus:ring-2 ring-accent"
-            />
-            <button className="bg-accent px-6 py-2.5 rounded-r-md font-bold hover:bg-accent-dark transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Links */}
       <div className="py-12 px-4 md:px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* About */}
@@ -59,6 +39,7 @@ export default function Footer() {
           <h4 className="text-lg font-bold border-b border-white/20 pb-2 inline-block">Quick Links</h4>
           <ul className="space-y-2 text-sm text-white/80">
             <li><Link href="/about" className="hover:text-accent transition-colors">About Us</Link></li>
+            <li><Link href="/blogs" className="hover:text-accent transition-colors text-accent">Read Blog</Link></li>
             <li><Link href="/contact" className="hover:text-accent transition-colors">Contact Us</Link></li>
             <li><Link href="/account" className="hover:text-accent transition-colors">Track Order</Link></li>
             <li><Link href="/contact?subject=Bulk Inquiries" className="hover:text-accent transition-colors">Bulk Inquiries</Link></li>

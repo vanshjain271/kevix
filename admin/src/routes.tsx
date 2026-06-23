@@ -9,6 +9,7 @@ import Products from './pages/Products';
 import ProductForm from './pages/ProductForm';
 import Categories from './pages/Categories';
 import Brands from './pages/Brands';
+import Blogs from './pages/Blogs';
 import LotsList from './pages/LotsList';
 import LotForm from './pages/LotForm';
 import Orders from './pages/Orders';
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: 'catalog/lots/:id', element: <LotForm /> },
       { path: 'catalog/lots/edit/:id', element: <LotForm /> },
       { path: 'catalog/categories', element: <Categories /> },
+      { path: 'catalog/blogs', element: <Blogs /> },
       { path: 'catalog/brands', element: <Brands /> },
       { path: 'catalog/reviews', element: <Reviews /> },
 
