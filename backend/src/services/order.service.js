@@ -43,7 +43,25 @@ class OrderService {
 
       if (!product.isLot && stock < item.quantity) return { success: false, message: `Insufficient stock for ${product.name}` };
       
-      const itemTotal = price * item.quantity;
+      let itemTotal = price * item.quantity;
+
+      // Apply Lot Pricing if product is a lot
+      if (product.isLot && product.lotDetails) {
+        if (product.lotDetails.allowHalfLot && item.quantity === product.lotDetails.halfLotQuantity) {
+          itemTotal = product.lotDetails.halfLotPrice;
+          price = item.quantity > 0 ? itemTotal / item.quantity : 0;
+          mrp = price;
+        } else if (product.lotDetails.allowMiniLot && item.quantity === product.lotDetails.miniLotQuantity) {
+          itemTotal = product.lotDetails.miniLotPrice;
+          price = item.quantity > 0 ? itemTotal / item.quantity : 0;
+          mrp = price;
+        } else if (product.lotDetails.fullLotQuantity > 0) {
+          price = product.lotDetails.fullLotPrice / product.lotDetails.fullLotQuantity;
+          itemTotal = price * item.quantity;
+          mrp = price;
+        }
+      }
+
       const itemTax = (itemTotal * (product.taxRate || 0)) / 100;
       
       subtotal += itemTotal;
