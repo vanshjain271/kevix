@@ -112,10 +112,10 @@ export default function Header() {
           {/* Stylish KEVIX Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
             <div className="relative">
-              <span className="text-3xl font-black tracking-tighter bg-gradient-to-br from-purple-600 via-violet-600 to-purple-900 bg-clip-text text-transparent select-none group-hover:from-purple-500 group-hover:to-purple-700 transition-all duration-300">
+              <span className="text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-br from-purple-600 via-violet-600 to-purple-900 bg-clip-text text-transparent select-none group-hover:from-purple-500 group-hover:to-purple-700 transition-all duration-300">
                 KEVI<span className="text-purple-400">X</span>
               </span>
-              <span className="absolute -top-1 -right-3 text-purple-500 text-[10px] font-bold tracking-widest uppercase opacity-70">™</span>
+              <span className="absolute -top-1 -right-3 text-purple-500 text-[9px] md:text-[10px] font-bold tracking-widest uppercase opacity-70">™</span>
             </div>
           </Link>
 
