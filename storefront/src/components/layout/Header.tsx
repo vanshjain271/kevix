@@ -107,7 +107,7 @@ export default function Header() {
 
       {/* Main Header */}
       <div className="bg-white border-b border-purple-100 py-3 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto flex items-center gap-4 md:gap-8">
+        <div className="max-w-7xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-y-3 md:gap-8">
 
           {/* Stylish KEVIX Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
@@ -120,7 +120,7 @@ export default function Header() {
           </Link>
 
           {/* Search Bar with Autocomplete */}
-          <div className="flex-grow w-full md:w-auto relative" ref={searchRef}>
+          <div className="order-last md:order-none w-full md:flex-grow md:w-auto relative" ref={searchRef}>
             <form onSubmit={handleSearchSubmit}>
               <div className="flex items-center w-full bg-gray-50 border-2 border-purple-200 rounded-xl overflow-hidden focus-within:border-purple-500 focus-within:bg-white transition-all duration-200 shadow-sm">
                 <input
