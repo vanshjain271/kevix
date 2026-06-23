@@ -67,6 +67,37 @@ function SearchResults() {
   const query = searchParams.get('q') || '';
   const { products, isLoading } = useProducts(undefined, query);
 
+  const formattedProducts = products.map((p: any) => ({
+    ...p,
+    brandName: p.brand?.name || p.brand || 'Generic',
+    discount: p.mrp > 0 && p.salePrice < p.mrp ? Math.round(((p.mrp - p.salePrice) / p.mrp) * 100) : 0,
+  }));
+
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [minDiscount, setMinDiscount] = useState<number | null>(null);
+  const [priceRange, setPriceRange] = useState<{min: number, max: number} | null>(null);
+
+  const uniqueBrands = Array.from(new Set(formattedProducts.map((p: any) => p.brandName).filter(Boolean)));
+
+  const displayProducts = formattedProducts.filter((p: any) => {
+    if (selectedBrands.length > 0 && !selectedBrands.includes(p.brandName)) return false;
+    if (minDiscount && p.discount < minDiscount) return false;
+    if (priceRange) {
+      if ((p.salePrice || 0) < priceRange.min || (p.salePrice || 0) > priceRange.max) return false;
+    }
+    return true;
+  });
+
+  const clearFilters = () => {
+    setSelectedBrands([]);
+    setMinDiscount(null);
+    setPriceRange(null);
+  };
+
+  const handleBrandChange = (brand: string) => {
+    setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -75,30 +106,114 @@ function SearchResults() {
             {query ? `Results for "${query}"` : 'All Products'}
           </h1>
           {!isLoading && (
-            <p className="text-sm text-gray-500 mt-1">{products.length} products found</p>
+            <p className="text-sm text-gray-500 mt-1">{displayProducts.length} products found</p>
           )}
         </div>
+
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar Filters */}
+          <aside className="w-full md:w-64 shrink-0">
+            <div className="bg-white border border-gray-200 rounded-xl sticky top-24 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h2 className="font-bold text-lg text-gray-800">Filters</h2>
+                <button onClick={clearFilters} className="text-xs text-purple-600 font-bold hover:underline">CLEAR ALL</button>
+              </div>
+              
+              {/* Brand Filter */}
+              {uniqueBrands.length > 0 && (
+                <div className="p-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-sm mb-3 uppercase text-gray-700 tracking-wider">Brand</h3>
+                  <div className="space-y-2.5 max-h-48 overflow-y-auto scrollbar-hide">
+                    {uniqueBrands.map((brand: any) => (
+                      <label key={brand} className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedBrands.includes(brand)}
+                          onChange={() => handleBrandChange(brand)}
+                          className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500" 
+                        />
+                        <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium truncate">{brand}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Price Filter */}
+              <div className="p-4 border-b border-gray-100">
+                <h3 className="font-semibold text-sm mb-3 uppercase text-gray-700 tracking-wider">Price</h3>
+                <div className="space-y-2.5">
+                  {[
+                    { label: 'Under ₹1,000', min: 0, max: 1000 },
+                    { label: '₹1,000 - ₹5,000', min: 1000, max: 5000 },
+                    { label: '₹5,000 - ₹10,000', min: 5000, max: 10000 },
+                    { label: 'Over ₹10,000', min: 10000, max: 10000000 }
+                  ].map(range => (
+                    <label key={range.label} className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="radio" 
+                        name="priceRange"
+                        checked={priceRange?.min === range.min && priceRange?.max === range.max}
+                        onChange={() => setPriceRange({ min: range.min, max: range.max })}
+                        className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" 
+                      />
+                      <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{range.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Discount Filter */}
+              <div className="p-4">
+                <h3 className="font-semibold text-sm mb-3 uppercase text-gray-700 tracking-wider">Discount</h3>
+                <div className="space-y-2.5">
+                  {[
+                    { label: '10% or more', value: 10 },
+                    { label: '30% or more', value: 30 },
+                    { label: '50% or more', value: 50 }
+                  ].map(discount => (
+                    <label key={discount.label} className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="radio" 
+                        name="discount"
+                        checked={minDiscount === discount.value}
+                        onChange={() => setMinDiscount(discount.value)}
+                        className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" 
+                      />
+                      <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{discount.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Product List */}
+          <main className="flex-grow">
+
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <span className="material-symbols-outlined animate-spin text-purple-600 text-4xl">progress_activity</span>
           </div>
-        ) : products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
+        ) : displayProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white rounded-xl border border-gray-200">
             <span className="material-symbols-outlined text-[64px] text-purple-200">search_off</span>
             <h2 className="text-xl font-bold text-gray-700">No results found</h2>
-            <p className="text-gray-500 text-sm">Try different keywords or browse categories.</p>
-            <Link href="/" className="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-colors">
-              Back to Home
-            </Link>
+            <p className="text-gray-500 text-sm">Try different filters or keywords.</p>
+            <button onClick={clearFilters} className="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-colors">
+              Clear Filters
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {products.map((product: any) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {displayProducts.map((product: any) => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>
         )}
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -90,7 +90,11 @@ const productSchema = new mongoose.Schema({
     ref: 'Category',
     required: [true, 'At least one category is required']
   }],
-  // Brand reference (Removed per requirements)
+  // Brand reference
+  brand: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Brand'
+  },
   // Base SKU (used when no variants)
   sku: {
     type: String,
@@ -416,6 +420,7 @@ productSchema.statics.getActiveProducts = async function (options = {}) {
   const [products, total] = await Promise.all([
     this.find(query)
       .populate('category', 'name slug')
+      .populate('brand', 'name slug')
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit))
