@@ -34,7 +34,9 @@ interface StoreSettingsData {
   // Payment
   codEnabled: boolean;
   advancePartialPayment: boolean;
+  partialPaymentType: 'percentage' | 'flat';
   partialPaymentPercent: number;
+  partialPaymentFlatAmount: number;
   razorpayEnabled: boolean;
   // Order
   autoConfirmOrders: boolean;
@@ -81,7 +83,9 @@ const defaultSettings: StoreSettingsData = {
   serviceType: 'delivery',
   codEnabled: true,
   advancePartialPayment: false,
+  partialPaymentType: 'percentage',
   partialPaymentPercent: 20,
+  partialPaymentFlatAmount: 100,
   razorpayEnabled: false,
   autoConfirmOrders: false,
   orderNotes: '',
@@ -428,15 +432,41 @@ const StoreSettings: React.FC = () => {
                       <Switch size="small" checked={settings.advancePartialPayment} onChange={(e) => setSettings({ ...settings, advancePartialPayment: e.target.checked })} />
                     </Box>
                     {settings.advancePartialPayment && (
-                      <TextField
-                        type="number"
-                        label="Pre-pay Percent"
-                        value={settings.partialPaymentPercent}
-                        onChange={(e) => setSettings({ ...settings, partialPaymentPercent: parseInt(e.target.value) || 0 })}
-                        InputProps={{ endAdornment: <Typography variant="caption">%</Typography> }}
-                        size="small"
-                        sx={{ mt: 2, width: 150 }}
-                      />
+                      <Box sx={{ mt: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <TextField
+                          select
+                          label="Type"
+                          value={settings.partialPaymentType}
+                          onChange={(e) => setSettings({ ...settings, partialPaymentType: e.target.value as 'percentage' | 'flat' })}
+                          size="small"
+                          sx={{ width: 150 }}
+                        >
+                          <MenuItem value="percentage">Percentage</MenuItem>
+                          <MenuItem value="flat">Flat Amount</MenuItem>
+                        </TextField>
+
+                        {settings.partialPaymentType === 'percentage' ? (
+                          <TextField
+                            type="number"
+                            label="Pre-pay Percent"
+                            value={settings.partialPaymentPercent}
+                            onChange={(e) => setSettings({ ...settings, partialPaymentPercent: parseInt(e.target.value) || 0 })}
+                            InputProps={{ endAdornment: <Typography variant="caption">%</Typography> }}
+                            size="small"
+                            sx={{ width: 150 }}
+                          />
+                        ) : (
+                          <TextField
+                            type="number"
+                            label="Flat Amount"
+                            value={settings.partialPaymentFlatAmount}
+                            onChange={(e) => setSettings({ ...settings, partialPaymentFlatAmount: parseInt(e.target.value) || 0 })}
+                            InputProps={{ startAdornment: <Typography variant="caption" sx={{ mr: 1 }}>₹</Typography> }}
+                            size="small"
+                            sx={{ width: 150 }}
+                          />
+                        )}
+                      </Box>
                     )}
                   </Box>
                 )}
