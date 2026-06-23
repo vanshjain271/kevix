@@ -70,6 +70,10 @@ const userValidation = {
       .trim()
       .toLowerCase()
       .isEmail().withMessage('Please enter a valid email address'),
+    body('phone')
+      .optional()
+      .trim()
+      .matches(/^[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit Indian phone number'),
     body('addresses')
       .optional()
       .isArray().withMessage('Addresses must be an array'),

@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useCategories, useSettings } from '@/hooks/useApi';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import api from '@/lib/api';
 
 export default function Header() {
@@ -34,6 +34,18 @@ export default function Header() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const pathname = usePathname();
+  
+  // Force profile completion
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const { name, email, phone } = user;
+      if ((!name || !email || !phone) && pathname !== '/complete-profile') {
+        router.push('/complete-profile');
+      }
+    }
+  }, [isAuthenticated, user, pathname, router]);
 
   const fetchSuggestions = async (query: string) => {
     if (query.length < 2) { setSuggestions([]); return; }

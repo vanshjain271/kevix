@@ -66,7 +66,7 @@ class UserService {
     }
     
     // Only allow specific fields to be updated
-    const allowedFields = ['name', 'email', 'addresses'];
+    const allowedFields = ['name', 'email', 'phone', 'addresses'];
     
     for (const field of allowedFields) {
       if (updates[field] !== undefined) {

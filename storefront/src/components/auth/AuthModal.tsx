@@ -5,8 +5,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/api';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export default function AuthModal() {
+  const router = useRouter();
   const { isLoginModalOpen, closeLoginModal, setAuth } = useAuthStore();
   
   const [phone, setPhone] = useState('');
@@ -76,6 +78,10 @@ export default function AuthModal() {
       if (res.data.success) {
         setAuth(res.data.token, res.data.user);
         handleClose();
+        const { name, email, phone } = res.data.user;
+        if (!name || !email || !phone) {
+          router.push('/complete-profile');
+        }
       } else {
         setError(res.data.message || 'Invalid OTP. Please try again.');
       }
@@ -101,6 +107,10 @@ export default function AuthModal() {
       if (res.data.success) {
         setAuth(res.data.token, res.data.user);
         handleClose();
+        const { name, email, phone } = res.data.user;
+        if (!name || !email || !phone) {
+          router.push('/complete-profile');
+        }
       } else {
         setError(res.data.message || 'Google Login failed.');
       }

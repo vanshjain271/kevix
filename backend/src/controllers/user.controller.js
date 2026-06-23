@@ -43,11 +43,12 @@ const getProfile = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   try {
-    const { name, email, addresses } = req.body;
+    const { name, email, phone, addresses } = req.body;
     
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (email !== undefined) updates.email = email;
+    if (phone !== undefined) updates.phone = phone;
     if (addresses !== undefined) updates.addresses = addresses;
     
     const result = await UserService.updateProfile(req.user.userId, updates);
