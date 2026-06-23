@@ -101,6 +101,7 @@ const paymentDetailsSchema = new mongoose.Schema(
     razorpayOrderId: { type: String, default: '' },
     razorpayPaymentId: { type: String, default: '' },
     razorpaySignature: { type: String, default: '' },
+    utrNumber: { type: String, default: '' },
     amountPaid: { type: Number, default: 0 },
     codAmount: { type: Number, default: 0 },
     paidAt: { type: Date, default: null },

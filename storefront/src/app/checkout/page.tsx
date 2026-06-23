@@ -32,7 +32,7 @@ export default function CheckoutPage() {
   const [utr, setUtr] = useState('');
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [paymentMode, setPaymentMode] = useState<'UPI' | 'RAZORPAY' | 'COD'>('UPI');
+  const [paymentMode, setPaymentMode] = useState<'UPI' | 'RAZORPAY' | 'COD' | 'PARTIAL_COD'>('UPI');
 
   // New address form state
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -66,6 +66,11 @@ export default function CheckoutPage() {
   const orderTotal = totalPrice + deliveryCharges;
 
   const upiId = settings?.upiId || 'kevix@upi';
+  const advanceAmount = settings?.partialPaymentType === 'flat' 
+    ? (settings?.partialPaymentFlatAmount || 0) 
+    : Math.round(orderTotal * ((settings?.partialPaymentPercent || 0) / 100));
+  const finalAdvance = advanceAmount > orderTotal ? orderTotal : advanceAmount;
+  const restAmount = orderTotal - finalAdvance;
 
   const handleSaveAddress = async () => {
     if (!addressForm.name || !addressForm.phone || !addressForm.addressLine1 || !addressForm.city || !addressForm.state || !addressForm.pincode) {
@@ -109,14 +114,16 @@ export default function CheckoutPage() {
       }));
 
       // Map frontend payment mode to backend accepted values
-      const backendPaymentMode = paymentMode === 'UPI' ? 'UPI_QR' : paymentMode;
+      let backendPaymentMode = paymentMode;
+      if (paymentMode === 'UPI') backendPaymentMode = 'UPI_QR';
+      if (paymentMode === 'PARTIAL_COD') backendPaymentMode = 'COD_PARTIAL';
 
       const res = await api.post('/orders', {
         items: orderItems,
         // Backend expects shippingAddressId (the _id of the saved address)
         shippingAddress: selectedAddress._id,
         paymentMode: backendPaymentMode,
-        utr: paymentMode === 'UPI' ? utr : undefined,
+        utr: paymentMode === 'UPI' || paymentMode === 'PARTIAL_COD' ? utr : undefined,
       });
 
       if (res.data.success) {
@@ -412,6 +419,54 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
+                {/* Partial Payment Option */}
+                {settings?.advancePartialPayment && (
+                  <div className={`p-4 border-b border-surface-border ${paymentMode === 'PARTIAL_COD' ? 'bg-primary/5' : ''}`}>
+                    <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
+                      <input type="radio" name="payment" checked={paymentMode === 'PARTIAL_COD'} onChange={() => setPaymentMode('PARTIAL_COD')} className="w-4 h-4 accent-primary" />
+                      Partial Payment (Advance + COD)
+                    </label>
+                    {paymentMode === 'PARTIAL_COD' && (
+                      <div className="ml-8 mt-4 bg-white p-6 rounded border border-surface-border flex flex-col md:flex-row items-center gap-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-40 h-40 bg-surface border border-surface-border p-2 rounded-lg flex items-center justify-center">
+                            {settings?.paymentQrCode ? (
+                              <img src={settings.paymentQrCode} alt="Payment QR Code" className="w-full h-full object-contain" />
+                            ) : (
+                              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiId}&pn=Kevix&am=${finalAdvance}&cu=INR`} alt="UPI QR Code" width={150} height={150} />
+                            )}
+                          </div>
+                          <span className="text-xs text-text-secondary font-medium">Scan with any UPI app</span>
+                        </div>
+                        <div className="flex-grow w-full">
+                          <p className="text-sm text-text-primary mb-4 leading-relaxed">
+                            1. Scan the QR code using any UPI app.<br/>
+                            2. Pay exactly <strong className="text-lg">₹{finalAdvance.toLocaleString('en-IN')}</strong> right now.<br/>
+                            3. Pay the remaining <strong className="text-lg">₹{restAmount.toLocaleString('en-IN')}</strong> on Cash on Delivery.<br/>
+                            4. Enter the 12-digit UTR / Reference number below.
+                          </p>
+                          <div className="space-y-4">
+                            <input
+                              type="text"
+                              placeholder="Enter 12-digit UTR Number"
+                              value={utr}
+                              onChange={(e) => setUtr(e.target.value)}
+                              className="w-full border border-surface-border rounded-sm px-4 py-3 outline-none focus:border-primary focus:ring-1 ring-primary text-sm"
+                            />
+                            <button
+                              disabled={isPlacingOrder || !utr || !!(settings?.minOrderAmount && totalPrice < settings.minOrderAmount)}
+                              onClick={handlePlaceOrder}
+                              className="w-full md:w-auto bg-accent text-white px-8 py-3 rounded-sm font-bold shadow hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isPlacingOrder ? 'PLACING ORDER...' : 'CONFIRM ORDER'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Cash on Delivery Option */}
                 <div className={`p-4 ${!settings?.codEnabled ? 'opacity-60 cursor-not-allowed' : paymentMode === 'COD' ? 'bg-primary/5' : ''}`}>
                   <label className="flex items-center gap-4 cursor-pointer font-medium text-text-primary">
@@ -426,9 +481,9 @@ export default function CheckoutPage() {
                       {settings?.advancePartialPayment && (
                         <div className="mb-4 p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded text-sm">
                           {settings.partialPaymentType === 'flat' ? (
-                            `Note: A partial advance of ₹${settings.partialPaymentFlatAmount || 0} is required to prevent fake orders.`
+                            `Note: We highly recommend using Partial Payment instead, as a ₹${settings.partialPaymentFlatAmount || 0} advance may be required to process this order.`
                           ) : (
-                            `Note: A partial advance of ${settings.partialPaymentPercent || 0}% (₹${Math.round(orderTotal * ((settings.partialPaymentPercent || 0) / 100))}) is required to prevent fake orders.`
+                            `Note: We highly recommend using Partial Payment instead, as a ${settings.partialPaymentPercent || 0}% advance may be required to process this order.`
                           )}
                         </div>
                       )}

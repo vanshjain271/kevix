@@ -8,7 +8,7 @@ const NotificationService = require('./notification.service');
 const InvoiceService = require('./invoice.service');
 
 class OrderService {
-  async createOrder(userId, items, shippingAddressId, paymentMode = 'FULL_PAYMENT', couponCode = null) {
+  async createOrder(userId, items, shippingAddressId, paymentMode = 'FULL_PAYMENT', couponCode = null, utr = null) {
     if (!items || items.length === 0) return { success: false, message: 'Order must have at least one item' };
     if (!shippingAddressId) return { success: false, message: 'Shipping address is required' };
 
@@ -112,8 +112,13 @@ class OrderService {
     let codAmount = 0;
 
     if (paymentMode === 'COD_PARTIAL') {
-      const partialPercentage = settings.partialPaymentPercent || 20;
-      amountToPay = (totalAmount * partialPercentage) / 100;
+      if (settings.partialPaymentType === 'flat') {
+        amountToPay = settings.partialPaymentFlatAmount || 0;
+      } else {
+        const partialPercentage = settings.partialPaymentPercent || 20;
+        amountToPay = (totalAmount * partialPercentage) / 100;
+      }
+      if (amountToPay > totalAmount) amountToPay = totalAmount;
       codAmount = totalAmount - amountToPay;
     } else if (paymentMode === 'COD') {
       amountToPay = 0;
@@ -134,6 +139,7 @@ class OrderService {
       taxAmount: taxTotal,
       payment: { 
         mode: paymentMode, 
+        utrNumber: utr || '',
         amountPaid: 0, 
         codAmount 
       },
