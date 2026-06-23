@@ -48,7 +48,9 @@ const storeSettingsSchema = new mongoose.Schema({
     // Payment Settings
     codEnabled: { type: Boolean, default: true },
     advancePartialPayment: { type: Boolean, default: false },
+    partialPaymentType: { type: String, enum: ['percentage', 'flat'], default: 'percentage' },
     partialPaymentPercent: { type: Number, default: 20 },
+    partialPaymentFlatAmount: { type: Number, default: 100 },
     razorpayEnabled: { type: Boolean, default: false },
 
     // Order Settings
