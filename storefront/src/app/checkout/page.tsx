@@ -306,13 +306,22 @@ export default function CheckoutPage() {
                     const mrp = product.mrp || 0;
                     return (
                     <div key={item.id} className="flex justify-between items-start mt-6 pt-6 border-t border-surface-border first:mt-0 first:pt-0 first:border-0">
-                      <div>
-                        <h3 className="font-medium text-text-primary">{product.name}</h3>
-                        {item.variantName && <p className="text-xs text-primary mt-0.5">Variant: {item.variantName}</p>}
-                        <p className="text-sm text-text-secondary mt-1">Qty: {item.quantity}</p>
-                        <div className="flex items-baseline gap-2 mt-2">
-                          <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
-                          {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                      <div className="flex gap-4">
+                        <div className="w-16 h-16 bg-surface rounded border border-surface-border overflow-hidden shrink-0 p-1">
+                          {product.images && product.images[0] ? (
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-text-muted text-xs">No Img</div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-text-primary">{product.name}</h3>
+                          {item.variantName && <p className="text-xs text-primary mt-0.5">Variant: {item.variantName}</p>}
+                          <p className="text-sm text-text-secondary mt-1">Qty: {item.quantity}</p>
+                          <div className="flex items-baseline gap-2 mt-2">
+                            <span className="text-lg font-bold text-text-primary">₹{salePrice.toLocaleString('en-IN')}</span>
+                            {mrp > salePrice && <span className="text-sm text-text-muted line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+                          </div>
                         </div>
                       </div>
                       <div className="text-sm font-medium text-text-primary text-right">
@@ -439,9 +448,13 @@ export default function CheckoutPage() {
                   </label>
                   {settings?.codEnabled && paymentMode === 'COD' && (
                     <div className="ml-8 mt-4">
-                      {settings?.advancePartialPayment && settings?.partialPaymentPercent > 0 && (
+                      {settings?.advancePartialPayment && (
                         <div className="mb-4 p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded text-sm">
-                          Note: A partial advance of {settings.partialPaymentPercent}% (₹{Math.round(orderTotal * (settings.partialPaymentPercent / 100))}) is required to prevent fake orders.
+                          {settings.partialPaymentType === 'flat' ? (
+                            `Note: A partial advance of ₹${settings.partialPaymentFlatAmount || 0} is required to prevent fake orders.`
+                          ) : (
+                            `Note: A partial advance of ${settings.partialPaymentPercent || 0}% (₹${Math.round(orderTotal * ((settings.partialPaymentPercent || 0) / 100))}) is required to prevent fake orders.`
+                          )}
                         </div>
                       )}
                       {settings?.minOrderAmount && totalPrice < settings.minOrderAmount && (
