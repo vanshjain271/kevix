@@ -11,17 +11,18 @@
 
 const PDFDocument = require('pdfkit');
 
-const COMPANY = {
-    name: 'Arbuda accessories',
-    tagline: 'Packing Slip',
-};
+const StoreSettings = require('../models/StoreSettings');
 
 /**
  * Generate packing slip PDF buffer
  * @param {Object} order - Populated order document
  * @returns {Promise<Buffer>}
  */
-const generatePackingSlipPDF = (order) => {
+const generatePackingSlipPDF = async (order) => {
+    const settings = await StoreSettings.findOne() || {};
+    const companyName = settings.companyTradeName || 'Arbuda accessories';
+    const companyTagline = 'Packing Slip';
+
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ size: 'A4', margin: 40 });
@@ -32,8 +33,8 @@ const generatePackingSlipPDF = (order) => {
             doc.on('error', reject);
 
             // ── Header ──
-            doc.fontSize(20).font('Helvetica-Bold').text(COMPANY.name, 40, 40);
-            doc.fontSize(14).font('Helvetica').text(COMPANY.tagline, 40, 65, { color: '#666' });
+            doc.fontSize(20).font('Helvetica-Bold').text(companyName, 40, 40);
+            doc.fontSize(14).font('Helvetica').text(companyTagline, 40, 65, { color: '#666' });
             doc.moveTo(40, 90).lineTo(555, 90).stroke('#ccc');
 
             // ── Order Info ──
