@@ -1,5 +1,5 @@
 /**
- * GadgetHub Backend Server - MVP
+ * Kevix Backend Server - MVP
  *
  * FIXED: Added invoice routes mounting
  */
@@ -61,11 +61,11 @@ const app = express();
 ========================= */
 app.use(cors({
   origin: [
-    'https://admin.gadgethub.com',
-    'https://www.admin.gadgethub.com',
-    'https://gadgethubapp-admin.vercel.app',
-    'https://gadgethub.com',
-    'https://www.gadgethub.com',
+    'https://admin.kevix.in',
+    'https://www.admin.kevix.in',
+    'https://kevixapp-admin.vercel.app',
+    'https://kevix.in',
+    'https://www.kevix.in',
     'https://kevix.in',
     'https://www.kevix.in',
     'https://admin.kevix.in',
@@ -110,7 +110,7 @@ app.use(
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'GadgetHub API running 🚀'
+    message: 'Kevix API running 🚀'
   });
 });
 

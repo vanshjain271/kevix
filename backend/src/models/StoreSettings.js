@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 const storeSettingsSchema = new mongoose.Schema({
     // Store Details
-    storeName: { type: String, default: 'GadgetHub Store' },
+    storeName: { type: String, default: 'Kevix Store' },
     storeEmail: { type: String, default: '' },
     storePhone: { type: String, default: '' },
     storeAddress: { type: String, default: '' },
@@ -85,7 +85,7 @@ const storeSettingsSchema = new mongoose.Schema({
     companyState: { type: String, default: 'Gujarat' },
     companyPincode: { type: String, default: '380022' },
     companyPhone: { type: String, default: '9549289191' },
-    companyEmail: { type: String, default: 'info@gadgethub.com' },
+    companyEmail: { type: String, default: 'info@kevix.in' },
     gstin: { type: String, default: '24DGMPR6993C1ZV' },
     pan: { type: String, default: 'DGMPR6993C' },
     bankName: { type: String, default: 'Union Bank of India' },

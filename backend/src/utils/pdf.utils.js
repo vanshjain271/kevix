@@ -1,5 +1,5 @@
 /**
- * PDF Utility — GadgetHub Wholesale Mobile Accessories
+ * PDF Utility — Kevix Wholesale Mobile Accessories
  * Clean professional invoice: no GST, full product detail, advance/token, balance
  */
 
@@ -96,7 +96,7 @@ const generateInvoicePDF = async (rawInvoice) => {
     address: settings.companyAddress || 'Shop No. 481, 4th Floor, D-Block, Hubtown Building,',
     address2: `${settings.companyCity || 'Ahmedabad'} - ${settings.companyPincode || '380022'}, ${settings.companyState || 'Gujarat'}`,
     phone: settings.companyPhone || '9549289191',
-    email: settings.companyEmail || 'info@gadgethub.com',
+    email: settings.companyEmail || 'info@kevix.in',
   };
 
   return new Promise((resolve, reject) => {

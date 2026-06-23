@@ -21,7 +21,7 @@ const configSchema = new mongoose.Schema({
   // General Settings
   storeName: {
     type: String,
-    default: 'GadgetHub Store'
+    default: 'Kevix Store'
   },
   storeEmail: {
     type: String,

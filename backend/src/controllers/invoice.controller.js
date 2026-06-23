@@ -18,7 +18,7 @@ const getInvoiceByOrder = async (req, res) => {
     }
 
     // Return the URL for the mobile app to download (RNFS needs a public URL)
-    const publicUrl = `https://api.gadgethub.com/api/v1/invoices/public-pdf/${orderId}`;
+    const publicUrl = `https://api.kevix.in/api/v1/invoices/public-pdf/${orderId}`;
     
     return res.status(200).json({ 
       success: true, 

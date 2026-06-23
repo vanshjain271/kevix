@@ -31,7 +31,7 @@ class SMSService {
    */
   async sendOTP(phone, otp) {
     const formattedPhone = this._formatPhone(phone);
-    const message = `Your GadgetHub verification code is: ${otp}. Valid for 10 minutes. Do not share with anyone.`;
+    const message = `Your Kevix verification code is: ${otp}. Valid for 10 minutes. Do not share with anyone.`;
 
     try {
       if (this.provider === 'twilio') {
@@ -199,7 +199,7 @@ class SMSService {
    */
   async sendOrderStatusUpdate(phone, orderNumber, status) {
     let message = '';
-    const storeName = 'GadgetHub';
+    const storeName = 'Kevix';
 
     switch (status.toUpperCase()) {
       case 'CONFIRMED':
