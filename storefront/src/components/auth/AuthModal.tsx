@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/api';
 import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export default function AuthModal() {
@@ -18,20 +18,39 @@ export default function AuthModal() {
   const [error, setError] = useState('');
   const [devOtp, setDevOtp] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   if (!isLoginModalOpen) return null;
 
   const resetModal = () => {
-    setStep('phone');
     setPhone('');
     setOtp('');
+    setStep('phone');
     setError('');
     setDevOtp('');
+    setConfirmationResult(null);
+    if ((window as any).recaptchaVerifier) {
+      try {
+        (window as any).recaptchaVerifier.clear();
+        (window as any).recaptchaVerifier = null;
+      } catch (e) {}
+    }
   };
 
   const handleClose = () => {
     resetModal();
     closeLoginModal();
+  };
+
+  const setupRecaptcha = () => {
+    if (!(window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved
+        }
+      });
+    }
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -44,20 +63,21 @@ export default function AuthModal() {
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/auth/send-otp', { phone });
+      setupRecaptcha();
+      const appVerifier = (window as any).recaptchaVerifier;
+      const phoneNumber = `+91${phone}`;
       
-      if (res.data.success) {
-        setIsNewUser(res.data.isNewUser || false);
-        setStep('otp');
-        // Show OTP in development mode (backend sends it in response)
-        if (res.data.devOtp) {
-          setDevOtp(res.data.devOtp);
-        }
-      } else {
-        setError(res.data.message || 'Failed to send OTP. Please try again.');
-      }
+      const confResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+      setConfirmationResult(confResult);
+      setStep('otp');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+      console.error(err);
+      setError(err.message || 'Failed to send OTP. Please try again.');
+      if ((window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier.render().then((widgetId: any) => {
+          (window as any).grecaptcha.reset(widgetId);
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -69,11 +89,18 @@ export default function AuthModal() {
       setError('Please enter a valid OTP');
       return;
     }
+    if (!confirmationResult) {
+      setError('Session expired. Please try again.');
+      return;
+    }
 
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/auth/verify-otp', { phone, otp });
+      const result = await confirmationResult.confirm(otp);
+      const idToken = await result.user.getIdToken();
+      
+      const res = await api.post('/auth/firebase-login', { idToken });
       
       if (res.data.success) {
         setAuth(res.data.token, res.data.user);
@@ -83,10 +110,11 @@ export default function AuthModal() {
           router.push('/complete-profile');
         }
       } else {
-        setError(res.data.message || 'Invalid OTP. Please try again.');
+        setError(res.data.message || 'Verification failed. Please try again.');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
+      console.error(err);
+      setError(err.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -160,6 +188,9 @@ export default function AuthModal() {
               {error}
             </div>
           )}
+
+          {/* Invisible ReCAPTCHA Container */}
+          <div id="recaptcha-container"></div>
 
           {step === 'phone' ? (
             <form onSubmit={handleSendOtp} className="space-y-5">
