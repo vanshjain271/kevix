@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, TextField, Button,
   FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel,
-  IconButton, Paper, Chip, Alert, Snackbar, CircularProgress, Tooltip
+  IconButton, Paper, Chip, Alert, Snackbar, CircularProgress, Tooltip, Autocomplete, Autocomplete
 } from '@mui/material';
 import {
   Delete, CloudUpload, ArrowBack, Save
@@ -42,6 +42,7 @@ const LotForm: React.FC = () => {
 
   // Status & Images
   const [isActive, setIsActive] = useState(true);
+  const [homepageSections, setHomepageSections] = useState<string[]>([]);
   const [images, setImages] = useState<ImagePreview[]>([]);
   const [dragActive, setDragActive] = useState(false);
 
@@ -86,6 +87,7 @@ const LotForm: React.FC = () => {
           setSku(product.sku || '');
           setCategory(Array.isArray(product.category) ? product.category.map((c: any) => c._id || c) : (product.category ? [product.category._id || product.category] : []));
           setIsActive(product.isActive !== false);
+          setHomepageSections(product.homepageSections || []);
 
           if (product.lotDetails) {
             setFullLotQuantity(String(product.lotDetails.fullLotQuantity || ''));
@@ -164,6 +166,7 @@ const LotForm: React.FC = () => {
         category.forEach(catId => formData.append('category', catId));
       }
       formData.append('isActive', String(isActive));
+      formData.append('homepageSections', JSON.stringify(homepageSections));
 
       const lotDetails = {
         fullLotQuantity: parseInt(fullLotQuantity),
@@ -444,6 +447,36 @@ const LotForm: React.FC = () => {
                     </Select>
                   </FormControl>
                 </Box>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 12 }}>Storefront Visibility</Typography>
+                <Autocomplete
+                  multiple
+                  freeSolo
+                  options={[]}
+                  value={homepageSections}
+                  onChange={(_, newValue) => setHomepageSections(newValue)}
+                  renderTags={(value: readonly string[], getTagProps) =>
+                    value.map((option: string, index: number) => {
+                      const { key, ...tagProps } = getTagProps({ index });
+                      return (
+                        <Chip variant="outlined" label={option} key={key} {...tagProps} size="small" sx={{ borderRadius: 1 }} />
+                      );
+                    })
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="Add tags..."
+                      helperText="Create custom homepage sections"
+                      sx={{ '& .MuiFormHelperText-root': { ml: 0, mt: 1 } }}
+                    />
+                  )}
+                />
               </CardContent>
             </Card>
 
