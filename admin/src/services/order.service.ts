@@ -82,17 +82,17 @@ class OrderService {
 
     const blobUrl = URL.createObjectURL(blob);
     
-    // Open in a new hidden iframe to print
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = blobUrl;
-    document.body.appendChild(iframe);
-    
-    iframe.onload = () => {
-      setTimeout(() => {
-        iframe.contentWindow?.print();
-      }, 500); // Give it a little time to load the PDF
-    };
+    // Open in a new tab to let the browser's PDF viewer handle printing
+    const printWindow = window.open(blobUrl, '_blank');
+    if (!printWindow) {
+      // If popup blocked, fallback to download
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `invoice-${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   }
 }
 

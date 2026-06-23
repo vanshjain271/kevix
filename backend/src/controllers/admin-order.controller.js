@@ -251,13 +251,8 @@ const generatePackingSlip = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    const allowedStatuses = ['PACKED', 'SHIPPED', 'DELIVERED'];
-    if (!allowedStatuses.includes(order.status)) {
-      return res.status(400).json({
-        success: false,
-        message: `Packing slip is only available for orders in PACKED, SHIPPED, or DELIVERED status. Current status: ${order.status}`
-      });
-    }
+    // Allow packing slip for any status
+    // Removed allowedStatuses restriction
 
     const pdfBuffer = await generatePackingSlipPDF(order);
 
