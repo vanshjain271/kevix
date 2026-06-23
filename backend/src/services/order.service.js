@@ -41,7 +41,7 @@ class OrderService {
         stock = product.stock;
       }
 
-      if (stock < item.quantity) return { success: false, message: `Insufficient stock for ${product.name}` };
+      if (!product.isLot && stock < item.quantity) return { success: false, message: `Insufficient stock for ${product.name}` };
       
       const itemTotal = price * item.quantity;
       const itemTax = (itemTotal * (product.taxRate || 0)) / 100;
