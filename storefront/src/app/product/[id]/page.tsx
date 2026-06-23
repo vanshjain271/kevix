@@ -22,6 +22,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   
+  // Review Modal State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState({ type: '', text: '' });
+  
   const displayProduct = product ? {
     ...product,
     discount: Math.round(((product.mrp - product.salePrice) / product.mrp) * 100),
@@ -86,6 +92,32 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       console.error('Failed to toggle wishlist', error);
     } finally {
       setIsTogglingWishlist(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    setReviewSubmitting(true);
+    setReviewMsg({ type: '', text: '' });
+    try {
+      const res = await api.post('/reviews', {
+        productId: product._id,
+        rating: reviewForm.rating,
+        title: reviewForm.title,
+        comment: reviewForm.comment
+      });
+      if (res.data?.success) {
+        setReviewMsg({ type: 'success', text: 'Review submitted for approval!' });
+        setTimeout(() => setIsReviewModalOpen(false), 2000);
+      }
+    } catch (error: any) {
+      setReviewMsg({ type: 'error', text: error.response?.data?.message || 'Failed to submit review' });
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -426,8 +458,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Reviews Section */}
-            <div className="mt-8 border-t border-surface-border pt-6">
-              <h3 className="text-xl font-medium text-text-primary mb-4">Ratings & Reviews</h3>
+            <div id="reviews" className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-medium text-text-primary">Ratings & Reviews</h3>
+                <button 
+                  onClick={() => isAuthenticated ? setIsReviewModalOpen(true) : openLoginModal()} 
+                  className="px-4 py-2 border border-primary text-primary rounded-sm font-medium hover:bg-primary/5 transition-colors"
+                >
+                  Write a Review
+                </button>
+              </div>
               
               {isLoadingReviews ? (
                 <div className="flex justify-center p-6"><span className="material-symbols-outlined animate-spin text-primary">progress_activity</span></div>
@@ -472,6 +512,77 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         onClose={() => setIsInquiryModalOpen(false)} 
         product={displayProduct} 
       />
+
+      {/* Write Review Modal */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-surface-border bg-surface">
+              <h3 className="font-bold text-lg text-text-primary">Write a Review</h3>
+              <button onClick={() => setIsReviewModalOpen(false)} className="text-text-secondary hover:text-text-primary">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <form onSubmit={handleReviewSubmit} className="p-4 space-y-4">
+              {reviewMsg.text && (
+                <div className={`p-3 rounded text-sm font-medium ${reviewMsg.type === 'success' ? 'bg-success/10 text-success' : 'bg-red-50 text-red-600'}`}>
+                  {reviewMsg.text}
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button 
+                      key={star} 
+                      type="button" 
+                      onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
+                      className={`${reviewForm.rating >= star ? 'text-yellow-400' : 'text-gray-300'} hover:scale-110 transition-transform`}
+                    >
+                      <span className="material-symbols-outlined text-[32px]">{reviewForm.rating >= star ? 'star' : 'star_border'}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1">Title</label>
+                <input 
+                  type="text" 
+                  value={reviewForm.title} 
+                  onChange={e => setReviewForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-surface-border rounded-sm focus:outline-none focus:border-primary"
+                  placeholder="Sum up your experience"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1">Review</label>
+                <textarea 
+                  value={reviewForm.comment} 
+                  onChange={e => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                  className="w-full px-3 py-2 border border-surface-border rounded-sm focus:outline-none focus:border-primary min-h-[100px]"
+                  placeholder="What did you like or dislike?"
+                  required
+                ></textarea>
+              </div>
+              
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  disabled={reviewSubmitting}
+                  className="w-full bg-primary text-white font-bold py-3 rounded-sm hover:bg-primary-dark transition-colors disabled:opacity-70 flex justify-center items-center"
+                >
+                  {reviewSubmitting ? <span className="material-symbols-outlined animate-spin">progress_activity</span> : 'Submit Review'}
+                </button>
+                <p className="text-xs text-text-secondary mt-2 text-center">Your review will be public after approval.</p>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
