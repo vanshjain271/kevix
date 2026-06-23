@@ -6,6 +6,7 @@ const CouponService = require('./coupon.service');
 const RazorpayService = require('./razorpay.service');
 const NotificationService = require('./notification.service');
 const InvoiceService = require('./invoice.service');
+const CartService = require('./cart.service');
 
 class OrderService {
   async createOrder(userId, items, shippingAddressId, paymentMode = 'FULL_PAYMENT', couponCode = null, utr = null) {
@@ -166,6 +167,13 @@ class OrderService {
 
     await order.save();
     
+    // Clear user cart
+    try {
+      await CartService.clearCart(userId);
+    } catch (err) {
+      console.error('Failed to clear cart after order placement:', err);
+    }
+    
     // If a coupon was applied, record its usage independently (MVP behavior)
     if (appliedCouponDetails) {
        // Since it's created, log the usage internally
@@ -218,6 +226,7 @@ class OrderService {
         .skip(skip)
         .limit(parseInt(limit))
         .populate('user', 'name phone')
+        .populate('items.product', 'name images mrp salePrice slug')
         .lean(),
       Order.countDocuments(query)
     ]);
@@ -236,7 +245,10 @@ class OrderService {
   }
 
   async getOrderById(orderId, userId, isAdmin = false) {
-    const order = await Order.findById(orderId).populate('user', 'name phone email').populate('invoice');
+    const order = await Order.findById(orderId)
+      .populate('user', 'name phone email')
+      .populate('invoice')
+      .populate('items.product', 'name images mrp salePrice slug');
     if (!order) return { success: false, message: 'Order not found' };
     if (!isAdmin && (order.user._id || order.user).toString() !== userId.toString()) return { success: false, message: 'Access denied' };
     return { success: true, order };

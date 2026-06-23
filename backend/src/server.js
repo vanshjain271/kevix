@@ -26,6 +26,7 @@ const orderRoutes = require('./routes/order.routes');
 const adminOrderRoutes = require('./routes/admin/order.routes');
 const invoiceRoutes = require('./routes/invoice.routes');
 const adminInvoiceRoutes = require('./routes/admin/invoice.routes');
+const adminWishlistRoutes = require('./routes/admin/wishlist.routes');
 const adminProfileRoutes = require('./routes/admin/profile.routes');
 const adminAnalyticsRoutes = require('./routes/admin/analytics.routes');
 const notificationRoutes = require('./routes/notification.routes');
@@ -133,6 +134,7 @@ app.use('/api/v1/admin/orders', adminOrderRoutes);
 // FIXED: Invoice routes now mounted
 app.use('/api/v1/invoices', invoiceRoutes);
 app.use('/api/v1/admin/invoices', adminInvoiceRoutes);
+app.use('/api/v1/admin/wishlists', adminWishlistRoutes);
 
 app.use('/api/v1/admin/profile', adminProfileRoutes);
 

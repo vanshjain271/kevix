@@ -48,11 +48,18 @@ export default function AccountPage() {
     pincode: ''
   });
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
     if (!isAuthenticated) {
       openLoginModal();
     }
-  }, [isAuthenticated, openLoginModal]);
+  }, [isMounted, isAuthenticated, openLoginModal]);
 
   useEffect(() => {
     if (user) {

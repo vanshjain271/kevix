@@ -18,10 +18,17 @@ export default function WishlistPage() {
   const [addingId, setAddingId] = useState<string | null>(null);
   const [addedId, setAddedId] = useState<string | null>(null);
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
     if (!isAuthenticated) { openLoginModal(); return; }
     loadWishlist();
-  }, [isAuthenticated]);
+  }, [isMounted, isAuthenticated, openLoginModal]);
 
   const loadWishlist = async () => {
     setLoading(true);

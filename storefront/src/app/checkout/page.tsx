@@ -40,13 +40,20 @@ export default function CheckoutPage() {
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [addressError, setAddressError] = useState('');
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
     if (!isAuthenticated) {
       openLoginModal();
     } else {
       fetchCart();
     }
-  }, [isAuthenticated, fetchCart, openLoginModal]);
+  }, [isMounted, isAuthenticated, fetchCart, openLoginModal]);
 
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddress) {

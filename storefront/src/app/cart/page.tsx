@@ -30,13 +30,20 @@ export default function CartPage() {
     return product.minOrderQty || 1;
   };
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
     if (isAuthenticated) {
       fetchCart();
     } else {
       openLoginModal();
     }
-  }, [isAuthenticated, fetchCart, openLoginModal]);
+  }, [isMounted, isAuthenticated, fetchCart, openLoginModal]);
 
   // Calculations based on backend items — use optional chaining + fallback to 0
   const totalMrp = items.reduce((sum, item) => sum + ((item.productId?.mrp || 0) * item.quantity), 0);
