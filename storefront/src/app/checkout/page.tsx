@@ -132,7 +132,7 @@ export default function CheckoutPage() {
       }));
 
       // Map frontend payment mode to backend accepted values
-      let backendPaymentMode = paymentMode;
+      let backendPaymentMode: any = paymentMode;
       if (paymentMode === 'UPI') backendPaymentMode = 'UPI_QR';
       if (paymentMode === 'PARTIAL_COD') backendPaymentMode = 'COD_PARTIAL';
 
@@ -399,6 +399,13 @@ export default function CheckoutPage() {
             </div>
             {step === 3 && (
               <div className="p-0 border-t border-surface-border">
+
+                {/* Checkout Note */}
+                {settings?.cartNote && (
+                  <div className="p-4 bg-blue-50 border-b border-blue-100 text-blue-800 text-sm whitespace-pre-line">
+                    {settings.cartNote}
+                  </div>
+                )}
 
                 {/* UPI / QR Option */}
                 <div className={`p-4 border-b border-surface-border ${paymentMode === 'UPI' ? 'bg-primary/5' : ''}`}>

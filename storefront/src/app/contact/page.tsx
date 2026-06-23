@@ -53,8 +53,8 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-text-primary text-lg">Phone Number</h3>
                 <p className="text-text-secondary mt-1">
-                  <a href={`tel:${settings?.contactPhone || '+919999999999'}`} className="hover:text-accent transition-colors">
-                    {settings?.contactPhone || '+91-9999999999'}
+                  <a href={`tel:${settings?.contactPhone || '+918866847353'}`} className="hover:text-accent transition-colors">
+                    {settings?.contactPhone || '+91 88668 47353'}
                   </a>
                 </p>
               </div>
@@ -64,13 +64,11 @@ export default function ContactPage() {
               <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="material-symbols-outlined">mail</span>
               </div>
-              <div>
-                <h3 className="font-bold text-text-primary text-lg">Email Address</h3>
-                <p className="text-text-secondary mt-1">
-                  <a href={`mailto:${settings?.contactEmail || 'support@kevix.in'}`} className="hover:text-accent transition-colors">
-                    {settings?.contactEmail || 'support@kevix.in'}
-                  </a>
-                </p>
+              <div className="flex-1">
+                <h3 className="font-bold text-text-primary mb-1">Email Us</h3>
+                <a href={`mailto:${settings?.contactEmail || 'arbudaaccessories@gmail.com'}`} className="hover:text-accent transition-colors">
+                  {settings?.contactEmail || 'arbudaaccessories@gmail.com'}
+                </a>
               </div>
             </div>
           </div>

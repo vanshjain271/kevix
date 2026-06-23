@@ -44,7 +44,7 @@ export default function AuthModal() {
 
   const setupRecaptcha = () => {
     if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth!, 'recaptcha-container', {
         'size': 'invisible',
         'callback': () => {
           // reCAPTCHA solved
@@ -67,7 +67,7 @@ export default function AuthModal() {
       const appVerifier = (window as any).recaptchaVerifier;
       const phoneNumber = `+91${phone}`;
       
-      const confResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+      const confResult = await signInWithPhoneNumber(auth!, phoneNumber, appVerifier);
       setConfirmationResult(confResult);
       setStep('otp');
     } catch (err: any) {
