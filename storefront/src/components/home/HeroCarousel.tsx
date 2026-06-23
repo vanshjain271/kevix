@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useBanners } from '@/hooks/useApi';
 
 export default function HeroCarousel() {
   const { banners, isLoading } = useBanners();
   const [current, setCurrent] = useState(0);
+  const router = useRouter();
 
   const displayBanners = banners || [];
 
@@ -51,7 +53,8 @@ export default function HeroCarousel() {
         return (
           <div 
             key={slide._id || index}
-            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'} bg-primary-dark`}
+            onClick={() => { if (link) router.push(link); }}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'} bg-primary-dark ${link ? 'cursor-pointer' : ''}`}
           >
             <div className="absolute inset-0 bg-black/40 z-10"></div>
             {imageSrc && (
