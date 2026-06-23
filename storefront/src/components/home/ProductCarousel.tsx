@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   id: string;
@@ -14,6 +15,7 @@ interface Product {
   discount: number;
   image: string;
   rating: number;
+  isLot?: boolean;
 }
 
 interface Props {
@@ -31,6 +33,7 @@ function ProductCard({ product }: { product: Product }) {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const wishlisted = isWishlisted(product.id);
+  const router = useRouter();
 
   const cartItem = items.find(i => i.productId?._id === product.id);
 
@@ -42,6 +45,17 @@ function ProductCard({ product }: { product: Product }) {
     setAdding(false);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleBuyNow = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (!cartItem) {
+      setAdding(true);
+      await addToCart(product.id, 1);
+      setAdding(false);
+    }
+    router.push('/checkout');
   };
 
   const handleWishlist = async (e: React.MouseEvent) => {
@@ -81,7 +95,19 @@ function ProductCard({ product }: { product: Product }) {
           <span className="text-xs text-gray-500 font-medium">{product.rating.toFixed(1)}</span>
         </div>
         <div className="mt-3 h-10 w-full">
-          {cartItem ? (
+          {product.isLot ? (
+            <button
+              onClick={handleBuyNow}
+              disabled={adding}
+              className={`w-full h-full rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white hover:shadow-md active:scale-95 disabled:opacity-70`}
+            >
+              {adding ? (
+                <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+              ) : (
+                <><span className="material-symbols-outlined text-[16px]">bolt</span> Buy Lot</>
+              )}
+            </button>
+          ) : cartItem ? (
             <div className="flex items-center justify-between w-full h-full border border-purple-600 rounded-xl overflow-hidden">
               <button 
                 onClick={(e) => { e.preventDefault(); updateQuantity(cartItem.id!, cartItem.quantity - 1); }}
