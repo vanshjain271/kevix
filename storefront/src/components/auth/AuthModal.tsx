@@ -90,6 +90,9 @@ export default function AuthModal() {
     setError('');
     setLoading(true);
     try {
+      if (!auth || !googleProvider) {
+        throw new Error("Google authentication is not initialized.");
+      }
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
       

@@ -16,6 +16,7 @@ interface Product {
   image: string;
   rating: number;
   isLot?: boolean;
+  lotDetails?: any;
 }
 
 interface Props {
@@ -41,10 +42,16 @@ function ProductCard({ product }: { product: Product }) {
     e.preventDefault();
     if (!isAuthenticated) { openLoginModal(); return; }
     setAdding(true);
-    await addToCart(product.id, 1);
-    setAdding(false);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    try {
+      const qty = product.isLot && product.lotDetails ? product.lotDetails.fullLotQuantity : 1;
+      await addToCart(product.id, qty);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch (err) {
+      console.error('Add to cart failed', err);
+    } finally {
+      setAdding(false);
+    }
   };
 
   const handleBuyNow = async (e: React.MouseEvent) => {
@@ -52,10 +59,18 @@ function ProductCard({ product }: { product: Product }) {
     if (!isAuthenticated) { openLoginModal(); return; }
     if (!cartItem) {
       setAdding(true);
-      await addToCart(product.id, 1);
-      setAdding(false);
+      try {
+        const qty = product.isLot && product.lotDetails ? product.lotDetails.fullLotQuantity : 1;
+        await addToCart(product.id, qty);
+        router.push('/checkout');
+      } catch (err) {
+        console.error('Buy lot failed', err);
+      } finally {
+        setAdding(false);
+      }
+    } else {
+      router.push('/checkout');
     }
-    router.push('/checkout');
   };
 
   const handleWishlist = async (e: React.MouseEvent) => {

@@ -16,6 +16,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { reviews, isLoading: isLoadingReviews } = useReviews(resolvedParams.id);
   const { wishlist, mutate: mutateWishlist } = useWishlist();
   const { addToCart, items, updateQuantity, isLoading: addingToCart } = useCartStore();
+  const [isAdding, setIsAdding] = useState(false);
   const { isAuthenticated, openLoginModal } = useAuthStore();
   const router = useRouter();
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
@@ -245,7 +246,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <button 
-                  onClick={() => {
+                  onClick={async (e) => {
+                    e.preventDefault();
                     if (!isAuthenticated) { openLoginModal(); return; }
                     let qty = 1;
                     if (displayProduct.isLot && displayProduct.lotDetails) {
@@ -253,17 +255,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
                       if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
                     }
-                    addToCart(displayProduct._id, qty, selectedVariant?._id);
+                    setIsAdding(true);
+                    try {
+                      await addToCart(displayProduct._id, qty, selectedVariant?._id);
+                    } catch (err) {
+                      console.error('Add to cart failed', err);
+                    } finally {
+                      setIsAdding(false);
+                    }
                   }}
-                  disabled={addingToCart || displayProduct.stock <= 0}
+                  disabled={addingToCart || isAdding || (!displayProduct.isLot && displayProduct.stock <= 0)}
                   className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
                 >
-                  <span className="material-symbols-outlined text-[18px]">{addingToCart ? 'hourglass_empty' : 'shopping_cart'}</span> 
-                  {addingToCart ? 'ADDING...' : 'ADD TO CART'}
+                  <span className="material-symbols-outlined text-[18px]">{(addingToCart || isAdding) ? 'hourglass_empty' : 'shopping_cart'}</span> 
+                  {(addingToCart || isAdding) ? 'ADDING...' : 'ADD TO CART'}
                 </button>
               )}
               <button 
-                onClick={async () => {
+                onClick={async (e) => {
+                  e.preventDefault();
                   if (!isAuthenticated) { openLoginModal(); return; }
                   let qty = 1;
                   if (displayProduct.isLot && displayProduct.lotDetails) {
@@ -271,10 +281,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
                     if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
                   }
-                  await addToCart(displayProduct._id, qty, selectedVariant?._id);
-                  router.push('/checkout');
+                  setIsAdding(true);
+                  try {
+                    await addToCart(displayProduct._id, qty, selectedVariant?._id);
+                    router.push('/checkout');
+                  } catch (err) {
+                    console.error('Buy now failed', err);
+                  } finally {
+                    setIsAdding(false);
+                  }
                 }}
-                disabled={addingToCart || displayProduct.stock <= 0} 
+                disabled={addingToCart || isAdding || (!displayProduct.isLot && displayProduct.stock <= 0)} 
                 className="flex-1 min-w-[140px] bg-primary hover:bg-primary-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
               >
                 <span className="material-symbols-outlined text-[18px]">bolt</span> BUY NOW

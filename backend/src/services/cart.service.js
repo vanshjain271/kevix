@@ -208,7 +208,7 @@ class CartService {
 
       const totalQuantity = (existingItem?.quantity || 0) + quantity;
 
-      if (totalQuantity > stock) {
+      if (!product.isLot && totalQuantity > stock) {
         return {
           success: false,
           message: `Insufficient stock. Only ${stock} units available.`
@@ -279,7 +279,7 @@ class CartService {
         stock = product.stock;
       }
 
-      if (quantity > stock) {
+      if (!product.isLot && quantity > stock) {
         return {
           success: false,
           message: `Insufficient stock. Only ${stock} units available.`

@@ -10,10 +10,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+import type { FirebaseApp } from 'firebase/app';
+import type { Auth, GoogleAuthProvider as GoogleAuthProviderType } from 'firebase/auth';
+
 // Initialize Firebase gracefully
-let app;
-let auth;
-let googleProvider;
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let googleProvider: GoogleAuthProviderType | undefined;
 
 try {
   if (firebaseConfig.apiKey) {

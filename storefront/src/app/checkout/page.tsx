@@ -309,7 +309,7 @@ export default function CheckoutPage() {
                       <div className="flex gap-4">
                         <div className="w-16 h-16 bg-surface rounded border border-surface-border overflow-hidden shrink-0 p-1">
                           {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain" />
+                            <img src={product.images[0].url || (product.images[0] as any)} alt={product.name} className="w-full h-full object-contain" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-text-muted text-xs">No Img</div>
                           )}
