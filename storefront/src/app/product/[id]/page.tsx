@@ -32,6 +32,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   
   const displayProduct = product ? {
     ...product,
+    stock: product.totalStock !== undefined ? product.totalStock : product.stock,
     discount: Math.round(((product.mrp - product.salePrice) / product.mrp) * 100),
     images: product.images && product.images.length > 0 ? product.images.map((img: any) => img.url || img) : [
       'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop'
@@ -380,8 +381,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   disabled={addingToCart || isAdding || (!displayProduct.isLot && (selectedVariant ? selectedVariant.stock : displayProduct.stock) <= 0)}
                   className="flex-1 min-w-[140px] bg-accent hover:bg-accent-dark text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow disabled:opacity-70"
                 >
-                  <span className="material-symbols-outlined text-[18px]">{(addingToCart || isAdding) ? 'hourglass_empty' : 'shopping_cart'}</span> 
-                  {(addingToCart || isAdding) ? 'ADDING...' : 'ADD TO CART'}
+                  <span className="material-symbols-outlined text-[18px]">{(addingToCart || isAdding) ? 'hourglass_empty' : displayProduct.hasModels ? 'checklist' : 'shopping_cart'}</span> 
+                  {(addingToCart || isAdding) ? 'ADDING...' : displayProduct.hasModels ? 'SELECT MODELS' : 'ADD TO CART'}
                 </button>
               )}
               <button 
