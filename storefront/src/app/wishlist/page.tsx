@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import api from '@/lib/api';
+import HoverZoomImage from '@/components/product/HoverZoomImage';
 
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=400';
 
@@ -109,8 +110,14 @@ export default function WishlistPage() {
 
                 return (
                   <div key={id} className="bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col group">
-                    <Link href={`/product/${id}`} className="relative block w-full aspect-square bg-gray-50 overflow-hidden">
-                      <img src={img} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
+                    <Link href={`/product/${id}`} className="block relative aspect-square p-4 bg-gray-50 border-b border-surface-border">
+                      <HoverZoomImage 
+                        src={img} 
+                        alt={product.name} 
+                        scale={2}
+                        className="w-full h-full"
+                        imageClassName="p-4" 
+                      />
                       {discount > 0 && (
                         <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                           {discount}% OFF

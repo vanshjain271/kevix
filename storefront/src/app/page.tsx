@@ -9,6 +9,7 @@ import { useProducts } from '@/hooks/useApi';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import HoverZoomImage from '@/components/product/HoverZoomImage';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop';
 
@@ -62,9 +63,15 @@ function ProductCardGrid({ product }: { product: any }) {
   return (
     <Link href={`/product/${product.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <img src={product.image} alt={product.name} className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300" />
+        <HoverZoomImage 
+          src={product.image} 
+          alt={product.name} 
+          scale={2}
+          className="w-full h-full"
+          imageClassName="p-3" 
+        />
         {product.discount > 0 && (
-          <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">
             {product.discount}% OFF
           </span>
         )}

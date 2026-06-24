@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useOrders, useAddresses, useWishlist } from '@/hooks/useApi';
 import api, { API_BASE_URL } from '@/lib/api';
+import HoverZoomImage from '@/components/product/HoverZoomImage';
 
 const getOrderStatusDisplay = (status: string) => {
   switch (status) {
@@ -486,8 +487,14 @@ export default function AccountPage() {
                             <span className="material-symbols-outlined text-[18px]">delete</span>
                           </button>
                           
-                          <Link href={`/product/${item._id}`} className="w-full aspect-square relative p-4 border-b border-surface-border">
-                            <Image src={image} alt={item.name} fill className="object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
+                          <Link href={`/product/${item._id}`} className="w-full aspect-square relative p-4 border-b border-surface-border block">
+                            <HoverZoomImage 
+                              src={image} 
+                              alt={item.name} 
+                              scale={2}
+                              className="w-full h-full"
+                              imageClassName="p-4" 
+                            />
                           </Link>
                           
                           <div className="p-4 flex flex-col flex-grow">

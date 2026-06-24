@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { use, useState } from 'react';
 import { useCategories, useProducts } from '@/hooks/useApi';
+import HoverZoomImage from '@/components/product/HoverZoomImage';
 
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -152,14 +153,15 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               {displayProducts.map((product: any) => (
                 <div key={product.id} className="bg-white border border-surface-border hover:shadow-lg transition-shadow rounded-sm group relative flex flex-col h-full">
                   <Link href={`/product/${product.id}`} className="block relative aspect-square p-4">
-                    <Image 
+                    <HoverZoomImage 
                       src={product.image}
                       alt={product.name}
-                      fill
-                      className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                      scale={2}
+                      className="w-full h-full"
+                      imageClassName="p-4"
                     />
-                    <button className="absolute top-3 right-3 text-text-muted hover:text-primary transition-colors">
-                      <span className="material-symbols-outlined">favorite</span>
+                    <button className="absolute top-3 right-3 text-text-muted hover:text-primary transition-colors z-10 bg-white/50 rounded-full w-8 h-8 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[20px]">favorite</span>
                     </button>
                   </Link>
                   
