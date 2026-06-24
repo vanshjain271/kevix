@@ -9,7 +9,7 @@ const axios = require('axios');
 
 class SMSService {
   constructor() {
-    this.provider = process.env.SMS_PROVIDER || 'twilio';
+    this.provider = process.env.SMS_PROVIDER || 'msg91';
   }
 
   /**
@@ -25,35 +25,25 @@ class SMSService {
 
   /**
    * Send OTP via configured provider
-   * @param {string} phone - 10-digit phone number
-   * @param {string} otp - OTP to send
-   * @returns {Promise<Object>} { success: boolean, messageId?: string, error?: string }
    */
   async sendOTP(phone, otp) {
     const formattedPhone = this._formatPhone(phone);
     const message = `Your Kevix verification code is: ${otp}. Valid for 10 minutes. Do not share with anyone.`;
 
     try {
-      if (this.provider === 'twilio') {
-        return await this._sendViaTwilio(formattedPhone, message);
-      } else if (this.provider === 'msg91') {
+      if (this.provider === 'msg91') {
         return await this._sendViaMSG91(phone, otp);
+      } else if (this.provider === 'twilio') {
+        return await this._sendViaTwilio(formattedPhone, message);
       } else {
-        // Development fallback - log OTP
         return this._devFallback(phone, otp);
       }
     } catch (error) {
       console.error('SMS Service Error:', error.message);
-      
-      // In development, don't fail the flow
       if (process.env.NODE_ENV === 'development') {
         return this._devFallback(phone, otp);
       }
-      
-      return {
-        success: false,
-        error: error.message
-      };
+      return { success: false, error: error.message };
     }
   }
 
@@ -70,89 +60,67 @@ class SMSService {
       throw new Error('Twilio credentials not configured');
     }
 
-    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-
     const response = await axios.post(
-      url,
-      new URLSearchParams({
-        To: phone,
-        From: fromNumber,
-        Body: message
-      }),
-      {
-        auth: {
-          username: accountSid,
-          password: authToken
-        }
-      }
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+      new URLSearchParams({ To: phone, From: fromNumber, Body: message }),
+      { auth: { username: accountSid, password: authToken } }
     );
 
-    return {
-      success: true,
-      messageId: response.data.sid
-    };
+    return { success: true, messageId: response.data.sid };
   }
 
   /**
-   * Send via MSG91
+   * Send OTP via MSG91
    * @private
    */
   async _sendViaMSG91(phone, otp) {
     const authKey = process.env.MSG91_AUTH_KEY;
-    const templateId = process.env.MSG91_TEMPLATE_ID;
+    const templateId = process.env.MSG91_OTP_TEMPLATE_ID;
 
     if (!authKey || !templateId) {
+      if (process.env.NODE_ENV === 'development') return this._devFallback(phone, otp);
       throw new Error('MSG91 credentials not configured');
     }
 
     const response = await axios.post(
       'https://api.msg91.com/api/v5/otp',
-      {
-        template_id: templateId,
-        mobile: `91${phone}`,
-        otp: otp
-      },
-      {
-        headers: {
-          'authkey': authKey,
-          'Content-Type': 'application/json'
-        }
-      }
+      { template_id: templateId, mobile: `91${phone}`, otp: otp },
+      { headers: { 'authkey': authKey, 'Content-Type': 'application/json' } }
     );
 
-    return {
-      success: response.data.type === 'success',
-      messageId: response.data.request_id
-    };
-  }
-
-  /**
-   * Development fallback - logs OTP to console
-   * @private
-   */
-  _devFallback(phone, otp) {
-    console.log('========================================');
-    console.log(`[DEV] OTP for ${phone}: ${otp}`);
-    console.log('========================================');
-    
-    return {
-      success: true,
-      messageId: 'dev-mode',
-      devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
-    };
+    return { success: response.data.type === 'success', messageId: response.data.request_id };
   }
 
   /**
    * Send a generic SMS message
    */
-  async sendMessage(phone, message) {
+  async sendMessage(phone, message, templateId = null) {
     const formattedPhone = this._formatPhone(phone);
     try {
-      if (this.provider === 'twilio') {
+      if (this.provider === 'msg91') {
+        const authKey = process.env.MSG91_AUTH_KEY;
+        const senderId = process.env.MSG91_SENDER_ID || 'KEVIXA'; // Default DLT Sender ID
+        
+        if (!authKey || !templateId) {
+          console.log(`[MSG91 Simulation] SMS To ${phone}: ${message}`);
+          return { success: true, messageId: 'simulated' };
+        }
+
+        // Send via MSG91 Flow/SMS API
+        const response = await axios.post(
+          'https://api.msg91.com/api/v5/flow/',
+          {
+            template_id: templateId,
+            sender: senderId,
+            mobiles: `91${phone}`,
+            // Variables would be passed dynamically based on template, assuming generic fallback for now
+            VAR1: message
+          },
+          { headers: { 'authkey': authKey, 'Content-Type': 'application/json' } }
+        );
+        return { success: true, messageId: response.data.message };
+      } else if (this.provider === 'twilio') {
         return await this._sendViaTwilio(formattedPhone, message);
-      } else {
-        console.log(`[SMS] To ${phone}: ${message}`);
-        return { success: true, messageId: 'simulated' };
       }
     } catch (error) {
       console.error('Send SMS Error:', error.message);
@@ -161,33 +129,59 @@ class SMSService {
   }
 
   /**
-   * Send a WhatsApp message via Twilio
+   * Send a WhatsApp message
    */
-  async sendWhatsAppMessage(phone, message) {
+  async sendWhatsAppMessage(phone, message, templateId = null) {
     const formattedPhone = this._formatPhone(phone);
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    const fromWhatsApp = process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886'; // Twilio Sandbox number
-
-    if (!accountSid || !authToken) {
-      console.log(`[WhatsApp Simulation] To ${phone}: ${message}`);
-      return { success: true, messageId: 'simulated' };
-    }
-
+    
     try {
-      const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-      const response = await axios.post(
-        url,
-        new URLSearchParams({
-          To: `whatsapp:${formattedPhone}`,
-          From: fromWhatsApp,
-          Body: message
-        }),
-        {
-          auth: { username: accountSid, password: authToken }
+      if (this.provider === 'msg91') {
+        const authKey = process.env.MSG91_AUTH_KEY;
+        const integratedNumber = process.env.MSG91_WHATSAPP_NUMBER;
+        
+        if (!authKey || !integratedNumber) {
+          console.log(`[MSG91 Simulation] WhatsApp To ${phone}: ${message}`);
+          return { success: true, messageId: 'simulated' };
         }
-      );
-      return { success: true, messageId: response.data.sid };
+
+        const response = await axios.post(
+          'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/',
+          {
+            integrated_number: integratedNumber,
+            content_type: "template",
+            payload: {
+              messaging_product: "whatsapp",
+              recipient_type: "individual",
+              to: `91${phone}`,
+              type: "template",
+              template: {
+                name: templateId || "kevix_generic_update",
+                language: { code: "en" },
+                components: [
+                  { type: "body", parameters: [{ type: "text", text: message }] }
+                ]
+              }
+            }
+          },
+          { headers: { 'authkey': authKey, 'Content-Type': 'application/json' } }
+        );
+        return { success: true, messageId: 'msg91-wa-sent' };
+        
+      } else if (this.provider === 'twilio') {
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
+        const fromWhatsApp = process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886';
+        if (!accountSid || !authToken) {
+          console.log(`[Twilio Simulation] WhatsApp To ${phone}: ${message}`);
+          return { success: true, messageId: 'simulated' };
+        }
+        const response = await axios.post(
+          `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+          new URLSearchParams({ To: `whatsapp:${formattedPhone}`, From: fromWhatsApp, Body: message }),
+          { auth: { username: accountSid, password: authToken } }
+        );
+        return { success: true, messageId: response.data.sid };
+      }
     } catch (error) {
       console.error('WhatsApp Error:', error.response?.data || error.message);
       return { success: false, error: error.message };
@@ -200,30 +194,33 @@ class SMSService {
   async sendOrderStatusUpdate(phone, orderNumber, status) {
     let message = '';
     const storeName = 'Kevix';
+    
+    // In a real MSG91 scenario, you map these statuses to DLT Template IDs.
+    // E.g. const templateId = process.env[`MSG91_TEMPLATE_${status.toUpperCase()}`]
+    const templateId = process.env.MSG91_ORDER_UPDATE_TEMPLATE_ID; 
 
     switch (status.toUpperCase()) {
-      case 'CONFIRMED':
-        message = `Hello! Your ${storeName} order #${orderNumber} has been CONFIRMED. We are preparing it for you!`;
-        break;
-      case 'PACKED':
-        message = `Good news! Your ${storeName} order #${orderNumber} is PACKED and ready for pickup.`;
-        break;
-      case 'SHIPPED':
-        message = `On the way! Your ${storeName} order #${orderNumber} has been SHIPPED. Track it in the app.`;
-        break;
-      case 'DELIVERED':
-        message = `Delivered! Your ${storeName} order #${orderNumber} has been successfully delivered. Thank you for shopping with us!`;
-        break;
-      case 'CANCELLED':
-        message = `Notice: Your ${storeName} order #${orderNumber} has been cancelled. Contact support for any queries.`;
-        break;
-      default:
-        message = `Update: Your ${storeName} order #${orderNumber} status changed to ${status.toLowerCase()}.`;
+      case 'CONFIRMED': message = `Hello! Your ${storeName} order #${orderNumber} has been CONFIRMED. We are preparing it for you!`; break;
+      case 'PACKED': message = `Good news! Your ${storeName} order #${orderNumber} is PACKED and ready for pickup.`; break;
+      case 'SHIPPED': message = `On the way! Your ${storeName} order #${orderNumber} has been SHIPPED. Track it in the app.`; break;
+      case 'DELIVERED': message = `Delivered! Your ${storeName} order #${orderNumber} has been successfully delivered. Thank you for shopping with us!`; break;
+      case 'CANCELLED': message = `Notice: Your ${storeName} order #${orderNumber} has been cancelled. Contact support for any queries.`; break;
+      default: message = `Update: Your ${storeName} order #${orderNumber} status changed to ${status.toLowerCase()}.`;
     }
 
-    // Send both SMS and WhatsApp for maximum reach
-    await this.sendMessage(phone, message);
-    await this.sendWhatsAppMessage(phone, message);
+    await this.sendMessage(phone, message, templateId);
+    await this.sendWhatsAppMessage(phone, message, process.env.MSG91_WA_ORDER_UPDATE_TEMPLATE);
+  }
+
+  /**
+   * Development fallback - logs OTP to console
+   * @private
+   */
+  _devFallback(phone, otp) {
+    console.log('========================================');
+    console.log(`[DEV MSG91 MODE] OTP for ${phone}: ${otp}`);
+    console.log('========================================');
+    return { success: true, messageId: 'dev-mode', devOtp: process.env.NODE_ENV === 'development' ? otp : undefined };
   }
 
   /**
@@ -232,15 +229,8 @@ class SMSService {
    */
   _formatPhone(phone) {
     const cleaned = phone.replace(/\D/g, '');
-    
-    if (cleaned.length === 10) {
-      return `+91${cleaned}`;
-    }
-    
-    if (cleaned.length === 12 && cleaned.startsWith('91')) {
-      return `+${cleaned}`;
-    }
-    
+    if (cleaned.length === 10) return `+91${cleaned}`;
+    if (cleaned.length === 12 && cleaned.startsWith('91')) return `+${cleaned}`;
     return phone;
   }
 }
