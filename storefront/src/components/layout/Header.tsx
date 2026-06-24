@@ -21,7 +21,9 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const categoryMenuRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Close suggestions on outside click
@@ -29,6 +31,9 @@ export default function Header() {
     const handler = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
+      }
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(e.target as Node)) {
+        setIsCategoryMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -231,17 +236,53 @@ export default function Header() {
       </div>
 
       {/* Purple Category Nav Bar */}
-      <nav className="bg-purple-700 text-white font-semibold text-sm shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex overflow-x-auto scrollbar-hide py-2.5 gap-6 items-center">
-          <Link href="/category/all" className="whitespace-nowrap hover:text-purple-200 transition-colors flex items-center gap-1.5 shrink-0">
-            <span className="material-symbols-outlined text-[18px]">menu</span>
-            All
-          </Link>
-          {categories && categories.map((cat: any) => (
-            <Link key={cat._id} href={`/category/${cat.slug}`} className="whitespace-nowrap hover:text-purple-200 transition-colors capitalize shrink-0">
-              {cat.name}
-            </Link>
-          ))}
+      <nav className="bg-purple-700 text-white font-semibold text-sm shadow-sm relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex overflow-x-auto scrollbar-hide items-center relative">
+          
+          {/* Dropdown Button */}
+          <div className="relative shrink-0 border-r border-purple-600 pr-4 mr-4 py-2.5" ref={categoryMenuRef}>
+            <button 
+              onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+              className="whitespace-nowrap hover:text-purple-200 transition-colors flex items-center gap-1.5 focus:outline-none"
+            >
+              <span className="material-symbols-outlined text-[18px]">menu</span>
+              All Categories
+              <span className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${isCategoryMenuOpen ? 'rotate-180' : ''}`}>arrow_drop_down</span>
+            </button>
+            
+            {/* Dropdown Menu */}
+            {isCategoryMenuOpen && (
+              <div className="absolute top-full left-0 mt-0 w-64 bg-white rounded-b-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <Link 
+                  href="/category/all" 
+                  onClick={() => setIsCategoryMenuOpen(false)}
+                  className="block px-5 py-2.5 text-gray-800 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                >
+                  View All Products
+                </Link>
+                {categories && categories.map((cat: any) => (
+                  <Link 
+                    key={cat._id} 
+                    href={`/category/${cat.slug}`} 
+                    onClick={() => setIsCategoryMenuOpen(false)}
+                    className="block px-5 py-2.5 text-gray-800 hover:bg-purple-50 hover:text-purple-700 transition-colors capitalize"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Horizontal Scrollable Categories */}
+          <div className="flex overflow-x-auto scrollbar-hide py-2.5 gap-6 items-center w-full">
+            {categories && categories.map((cat: any) => (
+              <Link key={cat._id} href={`/category/${cat.slug}`} className="whitespace-nowrap hover:text-purple-200 transition-colors capitalize shrink-0">
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+
         </div>
       </nav>
     </header>
