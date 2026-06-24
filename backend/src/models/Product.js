@@ -230,7 +230,16 @@ const productSchema = new mongoose.Schema({
   bulkPricing: [{
     minQty: { type: Number, required: true },
     salePrice: { type: Number, required: true }
-  }]
+  }],
+  // Mobile Models for bulk ordering (e.g. Tempered Glass for 50 different phones)
+  availableModels: [{
+    name: { type: String, required: true },
+    stock: { type: Number, default: 0, min: 0 }
+  }],
+  hasModels: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true,
   toJSON: {
@@ -278,6 +287,18 @@ productSchema.pre('save', function (next) {
     }
   }
 
+  // Handle models parsing
+  if (typeof this.availableModels === 'string') {
+    try {
+      this.availableModels = JSON.parse(this.availableModels);
+    } catch (e) {
+      console.error('Failed to parse availableModels string in pre-save:', e);
+    }
+  }
+
+  // Set hasModels flag
+  this.hasModels = this.availableModels && this.availableModels.length > 0;
+
   // Set hasVariants flag
   this.hasVariants = this.variants && this.variants.length > 0;
 
@@ -316,13 +337,16 @@ productSchema.virtual('discountPercentage').get(function () {
 });
 
 /**
- * Virtual: Total stock (including variants)
+ * Virtual: Total stock (including variants and models)
  */
 productSchema.virtual('totalStock').get(function () {
+  let stock = this.stock || 0;
   if (this.hasVariants && this.variants.length > 0) {
-    return this.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    stock = this.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+  } else if (this.hasModels && this.availableModels.length > 0) {
+    stock = this.availableModels.reduce((sum, m) => sum + (m.stock || 0), 0);
   }
-  return this.stock;
+  return stock;
 });
 
 /**

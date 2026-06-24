@@ -160,7 +160,7 @@ class CartService {
   /**
    * Add item to cart
    */
-  async addItem(userId, productId, variantId, quantity) {
+  async addItem(userId, productId, variantId, quantity, lotType = 'none', selectedModel = null) {
     try {
       // Validate product exists and is active
       const product = await Product.findById(productId);
@@ -194,6 +194,15 @@ class CartService {
       } else {
         stock = product.stock;
       }
+      
+      // If a model is selected, validate its specific stock
+      if (selectedModel && product.hasModels) {
+        const model = product.availableModels.find(m => m.name === selectedModel);
+        if (!model) {
+          return { success: false, message: 'Selected model not available' };
+        }
+        stock = model.stock;
+      }
 
       // Check stock availability
       const cart = await Cart.findOrCreateByUser(userId);
@@ -203,7 +212,10 @@ class CartService {
       const existingItem = cart.items.find(item => {
         const itemProductId = item.product.toString();
         const itemVariantId = item.variant ? item.variant.toString() : null;
-        return itemProductId === productId.toString() && itemVariantId === variantIdStr;
+        const itemSelectedModel = item.selectedModel || null;
+        return itemProductId === productId.toString() && 
+               itemVariantId === variantIdStr && 
+               itemSelectedModel === selectedModel;
       });
 
       const totalQuantity = (existingItem?.quantity || 0) + quantity;
@@ -215,8 +227,18 @@ class CartService {
         };
       }
 
+      // Check aggregate product quantity against MOQ
+      const allProductItems = cart.items.filter(item => item.product.toString() === productId.toString());
+      const aggregateQty = allProductItems.reduce((sum, item) => sum + item.quantity, 0) + quantity;
+      
+      if (aggregateQty < product.minOrderQty) {
+        // We do not block here to allow them to add items one by one, 
+        // but we will enforce it during checkout. 
+        // However, if they only add one item and it's less than MOQ, we could warn them in the UI.
+      }
+
       // Add item to cart
-      cart.addItem(productId, variantId, quantity);
+      cart.addItem(productId, variantId, quantity, lotType, selectedModel);
       await cart.save();
 
       return await this.getCart(userId);
@@ -277,6 +299,14 @@ class CartService {
         stock = variant.stock;
       } else {
         stock = product.stock;
+      }
+      
+      if (item.selectedModel && product.hasModels) {
+        const model = product.availableModels.find(m => m.name === item.selectedModel);
+        if (!model) {
+          return { success: false, message: 'Selected model not available' };
+        }
+        stock = model.stock;
       }
 
       if (!product.isLot && quantity > stock) {

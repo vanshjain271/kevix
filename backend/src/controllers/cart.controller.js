@@ -38,7 +38,7 @@ const getCart = async (req, res) => {
  */
 const addItem = async (req, res) => {
   try {
-    const { productId, variantId, quantity, lotType } = req.body;
+    const { productId, variantId, quantity, lotType, selectedModel } = req.body;
 
     if (!productId) {
       return res.status(400).json({
@@ -59,7 +59,8 @@ const addItem = async (req, res) => {
       productId,
       variantId || null,
       parseInt(quantity),
-      lotType
+      lotType,
+      selectedModel || null
     );
 
     if (!result.success) {

@@ -51,6 +51,11 @@ export default function WishlistPage() {
 
   const handleAddToCart = async (productId: string) => {
     if (!isAuthenticated) { openLoginModal(); return; }
+    const product = products.find(p => (p._id || p.id) === productId);
+    if (product && (product.hasVariants || product.hasModels)) {
+      window.location.href = `/product/${productId}`;
+      return;
+    }
     setAddingId(productId);
     await addToCart(productId, 1);
     setAddingId(null);

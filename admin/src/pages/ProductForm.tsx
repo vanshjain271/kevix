@@ -213,6 +213,8 @@ const ProductForm: React.FC = () => {
   const [isActive, setIsActive] = useState(true);
   const [hasVariants, setHasVariants] = useState(false);
   const [variants, setVariants] = useState<VariantOption[]>([]);
+  const [hasModels, setHasModels] = useState(false);
+  const [availableModels, setAvailableModels] = useState<{name: string, stock: string}[]>([]);
 
   // Image state
   const [images, setImages] = useState<ImagePreview[]>([]);
@@ -283,6 +285,13 @@ const ProductForm: React.FC = () => {
               salePrice: v.salePrice ? String(v.salePrice) : '', stock: v.stock ? String(v.stock) : '', isActive: v.isActive !== false
             })));
           }
+          setHasModels(product.hasModels || false);
+          if (product.availableModels?.length > 0) {
+            setAvailableModels(product.availableModels.map((m: any) => ({
+              name: m.name || '',
+              stock: m.stock !== undefined ? String(m.stock) : ''
+            })));
+          }
           setHomepageSections(product.homepageSections || []);
           if (product.bulkPricing?.length > 0) {
             setBulkPricing(product.bulkPricing.map((t: any) => ({
@@ -342,6 +351,12 @@ const ProductForm: React.FC = () => {
   };
   const removeVariant = (idx: number) => setVariants(prev => prev.filter((_, i) => i !== idx));
 
+  const addModel = () => setAvailableModels(prev => [...prev, { name: '', stock: '' }]);
+  const updateModel = (idx: number, field: keyof {name: string, stock: string}, value: any) => {
+    setAvailableModels(prev => prev.map((m, i) => i === idx ? { ...m, [field]: value } : m));
+  };
+  const removeModel = (idx: number) => setAvailableModels(prev => prev.filter((_, i) => i !== idx));
+
   // Bulk Pricing handlers
   const addBulkTier = () => setBulkPricing(prev => [...prev, { minQty: '', salePrice: '' }]);
   const updateBulkTier = (idx: number, field: keyof BulkPriceTier, value: string) => {
@@ -382,6 +397,7 @@ const ProductForm: React.FC = () => {
       formData.append('paymentMode', paymentMode);
       formData.append('isActive', String(isActive));
       formData.append('hasVariants', String(hasVariants));
+      formData.append('hasModels', String(hasModels));
       if (hasVariants && variants.length > 0) {
         const cleanedVariants = variants.map(v => ({
           ...v,
@@ -391,6 +407,15 @@ const ProductForm: React.FC = () => {
         }));
         formData.append('variants', JSON.stringify(cleanedVariants));
       }
+
+      if (hasModels) {
+        const cleanedModels = availableModels.filter(m => m.name.trim()).map(m => ({
+          name: m.name.trim(),
+          stock: m.stock ? parseInt(m.stock) : 0
+        }));
+        formData.append('availableModels', JSON.stringify(cleanedModels));
+      }
+
       formData.append('homepageSections', JSON.stringify(homepageSections));
       if (bulkPricing.length > 0) {
         const cleanedBulk = bulkPricing
@@ -644,6 +669,29 @@ const ProductForm: React.FC = () => {
                   </Box>
                 )}
               </Box>
+            </CardContent>
+          </Card>
+
+          {/* Section: Available Models */}
+          <Card sx={{ mb: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0F172A' }}>Available Models</Typography>
+                <FormControlLabel control={<Switch checked={hasModels} onChange={(e) => setHasModels(e.target.checked)} color="primary" />} label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Enable Models</Typography>} />
+              </Box>
+              
+              {hasModels && (
+                <Box sx={{ bgcolor: '#F8FAFC', p: 2, borderRadius: 2, border: '1px solid #E2E8F0' }}>
+                  {availableModels.map((model, idx) => (
+                    <Box key={idx} sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1.5 }}>
+                      <TextField size="small" label="Model Name" value={model.name} onChange={(e) => updateModel(idx, 'name', e.target.value)} sx={{ flex: 1, bgcolor: '#fff' }} placeholder="e.g. Samsung S24 Ultra" />
+                      <TextField size="small" label="Stock" type="number" value={model.stock} onChange={(e) => updateModel(idx, 'stock', e.target.value)} sx={{ width: 120, bgcolor: '#fff' }} />
+                      <IconButton size="small" color="error" onClick={() => removeModel(idx)} sx={{ bgcolor: '#FEE2E2', width: 32, height: 32 }}><Delete fontSize="small" /></IconButton>
+                    </Box>
+                  ))}
+                  <Button variant="outlined" startIcon={<Add />} onClick={addModel} sx={{ bgcolor: '#fff', fontWeight: 600, mt: 1 }}>Add Model</Button>
+                </Box>
+              )}
             </CardContent>
           </Card>
 

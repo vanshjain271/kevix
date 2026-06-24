@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import BulkInquiryModal from '@/components/product/BulkInquiryModal';
+import ModelsOrderModal from '@/components/product/ModelsOrderModal';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -21,6 +22,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const router = useRouter();
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+  const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
   
   // Review Modal State
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -353,12 +355,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <button 
                   onClick={async (e) => {
                     e.preventDefault();
+                    if (displayProduct.hasModels) {
+                      setIsModelsModalOpen(true);
+                      return;
+                    }
                     if (!isAuthenticated) { openLoginModal(); return; }
                     let qty = 1;
                     if (displayProduct.isLot && displayProduct.lotDetails) {
                       if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
-                      if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
-                      if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                      else if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
+                      else if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                    } else {
+                      qty = displayProduct.minOrderQty || 1;
                     }
                     setIsAdding(true);
                     try {
@@ -379,12 +387,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <button 
                 onClick={async (e) => {
                   e.preventDefault();
+                  if (displayProduct.hasModels) {
+                    setIsModelsModalOpen(true);
+                    return;
+                  }
                   if (!isAuthenticated) { openLoginModal(); return; }
                   let qty = 1;
                   if (displayProduct.isLot && displayProduct.lotDetails) {
                     if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
-                    if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
-                    if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                    else if (selectedLotType === 'half') qty = displayProduct.lotDetails.halfLotQuantity;
+                    else if (selectedLotType === 'mini') qty = displayProduct.lotDetails.miniLotQuantity;
+                  } else {
+                    qty = displayProduct.minOrderQty || 1;
                   }
                   setIsAdding(true);
                   try {
@@ -535,6 +549,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         onClose={() => setIsInquiryModalOpen(false)} 
         product={displayProduct} 
       />
+      
+      {displayProduct.hasModels && (
+        <ModelsOrderModal
+          isOpen={isModelsModalOpen}
+          onClose={() => setIsModelsModalOpen(false)}
+          product={displayProduct}
+        />
+      )}
 
       {/* Write Review Modal */}
       {isReviewModalOpen && (

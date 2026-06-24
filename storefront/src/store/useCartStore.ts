@@ -16,6 +16,7 @@ export interface CartItem {
   };
   variantId?: string;
   variantName?: string;
+  selectedModel?: string;
   quantity: number;
   priceAtAddition: number;
 }
@@ -25,7 +26,7 @@ interface CartState {
   isLoading: boolean;
 
   fetchCart: () => Promise<void>;
-  addToCart: (productId: string, quantity?: number, variantId?: string) => Promise<void>;
+  addToCart: (productId: string, quantity?: number, variantId?: string, selectedModel?: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
   clearLocalCart: () => void;
@@ -51,6 +52,7 @@ function normalizeItem(raw: any): CartItem {
     },
     variantId: raw.variant?._id || raw.variantId,
     variantName: raw.variant?.name,
+    selectedModel: raw.selectedModel,
     quantity: Number(raw.quantity),
     priceAtAddition: Number(raw.price ?? raw.priceAtAddition ?? 0),
   };
@@ -77,9 +79,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
 
-  addToCart: async (productId: string, quantity = 1, variantId?: string) => {
+  addToCart: async (productId: string, quantity = 1, variantId?: string, selectedModel?: string) => {
     try {
-      await api.post('/cart/items', { productId, quantity, variantId: variantId || undefined });
+      await api.post('/cart/items', { productId, quantity, variantId: variantId || undefined, selectedModel: selectedModel || undefined });
       await get().fetchCart();
     } catch (error: any) {
       console.error('Failed to add to cart:', error?.response?.data?.message || error);

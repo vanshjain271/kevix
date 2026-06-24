@@ -349,6 +349,7 @@ export default function CheckoutPage() {
                         <div>
                           <h3 className="font-medium text-text-primary">{product.name}</h3>
                           {item.variantName && <p className="text-xs text-primary mt-0.5">Variant: {item.variantName}</p>}
+                          {item.selectedModel && <p className="text-xs text-blue-600 mt-0.5">Model: {item.selectedModel}</p>}
                           {isLot && <p className="text-xs text-accent mt-0.5">Lot Size: {stepQty} units</p>}
                           <p className="text-sm text-text-secondary mt-1">Qty: {displayQty}</p>
                           <div className="flex items-baseline gap-2 mt-2">

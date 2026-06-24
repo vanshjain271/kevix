@@ -181,6 +181,9 @@ export default function CartPage() {
                       {item.variantName && (
                         <span className="text-xs text-primary font-medium mt-0.5">Variant: {item.variantName}</span>
                       )}
+                      {item.selectedModel && (
+                        <span className="text-xs text-blue-600 font-medium mt-0.5">Model: {item.selectedModel}</span>
+                      )}
                       {isLot && (
                         <span className="text-xs text-accent font-medium mt-0.5">Lot Size: {stepQty} units</span>
                       )}

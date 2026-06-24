@@ -41,8 +41,14 @@ class OrderService {
         mrp = product.mrp;
         stock = product.stock;
       }
+      
+      if (item.selectedModel && product.hasModels) {
+        const model = product.availableModels.find(m => m.name === item.selectedModel);
+        if (!model) return { success: false, message: `Selected model ${item.selectedModel} not available` };
+        stock = model.stock;
+      }
 
-      if (!product.isLot && stock < item.quantity) return { success: false, message: `Insufficient stock for ${product.name}` };
+      if (!product.isLot && stock < item.quantity) return { success: false, message: `Insufficient stock for ${product.name}${item.selectedModel ? ' (' + item.selectedModel + ')' : ''}` };
       
       let itemTotal = price * item.quantity;
 
@@ -71,6 +77,7 @@ class OrderService {
       orderItems.push({ 
         product: product._id, 
         variant: item.variantId || null, 
+        selectedModel: item.selectedModel || null,
         name: product.name, 
         image: product.images?.[0] || '', 
         quantity: item.quantity, 
