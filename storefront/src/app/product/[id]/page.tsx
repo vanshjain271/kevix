@@ -43,6 +43,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedLotType, setSelectedLotType] = useState<'full' | 'half' | 'mini'>('full');
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
+  // Image Zoom State
+  const [zoomStyle, setZoomStyle] = useState({ transformOrigin: 'center' });
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomStyle({ transformOrigin: `${x}% ${y}%` });
+  };
+  const handleMouseLeave = () => {
+    setZoomStyle({ transformOrigin: 'center' });
+  };
+
   const getStepQty = (product: any, currentQty: number) => {
     if (product.isLot && product.lotDetails) {
       const { fullLotQuantity, halfLotQuantity, miniLotQuantity, allowHalfLot, allowMiniLot } = product.lotDetails;
@@ -178,9 +190,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
             
             {/* Main Image */}
-            <div className="order-1 md:order-2 flex-grow aspect-square md:aspect-auto md:h-[450px] relative border border-surface-border rounded-sm p-4 group cursor-crosshair overflow-hidden">
+            <div 
+              className="order-1 md:order-2 flex-grow aspect-square md:aspect-auto md:h-[450px] relative border border-surface-border rounded-sm p-4 group cursor-crosshair overflow-hidden"
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+            >
               {activeImage && (
-                <Image key={activeImage} src={activeImage} alt={displayProduct.name} fill className="object-contain p-4 group-hover:scale-125 transition-transform duration-500 origin-center" />
+                <Image 
+                  key={activeImage} 
+                  src={activeImage} 
+                  alt={displayProduct.name} 
+                  fill 
+                  style={zoomStyle}
+                  className="object-contain p-4 group-hover:scale-[2] transition-transform duration-200" 
+                />
               )}
               <button 
                 onClick={handleToggleWishlist}
