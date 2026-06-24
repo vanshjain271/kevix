@@ -39,11 +39,11 @@ export default function CategoryNav() {
         </button>
 
         {isOpen && (
-          <div className="flex flex-wrap gap-6 py-4 border-t border-gray-100">
+          <div className="flex overflow-x-auto scrollbar-hide gap-8 py-4 border-t border-gray-100">
             {categories.map((cat: any) => {
               const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
               return (
-                <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} className="flex flex-col items-center gap-2 cursor-pointer group w-[80px]">
+                <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
                   <div className="w-14 h-14 rounded-full bg-primary/10 border border-transparent flex items-center justify-center overflow-hidden group-hover:bg-primary/20 transition-all duration-300 relative">
                     {isDeal && (
                       <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
