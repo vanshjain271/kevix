@@ -6,9 +6,9 @@ const express = require('express');
 const router = express.Router();
 const BannerController = require('../controllers/banner.controller');
 
-// Banners change occasionally — cache for 2 minutes
+// Banners change occasionally — cache for 5 seconds for fast updates
 const setCache = (req, res, next) => {
-  res.set('Cache-Control', 'private, max-age=120');
+  res.set('Cache-Control', 'private, max-age=5');
   next();
 };
 

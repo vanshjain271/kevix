@@ -7,9 +7,9 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../models/Category');
 
-// Categories change rarely — cache for 5 minutes
+// Categories change rarely — cache for 5 seconds for fast updates
 const setCache = (req, res, next) => {
-  res.set('Cache-Control', 'private, max-age=300');
+  res.set('Cache-Control', 'private, max-age=5');
   next();
 };
 
