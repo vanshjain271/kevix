@@ -1,8 +1,5 @@
-import apiClient from './api.service';
+import apiClient, { API_BASE_URL } from './api.service';
 import { Order, PaginatedResponse, OrderStatus } from '../types/api.types';
-
-// Must match api.service.ts — points to production server
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.kevix.in/api/v1';
 
 class OrderService {
   async getOrders(page = 1, limit = 10, status?: OrderStatus): Promise<PaginatedResponse<Order>> {
