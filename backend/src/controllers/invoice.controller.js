@@ -4,6 +4,7 @@
 
 const InvoiceService = require('../services/invoice.service');
 const Order = require('../models/Order');
+const User = require('../models/User');
 
 const getInvoiceByOrder = async (req, res) => {
   try {
@@ -64,9 +65,9 @@ const getInvoicesFromOrders = async (req, res) => {
   try {
     const { payStatus, dateFrom, dateTo, search } = req.query;
 
-    // Base filter: only show orders that are actionable (not pending/cancelled/failed)
+    // Base filter: only show orders that are actionable (not cancelled/failed)
     const query = {
-      status: { $in: ['CONFIRMED', 'PACKED', 'SHIPPED', 'DELIVERED', 'PAID'] }
+      status: { $nin: ['CANCELLED', 'PAYMENT_FAILED'] }
     };
 
     // Date filter
