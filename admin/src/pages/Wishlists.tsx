@@ -19,7 +19,6 @@ interface WishlistUser {
 
 export default function Wishlists() {
   const [users, setUsers] = useState<WishlistUser[]>([]);
-  const [stats, setStats] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -27,28 +26,18 @@ export default function Wishlists() {
 
   useEffect(() => {
     fetchWishlists();
-    fetchStats();
   }, [page]);
 
   const fetchWishlists = async () => {
     setIsLoading(true);
     try {
-      const res = await apiClient.get(`/admin/wishlists?page=${page}&limit=15`);
-      setUsers(res.data?.wishlists || []);
-      setTotalPages(res.data?.pagination?.pages || 1);
+      const res: any = await apiClient.get(`/admin/wishlists?page=${page}&limit=15`);
+      setUsers(res.wishlists || []);
+      setTotalPages(res.pagination?.pages || 1);
     } catch (err) {
       console.error('Failed to load wishlists', err);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      const res = await apiClient.get('/admin/wishlists/stats');
-      setStats(res.data?.data?.stats || []);
-    } catch {
-      setStats([]);
     }
   };
 
