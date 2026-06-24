@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Avatar, Select, MenuItem, IconButton, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, Chip,
+  Grid, Divider, CircularProgress
+} from '@mui/material';
+import { Chat as ChatIcon, Visibility as VisibilityIcon, Close as CloseIcon } from '@mui/icons-material';
 import api from '../services/api.service';
 
 interface Inquiry {
@@ -57,189 +64,233 @@ export default function Inquiries() {
     }
   };
 
-  if (loading) return <div className="p-8 flex justify-center"><span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span></div>;
+  if (loading) {
+    return (
+      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Bulk Inquiries</h1>
-          <p className="text-text-secondary text-sm">Manage wholesale requests from customers</p>
-        </div>
-      </div>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" fontWeight="bold" color="text.primary">
+          Bulk Inquiries
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Manage wholesale requests from customers
+        </Typography>
+      </Box>
 
-      <div className="bg-white rounded-xl shadow-sm border border-surface-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface text-text-secondary text-xs uppercase tracking-wider border-b border-surface-border">
-                <th className="p-4 font-semibold">Date</th>
-                <th className="p-4 font-semibold">Customer</th>
-                <th className="p-4 font-semibold">Product</th>
-                <th className="p-4 font-semibold text-right">Amount</th>
-                <th className="p-4 font-semibold">Quantity</th>
-                <th className="p-4 font-semibold">Status</th>
-                <th className="p-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-border">
-              {inquiries.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-text-secondary">
-                    No inquiries found.
-                  </td>
-                </tr>
-              ) : (
-                inquiries.map((inq) => (
-                  <tr key={inq._id} className="hover:bg-surface/50 transition-colors">
-                    <td className="p-4 text-sm text-text-secondary">
+      <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
+        <Table>
+          <TableHead sx={{ bgcolor: 'grey.50' }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 'bold' }}>Amount</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {inquiries.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                  No inquiries found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              inquiries.map((inq) => {
+                const amount = (inq.product?.salePrice || inq.product?.mrp || 0) * inq.quantity;
+                return (
+                  <TableRow key={inq._id} hover>
+                    <TableCell>
                       {new Date(inq.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="p-4">
-                      <div className="font-medium text-text-primary text-sm">{inq.name}</div>
-                      <div className="text-text-secondary text-xs">+91 {inq.phone}</div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded border border-surface-border overflow-hidden shrink-0 bg-surface">
-                          <img src={inq.product?.images?.[0] || ''} alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-text-primary line-clamp-1">{inq.product?.name}</div>
-                          <div className="text-xs text-text-secondary">SKU: {inq.product?.sku}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm font-bold text-text-primary text-right">
-                      ₹{((inq.product?.salePrice || inq.product?.mrp || 0) * inq.quantity).toLocaleString('en-IN')}
-                    </td>
-                    <td className="p-4 text-sm font-medium text-text-secondary">
-                      {inq.quantity} units
-                    </td>
-                    <td className="p-4">
-                      <select
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="medium">{inq.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">+91 {inq.phone}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Avatar
+                          variant="rounded"
+                          src={inq.product?.images?.[0] || ''}
+                          sx={{ width: 48, height: 48, border: '1px solid', borderColor: 'divider' }}
+                        />
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium" sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            maxWidth: 250
+                          }}>
+                            {inq.product?.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            SKU: {inq.product?.sku}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight="bold">
+                        ₹{amount.toLocaleString('en-IN')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip size="small" label={`${inq.quantity} units`} />
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        size="small"
                         value={inq.status}
-                        onChange={(e) => updateStatus(inq._id, e.target.value)}
-                        className={`text-xs font-bold px-2 py-1 rounded-full outline-none cursor-pointer border ${
-                          inq.status === 'PENDING' ? 'bg-warning/10 text-warning border-warning/20' :
-                          inq.status === 'CONTACTED' ? 'bg-info/10 text-info border-info/20' :
-                          inq.status === 'CONVERTED' ? 'bg-success/10 text-success border-success/20' :
-                          'bg-surface text-text-secondary border-surface-border'
-                        }`}
+                        onChange={(e) => updateStatus(inq._id, e.target.value as string)}
+                        sx={{
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          height: 32,
+                          '& .MuiSelect-select': { py: 0.5 },
+                          bgcolor: 
+                            inq.status === 'PENDING' ? 'warning.light' :
+                            inq.status === 'CONTACTED' ? 'info.light' :
+                            inq.status === 'CONVERTED' ? 'success.light' : 'grey.100',
+                          color: 
+                            inq.status === 'PENDING' ? 'warning.dark' :
+                            inq.status === 'CONTACTED' ? 'info.dark' :
+                            inq.status === 'CONVERTED' ? 'success.dark' : 'text.secondary',
+                        }}
                       >
-                        <option value="PENDING">PENDING</option>
-                        <option value="CONTACTED">CONTACTED</option>
-                        <option value="CONVERTED">CONVERTED</option>
-                        <option value="CLOSED">CLOSED</option>
-                      </select>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <a 
-                          href={`https://wa.me/91${inq.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${inq.name}, regarding your bulk inquiry for ${inq.product?.name} (${inq.quantity} units)...`)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="w-8 h-8 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white flex items-center justify-center transition-colors"
-                          title="Chat on WhatsApp"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">chat</span>
-                        </a>
-                        <button
-                          onClick={() => setSelectedInquiry(inq)}
-                          className="w-8 h-8 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-colors"
-                          title="View Details"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">visibility</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                        <MenuItem value="PENDING">PENDING</MenuItem>
+                        <MenuItem value="CONTACTED">CONTACTED</MenuItem>
+                        <MenuItem value="CONVERTED">CONVERTED</MenuItem>
+                        <MenuItem value="CLOSED">CLOSED</MenuItem>
+                      </Select>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Tooltip title="Chat on WhatsApp">
+                          <IconButton
+                            size="small"
+                            component="a"
+                            href={`https://wa.me/91${inq.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${inq.name}, regarding your bulk inquiry for ${inq.product?.name} (${inq.quantity} units)...`)}`}
+                            target="_blank"
+                            sx={{ color: '#25D366', bgcolor: '#25D3661A', '&:hover': { bgcolor: '#25D36633' } }}
+                          >
+                            <ChatIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="View Details">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => setSelectedInquiry(inq)}
+                            sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {selectedInquiry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden relative max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-surface-border">
-              <h2 className="text-lg font-bold text-text-primary">Inquiry Details</h2>
-              <button 
-                onClick={() => setSelectedInquiry(null)}
-                className="text-text-secondary hover:text-text-primary transition-colors"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto">
-              <div className="flex gap-4 mb-6 pb-6 border-b border-surface-border">
-                <div className="w-24 h-24 rounded-lg border border-surface-border overflow-hidden shrink-0">
-                  <img src={selectedInquiry.product?.images?.[0] || ''} alt="" className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-text-primary mb-1">{selectedInquiry.product?.name}</h3>
-                  <p className="text-sm text-text-secondary mb-2">SKU: {selectedInquiry.product?.sku}</p>
-                  <p className="text-primary font-bold">
+      {/* View Modal */}
+      <Dialog open={!!selectedInquiry} onClose={() => setSelectedInquiry(null)} maxWidth="sm" fullWidth>
+        {selectedInquiry && (
+          <>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+              <Typography variant="h6" fontWeight="bold">Inquiry Details</Typography>
+              <IconButton size="small" onClick={() => setSelectedInquiry(null)}>
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+              <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
+                <Avatar
+                  variant="rounded"
+                  src={selectedInquiry.product?.images?.[0] || ''}
+                  sx={{ width: 100, height: 100, border: '1px solid', borderColor: 'divider' }}
+                />
+                <Box>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    {selectedInquiry.product?.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    SKU: {selectedInquiry.product?.sku}
+                  </Typography>
+                  <Typography variant="subtitle2" color="primary" fontWeight="bold">
                     ₹{(selectedInquiry.product?.salePrice || selectedInquiry.product?.mrp || 0).toLocaleString('en-IN')} / unit
-                  </p>
-                </div>
-              </div>
+                  </Typography>
+                </Box>
+              </Box>
 
-              {(selectedInquiry.product?.colors?.length || selectedInquiry.product?.sizes?.length || selectedInquiry.product?.attributes?.length) ? (
-                <div className="mb-6 pb-6 border-b border-surface-border">
-                  <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider mb-3">Product Variants / Attributes</h4>
-                  <div className="space-y-2 text-sm">
-                    {selectedInquiry.product?.colors && selectedInquiry.product.colors.length > 0 && (
-                      <div className="flex gap-2"><span className="text-text-secondary w-20">Colors:</span> <span>{selectedInquiry.product.colors.join(', ')}</span></div>
-                    )}
-                    {selectedInquiry.product?.sizes && selectedInquiry.product.sizes.length > 0 && (
-                      <div className="flex gap-2"><span className="text-text-secondary w-20">Sizes:</span> <span>{selectedInquiry.product.sizes.join(', ')}</span></div>
-                    )}
-                    {selectedInquiry.product?.attributes?.map((attr: any, i: number) => (
-                      <div key={i} className="flex gap-2"><span className="text-text-secondary w-20">{attr.name}:</span> <span>{attr.value}</span></div>
+              {(selectedInquiry.product?.colors?.length || selectedInquiry.product?.sizes?.length || selectedInquiry.product?.attributes?.length) && (
+                <>
+                  <Typography variant="overline" fontWeight="bold" color="text.secondary">
+                    Product Variants / Attributes
+                  </Typography>
+                  <Box sx={{ mb: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {selectedInquiry.product.colors?.map(c => <Chip key={c} size="small" label={`Color: ${c}`} variant="outlined" />)}
+                    {selectedInquiry.product.sizes?.map(s => <Chip key={s} size="small" label={`Size: ${s}`} variant="outlined" />)}
+                    {selectedInquiry.product.attributes?.map((attr, i) => (
+                      <Chip key={i} size="small" label={`${attr.name}: ${attr.value}`} variant="outlined" />
                     ))}
-                  </div>
-                </div>
-              ) : null}
+                  </Box>
+                </>
+              )}
 
-              <div>
-                <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider mb-3">Customer Details</h4>
-                <div className="bg-surface rounded-lg p-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Name:</span>
-                    <span className="font-medium text-text-primary">{selectedInquiry.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Phone:</span>
-                    <span className="font-medium text-text-primary">+91 {selectedInquiry.phone}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Quantity Requested:</span>
-                    <span className="font-bold text-primary">{selectedInquiry.quantity} units</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Estimated Total:</span>
-                    <span className="font-bold text-text-primary">₹{((selectedInquiry.product?.salePrice || selectedInquiry.product?.mrp || 0) * selectedInquiry.quantity).toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-surface-border bg-surface flex justify-end">
-              <a
+              <Typography variant="overline" fontWeight="bold" color="text.secondary">
+                Customer Details
+              </Typography>
+              <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary" display="block">Name</Typography>
+                    <Typography variant="body2" fontWeight="medium">{selectedInquiry.name}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary" display="block">Phone</Typography>
+                    <Typography variant="body2" fontWeight="medium">+91 {selectedInquiry.phone}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary" display="block">Quantity</Typography>
+                    <Typography variant="body2" fontWeight="bold" color="primary">{selectedInquiry.quantity} units</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary" display="block">Total Amount</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      ₹{((selectedInquiry.product?.salePrice || selectedInquiry.product?.mrp || 0) * selectedInquiry.quantity).toLocaleString('en-IN')}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </DialogContent>
+            <DialogActions sx={{ p: 2, bgcolor: 'grey.50' }}>
+              <Button
+                variant="contained"
+                startIcon={<ChatIcon />}
+                sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#20b858' }, fontWeight: 'bold' }}
+                component="a"
                 href={`https://wa.me/91${selectedInquiry.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${selectedInquiry.name}, regarding your bulk inquiry for ${selectedInquiry.product?.name} (${selectedInquiry.quantity} units)...`)}`}
                 target="_blank"
-                rel="noreferrer"
-                className="bg-[#25D366] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-[#20b858] transition-colors"
               >
-                <span className="material-symbols-outlined text-[20px]">chat</span>
                 Chat on WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+    </Box>
   );
 }
