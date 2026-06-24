@@ -13,6 +13,10 @@ interface WishlistUser {
     name: string;
     price: number;
     image?: string;
+    sku?: string;
+    colors?: string[];
+    sizes?: string[];
+    attributes?: { name: string; value: string }[];
   }[];
   totalAmount: number;
 }
@@ -72,28 +76,7 @@ export default function Wishlists() {
         </div>
       </div>
 
-      {/* Most Wishlisted Products */}
-      {stats.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm mb-8">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-bold text-gray-800 text-lg">🔥 Most Wishlisted Products</h2>
-          </div>
-          <div className="p-4 flex flex-wrap gap-3">
-            {stats.map((stat: any) => {
-              const img = stat.product?.images?.[0]?.url || stat.product?.images?.[0];
-              return (
-                <div key={stat._id} className="flex items-center gap-3 bg-purple-50 rounded-xl px-4 py-3 border border-purple-100">
-                  {img && <img src={img} alt={stat.product?.name} className="w-10 h-10 object-contain rounded-lg" />}
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800 max-w-[160px] truncate">{stat.product?.name}</p>
-                    <p className="text-xs text-purple-600 font-bold">{stat.count} saves</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+
 
       {/* Users Wishlist Table */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
@@ -178,6 +161,18 @@ export default function Wishlists() {
                             )}
                             <div className="min-w-0">
                               <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
+                              <p className="text-xs text-gray-500 mb-1">SKU: {product.sku}</p>
+                              
+                              {(product.colors?.length || product.sizes?.length || product.attributes?.length) ? (
+                                <div className="text-[10px] text-gray-500 mb-1 space-y-0.5">
+                                  {product.colors && product.colors.length > 0 && <p>Color: {product.colors.join(', ')}</p>}
+                                  {product.sizes && product.sizes.length > 0 && <p>Size: {product.sizes.join(', ')}</p>}
+                                  {product.attributes?.map((attr, i) => (
+                                    <p key={i}>{attr.name}: {attr.value}</p>
+                                  ))}
+                                </div>
+                              ) : null}
+
                               <p className="text-sm font-bold text-purple-700">₹{price.toLocaleString('en-IN')}</p>
                             </div>
                           </div>

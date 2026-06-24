@@ -26,7 +26,7 @@ const createInquiry = async (req, res) => {
 const getInquiries = async (req, res) => {
   try {
     const inquiries = await Inquiry.find()
-      .populate('product', 'name sku images')
+      .populate('product', 'name sku images salePrice mrp colors sizes attributes')
       .populate('user', 'name phone email')
       .sort({ createdAt: -1 });
       

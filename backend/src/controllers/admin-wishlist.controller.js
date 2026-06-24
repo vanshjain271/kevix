@@ -12,7 +12,7 @@ const getWishlists = async (req, res) => {
     // Find users who have at least one item in their wishlist
     const users = await User.find({ 'wishlist.0': { $exists: true } })
       .select('name phone email wishlist')
-      .populate('wishlist', 'name images mrp salePrice')
+      .populate('wishlist', 'name images mrp salePrice sku colors sizes attributes')
       .skip(skip)
       .limit(limit)
       .lean();
@@ -29,6 +29,10 @@ const getWishlists = async (req, res) => {
         return {
           _id: product._id,
           name: product.name,
+          sku: product.sku,
+          colors: product.colors,
+          sizes: product.sizes,
+          attributes: product.attributes,
           image: product.images && product.images.length > 0 ? (product.images[0].url || product.images[0]) : null,
           price: price,
         };
