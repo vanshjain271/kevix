@@ -46,6 +46,10 @@ function ProductCardGrid({ product }: { product: any }) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (product.hasVariants || product.hasModels) {
+      window.location.href = `/product/${product.id}`;
+      return;
+    }
     if (!isAuthenticated) { openLoginModal(); return; }
     setAdding(true);
     await addToCart(product.id, 1);

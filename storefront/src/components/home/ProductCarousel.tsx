@@ -7,6 +7,8 @@ import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
+import ImageZoom from '@/components/ui/ImageZoom';
+
 interface Product {
   id: string;
   name: string;
@@ -17,6 +19,9 @@ interface Product {
   rating: number;
   isLot?: boolean;
   lotDetails?: any;
+  hasVariants?: boolean;
+  hasModels?: boolean;
+  minOrderQty?: number;
 }
 
 interface Props {
@@ -40,10 +45,14 @@ function ProductCard({ product }: { product: Product }) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (product.hasVariants || product.hasModels) {
+      router.push(`/product/${product.id}`);
+      return;
+    }
     if (!isAuthenticated) { openLoginModal(); return; }
     setAdding(true);
     try {
-      const qty = product.isLot && product.lotDetails ? product.lotDetails.fullLotQuantity : 1;
+      const qty = product.isLot && product.lotDetails ? product.lotDetails.fullLotQuantity : (product.minOrderQty || 1);
       await addToCart(product.id, qty);
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
@@ -56,6 +65,10 @@ function ProductCard({ product }: { product: Product }) {
 
   const handleBuyNow = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (product.hasVariants || product.hasModels) {
+      router.push(`/product/${product.id}`);
+      return;
+    }
     if (!isAuthenticated) { openLoginModal(); return; }
     if (!cartItem) {
       setAdding(true);
@@ -82,7 +95,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`} className="group shrink-0 w-44 md:w-52 bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <img src={product.image} alt={product.name} className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300" />
+        <ImageZoom src={product.image} alt={product.name} className="w-full h-full p-3 group-hover:scale-105 transition-transform duration-300" />
         {product.discount > 0 && (
           <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
             {product.discount}% OFF

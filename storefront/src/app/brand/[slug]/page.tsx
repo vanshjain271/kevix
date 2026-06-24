@@ -7,6 +7,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import HoverZoomImage from '@/components/product/HoverZoomImage';
+import ImageZoom from '@/components/ui/ImageZoom';
 import api from '@/lib/api';
 import useSWR from 'swr';
 
@@ -14,45 +15,49 @@ const fetcher = (url: string) => api.get(url).then(r => r.data?.data || r.data);
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=400';
 
 function ProductCard({ product }: { product: any }) {
-  const { addToCart } = useCartStore();
+  const { addToCart, items } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const { isAuthenticated, openLoginModal } = useAuthStore();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const id = product._id || product.id;
-  const wishlisted = isWishlisted(id);
-  const img = product.images?.[0]?.url || product.images?.[0] || DEFAULT_IMG;
-  const price = product.salePrice || 0;
-  const mrp = product.mrp || 0;
-  const discount = mrp > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0;
+  const wishlisted = isWishlisted(product.id);
+  const router = useRouter();
 
-  const handleCart = async (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (product.hasVariants || product.hasModels) {
+      router.push(`/product/${product.id}`);
+      return;
+    }
     if (!isAuthenticated) { openLoginModal(); return; }
     setAdding(true);
-    await addToCart(id, 1);
-    setAdding(false);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    try {
+      const qty = product.isLot && product.lotDetails ? product.lotDetails.fullLotQuantity : (product.minOrderQty || 1);
+      await addToCart(product.id, qty);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch (err) {
+      console.error('Add to cart failed', err);
+    } finally {
+      setAdding(false);
+    }
   };
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isAuthenticated) { openLoginModal(); return; }
-    await toggleWishlist(id);
+    await toggleWishlist(product.id);
   };
 
   return (
-    <Link href={`/product/${id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
+    <Link href={`/product/${product.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <HoverZoomImage 
-          src={img} 
+        <ImageZoom 
+          src={product.image || product.images?.[0]?.url || DEFAULT_IMG} 
           alt={product.name} 
-          scale={2}
-          className="w-full h-full"
-          imageClassName="p-3" 
+          className="w-full h-full p-3 group-hover:scale-105 transition-transform duration-300" 
         />
-        {discount > 0 && <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">{discount}% OFF</span>}
+        {product.discount > 0 && <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">{product.discount}% OFF</span>}
         <button onClick={handleWishlist} className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all ${wishlisted ? 'bg-red-50 text-red-500' : 'bg-white/90 text-gray-400 hover:text-red-400'}`}>
           <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: wishlisted ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
         </button>
@@ -60,10 +65,10 @@ function ProductCard({ product }: { product: any }) {
       <div className="p-3 flex flex-col flex-grow">
         <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug flex-grow">{product.name}</p>
         <div className="flex items-baseline gap-1.5 mt-2">
-          <span className="text-base font-bold text-gray-900">₹{price.toLocaleString('en-IN')}</span>
-          {mrp > price && <span className="text-xs text-gray-400 line-through">₹{mrp.toLocaleString('en-IN')}</span>}
+          <span className="text-base font-bold text-gray-900">₹{(product.salePrice || product.price || 0).toLocaleString('en-IN')}</span>
+          {(product.mrp || 0) > (product.salePrice || product.price || 0) && <span className="text-xs text-gray-400 line-through">₹{(product.mrp || 0).toLocaleString('en-IN')}</span>}
         </div>
-        <button onClick={handleCart} disabled={adding}
+        <button onClick={handleAddToCart} disabled={adding}
           className={`mt-3 w-full py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1 ${added ? 'bg-green-500 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white active:scale-95'} disabled:opacity-70`}>
           {adding ? <span className="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
             : added ? <><span className="material-symbols-outlined text-[14px]">check</span> Added!</>

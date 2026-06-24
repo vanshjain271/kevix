@@ -7,7 +7,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProducts } from '@/hooks/useApi';
-import HoverZoomImage from '@/components/product/HoverZoomImage';
+import ImageZoom from '@/components/ui/ImageZoom';
 
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=400';
 
@@ -26,6 +26,10 @@ function ProductCard({ product }: { product: any }) {
 
   const handleCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (product.hasVariants || product.hasModels) {
+      window.location.href = `/product/${id}`;
+      return;
+    }
     if (!isAuthenticated) { openLoginModal(); return; }
     setAdding(true);
     await addToCart(id, 1);
@@ -37,12 +41,10 @@ function ProductCard({ product }: { product: any }) {
   return (
     <Link href={`/product/${id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <HoverZoomImage 
+        <ImageZoom 
           src={img} 
           alt={product.name} 
-          scale={2}
-          className="w-full h-full"
-          imageClassName="p-3" 
+          className="w-full h-full p-3" 
         />
         {discount > 0 && <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">{discount}% OFF</span>}
         <button
