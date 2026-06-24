@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, TextField, Button,
   FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel,
-  IconButton, Paper, Chip, Alert, Snackbar, CircularProgress, Tooltip, Autocomplete, Autocomplete
+  IconButton, Paper, Chip, Alert, Snackbar, CircularProgress, Tooltip, Autocomplete
 } from '@mui/material';
 import {
   Delete, CloudUpload, ArrowBack, Save

@@ -31,9 +31,9 @@ export default function Inquiries() {
 
   const fetchInquiries = async () => {
     try {
-      const res = await api.get('/inquiries');
-      if (res.data.success) {
-        setInquiries(res.data.inquiries);
+      const res: any = await api.get('/inquiries');
+      if (res.success) {
+        setInquiries(res.inquiries);
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error);
