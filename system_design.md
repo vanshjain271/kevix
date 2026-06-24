@@ -34,13 +34,13 @@ graph TD
     end
 
     %% Relationships
-    Customer <--> |Browses, Adds to Cart, Buys| Storefront
-    Admin <--> |Manages Orders, Products| Dashboard
+    Customer <-->|Browses, Adds to Cart, Buys| Storefront
+    Admin <-->|Manages Orders, Products| Dashboard
     
-    Storefront <--> |JSON over HTTPS| API
-    Dashboard <--> |JSON over HTTPS (JWT Admin)| API
+    Storefront <-->|JSON over HTTPS| API
+    Dashboard <-->|JSON over HTTPS (JWT Admin)| API
     
-    API <--> |Mongoose ODM| MongoDB
+    API <-->|Mongoose ODM| MongoDB
     API --> |Uploads Images| S3
     API --> |Triggers OTP/SMS| MSG91
     API --> |Triggers Updates| WhatsApp
@@ -150,19 +150,19 @@ The Next.js storefront heavily leverages the modern App Router (`/app`), Server 
 ```mermaid
 graph TD
     %% Directory Structure
-    App[app/] --> Layout[layout.tsx - Global Providers & Navbar]
-    App --> Home[page.tsx - Landing Page]
-    App --> Product[product/]
-    Product --> ProductID[[id]/page.tsx - Product Details]
-    App --> Category[category/]
-    Category --> CategorySlug[[slug]/page.tsx - Listing Page]
+    App["app/"] --> Layout["layout.tsx - Global Providers & Navbar"]
+    App --> Home["page.tsx - Landing Page"]
+    App --> Product["product/"]
+    Product --> ProductID["[id]/page.tsx - Product Details"]
+    App --> Category["category/"]
+    Category --> CategorySlug["[slug]/page.tsx - Listing Page"]
     
     %% Components
-    Layout -.-> Header[Header Component]
-    Home -.-> Carousel[Hero Carousel]
-    Home -.-> ProductCard[Product Card Grid]
-    ProductID -.-> Zoom[Image Zoom Component]
-    ProductID -.-> Lot[Lot Selector Component]
+    Layout -.-> Header["Header Component"]
+    Home -.-> Carousel["Hero Carousel"]
+    Home -.-> ProductCard["Product Card Grid"]
+    ProductID -.-> Zoom["Image Zoom Component"]
+    ProductID -.-> Lot["Lot Selector Component"]
     
     %% State Management
     State[Zustand Store] --> Cart[useCartStore]
