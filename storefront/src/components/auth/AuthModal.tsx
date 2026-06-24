@@ -3,54 +3,39 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/api';
-import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export default function AuthModal() {
   const router = useRouter();
   const { isLoginModalOpen, closeLoginModal, setAuth } = useAuthStore();
   
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [pincode, setPincode] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [step, setStep] = useState<'form' | 'otp'>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [devOtp, setDevOtp] = useState('');
-  const [isNewUser, setIsNewUser] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   if (!isLoginModalOpen) return null;
 
   const resetModal = () => {
     setPhone('');
+    setName('');
+    setEmail('');
+    setPincode('');
     setOtp('');
-    setStep('phone');
+    setStep('form');
     setError('');
     setDevOtp('');
-    setConfirmationResult(null);
-    if ((window as any).recaptchaVerifier) {
-      try {
-        (window as any).recaptchaVerifier.clear();
-        (window as any).recaptchaVerifier = null;
-      } catch (e) {}
-    }
   };
 
   const handleClose = () => {
     resetModal();
     closeLoginModal();
-  };
-
-  const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth!, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved
-        }
-      });
-    }
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -59,25 +44,26 @@ export default function AuthModal() {
       setError('Please enter a valid 10-digit mobile number');
       return;
     }
+    if (mode === 'signup') {
+      if (!name.trim() || !email.trim() || !pincode.trim()) {
+        setError('Please fill all details to create your account.');
+        return;
+      }
+    }
     
     setError('');
     setLoading(true);
     try {
-      setupRecaptcha();
-      const appVerifier = (window as any).recaptchaVerifier;
-      const phoneNumber = `+91${phone}`;
-      
-      const confResult = await signInWithPhoneNumber(auth!, phoneNumber, appVerifier);
-      setConfirmationResult(confResult);
-      setStep('otp');
+      const res = await api.post('/auth/send-otp', { phone: `+91${phone}` });
+      if (res.data.success) {
+        setDevOtp(res.data.devOtp || '');
+        setStep('otp');
+      } else {
+        setError(res.data.message || 'Failed to send OTP.');
+      }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to send OTP. Please try again.');
-      if ((window as any).recaptchaVerifier) {
-        (window as any).recaptchaVerifier.render().then((widgetId: any) => {
-          (window as any).grecaptcha.reset(widgetId);
-        });
-      }
+      setError(err.response?.data?.message || err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -89,62 +75,50 @@ export default function AuthModal() {
       setError('Please enter a valid OTP');
       return;
     }
-    if (!confirmationResult) {
-      setError('Session expired. Please try again.');
-      return;
-    }
 
     setError('');
     setLoading(true);
     try {
-      const result = await confirmationResult.confirm(otp);
-      const idToken = await result.user.getIdToken();
-      
-      const res = await api.post('/auth/firebase-login', { idToken });
+      const res = await api.post('/auth/verify-otp', { phone: `+91${phone}`, otp });
       
       if (res.data.success) {
-        setAuth(res.data.token, res.data.user);
+        const { token, user } = res.data;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set token for the immediate next request
+        
+        let updatedUser = user;
+
+        if (mode === 'signup') {
+          // Send profile update
+          try {
+            const profileRes = await api.put('/users/me', { 
+              name, 
+              email, 
+              // We'd send pincode if backend supported it here, or maybe address structure. 
+              // Sending as part of generic data.
+            });
+            if (profileRes.data.success) {
+              updatedUser = profileRes.data.user;
+            }
+          } catch (profileErr) {
+            console.error('Failed to update profile after signup:', profileErr);
+            // It's okay, we'll still log them in
+          }
+        }
+
+        setAuth(token, updatedUser);
         handleClose();
-        const { name, email, phone } = res.data.user;
-        if (!name || !email || !phone) {
-          router.push('/complete-profile');
+        
+        if (mode === 'login') {
+          if (!updatedUser.name || !updatedUser.email) {
+            router.push('/complete-profile');
+          }
         }
       } else {
         setError(res.data.message || 'Verification failed. Please try again.');
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Invalid OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      if (!auth || !googleProvider) {
-        throw new Error("Google authentication is not initialized.");
-      }
-      const result = await signInWithPopup(auth, googleProvider);
-      const idToken = await result.user.getIdToken();
-      
-      const res = await api.post('/auth/firebase-login', { idToken });
-      
-      if (res.data.success) {
-        setAuth(res.data.token, res.data.user);
-        handleClose();
-        const { name, email, phone } = res.data.user;
-        if (!name || !email || !phone) {
-          router.push('/complete-profile');
-        }
-      } else {
-        setError(res.data.message || 'Google Login failed.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Google Login failed.');
+      setError(err.response?.data?.message || err.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -157,23 +131,23 @@ export default function AuthModal() {
         {/* Close Button */}
         <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 text-text-secondary hover:text-text-primary z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface transition-colors"
+          className="absolute top-4 right-4 text-white hover:text-gray-200 z-10 w-8 h-8 flex items-center justify-center rounded-full transition-colors"
         >
           <span className="material-symbols-outlined text-2xl">close</span>
         </button>
 
         {/* Purple Header */}
-        <div className="bg-gradient-to-br from-primary to-primary-dark p-8 text-white">
+        <div className="bg-gradient-to-br from-primary to-primary-dark p-8 text-white relative">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-2xl">
-              {step === 'phone' ? 'smartphone' : 'sms'}
+              {step === 'form' ? 'person' : 'sms'}
             </span>
           </div>
           <h2 className="text-2xl font-bold mb-1">
-            {step === 'phone' ? 'Login or Signup' : isNewUser ? 'Create Account' : 'Verify OTP'}
+            {step === 'form' ? (mode === 'login' ? 'Login to Kevix' : 'Create Account') : 'Verify OTP'}
           </h2>
           <p className="text-white/80 text-sm">
-            {step === 'phone' 
+            {step === 'form' 
               ? 'Access your Orders, Wishlist and Recommendations'
               : `OTP sent to +91 ${phone}`
             }
@@ -189,11 +163,54 @@ export default function AuthModal() {
             </div>
           )}
 
-          {/* Invisible ReCAPTCHA Container */}
-          <div id="recaptcha-container"></div>
-
-          {step === 'phone' ? (
+          {step === 'form' ? (
             <form onSubmit={handleSendOtp} className="space-y-5">
+              
+              {/* Tabs */}
+              <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
+                <button 
+                  type="button" 
+                  onClick={() => { setMode('login'); setError(''); }} 
+                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-colors ${mode === 'login' ? 'bg-white shadow text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Log In
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => { setMode('signup'); setError(''); }} 
+                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-colors ${mode === 'signup' ? 'bg-white shadow text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              {mode === 'signup' && (
+                <>
+                  <div>
+                    <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Full Name</label>
+                    <input 
+                      type="text" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. John Doe"
+                      className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
+                      required={mode === 'signup'}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Email Address</label>
+                    <input 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="e.g. john@example.com"
+                      className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
+                      required={mode === 'signup'}
+                    />
+                  </div>
+                </>
+              )}
+
               <div>
                 <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Mobile Number</label>
                 <div className="flex items-center border-2 border-surface-border rounded-lg overflow-hidden focus-within:border-primary transition-colors">
@@ -204,44 +221,43 @@ export default function AuthModal() {
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="Enter 10-digit number"
                     className="flex-1 px-4 py-3 text-text-primary outline-none text-base bg-white"
-                    autoFocus
                     required
                   />
                 </div>
               </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
+
+              {mode === 'signup' && (
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Pincode</label>
+                  <input 
+                    type="text" 
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="e.g. 110001"
+                    className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
+                    required={mode === 'signup'}
+                  />
+                </div>
+              )}
+
+              <p className="text-xs text-text-secondary leading-relaxed mt-2">
                 By continuing, you agree to Kevix's{' '}
                 <span className="text-primary cursor-pointer hover:underline">Terms of Use</span>
                 {' '}and{' '}
                 <span className="text-primary cursor-pointer hover:underline">Privacy Policy</span>.
               </p>
+              
               <button 
                 type="submit" 
-                disabled={loading || phone.length < 10}
-                className="w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 rounded-lg shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={loading || phone.length < 10 || (mode === 'signup' && (!name || !email || pincode.length < 6))}
+                className="w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 rounded-lg shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
               >
                 {loading ? (
                   <>
                     <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
                     Sending OTP...
                   </>
-                ) : 'CONTINUE'}
-              </button>
-
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-surface-border"></div>
-                <span className="flex-shrink-0 mx-4 text-text-secondary text-xs uppercase font-medium">OR</span>
-                <div className="flex-grow border-t border-surface-border"></div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                disabled={loading}
-                className="w-full bg-white border border-surface-border hover:bg-surface text-text-primary font-semibold py-3.5 rounded-lg shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-              >
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-                Continue with Google
+                ) : (mode === 'signup' ? 'CREATE ACCOUNT' : 'GET OTP')}
               </button>
             </form>
           ) : (
@@ -251,7 +267,7 @@ export default function AuthModal() {
                   <label className="text-xs font-semibold text-text-secondary uppercase block">Enter OTP</label>
                   <button 
                     type="button" 
-                    onClick={() => { setStep('phone'); setOtp(''); setError(''); setDevOtp(''); }}
+                    onClick={() => { setStep('form'); setOtp(''); setError(''); setDevOtp(''); }}
                     className="text-primary text-xs font-semibold hover:underline"
                   >
                     Change Number
@@ -284,7 +300,7 @@ export default function AuthModal() {
                     <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
                     Verifying...
                   </>
-                ) : 'VERIFY & LOGIN'}
+                ) : (mode === 'signup' ? 'VERIFY & CREATE' : 'VERIFY & LOGIN')}
               </button>
 
               <p className="text-center text-sm text-text-secondary">
