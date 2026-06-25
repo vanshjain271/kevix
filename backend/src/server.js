@@ -57,6 +57,9 @@ const publicBlogRoutes = require('./routes/blog.routes');
 // Init app
 const app = express();
 
+// Trust the first proxy (Vercel) to fix express-rate-limit ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+app.set('trust proxy', 1);
+
 /* =========================
    Middleware
 ========================= */
