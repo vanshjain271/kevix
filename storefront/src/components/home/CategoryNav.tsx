@@ -10,6 +10,18 @@ export default function CategoryNav() {
   const { categories, isLoading } = useCategories();
   const [isOpen, setIsOpen] = useState(false);
 
+  const getCategoryIcon = (cat: any) => {
+    if (cat.icon && cat.icon !== 'category') return cat.icon;
+    const name = cat.name?.toLowerCase() || '';
+    if (name.includes('earphone') || name.includes('headphone') || name.includes('audio')) return 'headphones';
+    if (name.includes('cover') || name.includes('case')) return 'phone_iphone';
+    if (name.includes('battery') || name.includes('power')) return 'battery_charging_full';
+    if (name.includes('cable') || name.includes('charger')) return 'cable';
+    if (name.includes('watch') || name.includes('wearable')) return 'watch';
+    if (name.includes('speaker')) return 'speaker';
+    return 'category'; // default
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white border-b border-surface-border py-3">
@@ -42,6 +54,8 @@ export default function CategoryNav() {
           <div className="flex overflow-x-auto scrollbar-hide gap-8 py-4 border-t border-gray-100">
             {categories.map((cat: any) => {
               const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
+              const displayIcon = getCategoryIcon(cat);
+              
               return (
                 <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
                   <div className="w-14 h-14 rounded-full bg-primary/10 border border-transparent flex items-center justify-center overflow-hidden group-hover:bg-primary/20 transition-all duration-300 relative">
@@ -51,7 +65,7 @@ export default function CategoryNav() {
                       </span>
                     )}
                     <span className="material-symbols-outlined text-[26px] text-primary group-hover:scale-110 transition-transform duration-300">
-                      {cat.icon || 'category'}
+                      {displayIcon}
                     </span>
                   </div>
                   <span className="text-xs font-semibold text-text-primary group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>

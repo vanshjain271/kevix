@@ -96,14 +96,14 @@ export default function Header() {
     <header className="w-full sticky top-0 z-50 shadow-md">
       {/* Announcement Ticker */}
       {settings?.tickerEnabled && settings?.tickerText && (
-        <div className="bg-purple-900 text-white text-xs py-2 overflow-hidden relative">
+        <div className="bg-gradient-top-bar text-white text-xs py-2 overflow-hidden relative shadow-md">
           <div className="ticker-track flex whitespace-nowrap">
             {/* Render the text multiple times so it wraps seamlessly */}
             {[...Array(6)].map((_, i) => (
               <span key={i} className="inline-flex items-center gap-3 px-6 shrink-0">
-                <span>📢</span>
-                <span className="font-medium tracking-wide">{settings.tickerText}</span>
-                <span className="text-purple-400 mx-2">•</span>
+                <span>🎁</span>
+                <span className="font-semibold tracking-wide text-[13px]">{settings.tickerText}</span>
+                <span className="text-white/60 mx-2">|</span>
               </span>
             ))}
           </div>
@@ -117,17 +117,17 @@ export default function Header() {
           {/* Stylish KEVIX Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
             <div className="relative">
-              <span className="text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-br from-purple-600 via-violet-600 to-purple-900 bg-clip-text text-transparent select-none group-hover:from-purple-500 group-hover:to-purple-700 transition-all duration-300">
-                KEVI<span className="text-purple-400">X</span>
+              <span className="text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-br from-primary-dark via-primary to-accent bg-clip-text text-transparent select-none group-hover:from-primary group-hover:to-accent transition-all duration-300">
+                KEVI<span className="text-accent-light">X</span>
               </span>
-              <span className="absolute -top-1 -right-3 text-purple-500 text-[9px] md:text-[10px] font-bold tracking-widest uppercase opacity-70">™</span>
+              <span className="absolute -top-1 -right-3 text-accent text-[9px] md:text-[10px] font-bold tracking-widest uppercase opacity-70">™</span>
             </div>
           </Link>
 
           {/* Search Bar with Autocomplete */}
           <div className="order-last md:order-none w-full md:flex-grow md:w-auto relative" ref={searchRef}>
             <form onSubmit={handleSearchSubmit}>
-              <div className="flex items-center w-full bg-gray-50 border-2 border-purple-200 rounded-xl overflow-hidden focus-within:border-purple-500 focus-within:bg-white transition-all duration-200 shadow-sm">
+              <div className="flex items-center w-full bg-gray-50 border-2 border-purple-200 rounded-xl overflow-hidden focus-within:border-primary focus-within:bg-white transition-all duration-200 shadow-sm">
                 <input
                   type="text"
                   value={search}
@@ -136,7 +136,7 @@ export default function Header() {
                   placeholder="Search for accessories..."
                   className="w-full px-4 py-2.5 text-gray-800 outline-none text-sm bg-transparent"
                 />
-                <button type="submit" className="bg-purple-600 text-white px-5 py-2.5 hover:bg-purple-700 transition-colors flex items-center justify-center shrink-0">
+                <button type="submit" className="bg-primary text-white px-5 py-2.5 hover:bg-primary-dark transition-colors flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[20px]">search</span>
                 </button>
               </div>
@@ -147,7 +147,7 @@ export default function Header() {
               <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-2xl border border-purple-100 z-50 overflow-hidden">
                 {isSearching ? (
                   <div className="p-4 flex items-center gap-3 text-gray-500 text-sm">
-                    <span className="material-symbols-outlined animate-spin text-purple-500 text-[18px]">progress_activity</span>
+                    <span className="material-symbols-outlined animate-spin text-primary text-[18px]">progress_activity</span>
                     Searching...
                   </div>
                 ) : suggestions.length > 0 ? (
@@ -165,7 +165,7 @@ export default function Header() {
                           )}
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">{product.name}</p>
-                            <p className="text-xs text-purple-600 font-bold">₹{(product.salePrice || 0).toLocaleString('en-IN')}</p>
+                            <p className="text-xs text-primary font-bold">₹{(product.salePrice || 0).toLocaleString('en-IN')}</p>
                           </div>
                           <span className="material-symbols-outlined text-gray-300 text-[16px] ml-auto shrink-0">north_west</span>
                         </button>
@@ -173,7 +173,7 @@ export default function Header() {
                     })}
                     <button
                       onClick={() => { setShowSuggestions(false); router.push(`/search?q=${encodeURIComponent(search)}`); }}
-                      className="w-full px-4 py-3 text-center text-sm text-purple-600 font-semibold hover:bg-purple-50 transition-colors"
+                      className="w-full px-4 py-3 text-center text-sm text-primary font-semibold hover:bg-purple-50 transition-colors"
                     >
                       See all results for "{search}"
                     </button>
@@ -188,18 +188,18 @@ export default function Header() {
           {/* Actions */}
           <div className="flex items-center gap-5 shrink-0">
             {isAuthenticated ? (
-              <Link href="/account" className="flex flex-col items-center text-gray-700 hover:text-purple-600 transition-colors group">
-                <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-purple-600 transition-colors">person</span>
+              <Link href="/account" className="flex flex-col items-center text-gray-700 hover:text-primary transition-colors group">
+                <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-primary transition-colors">person</span>
                 <span className="text-[10px] font-semibold mt-0.5 truncate max-w-[65px]">{user?.name?.split(' ')[0] || 'Profile'}</span>
               </Link>
             ) : (
-              <button onClick={openLoginModal} className="flex flex-col items-center text-gray-700 hover:text-purple-600 transition-colors group">
-                <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-purple-600 transition-colors">person</span>
+              <button onClick={openLoginModal} className="flex flex-col items-center text-gray-700 hover:text-primary transition-colors group">
+                <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-primary transition-colors">person</span>
                 <span className="text-[10px] font-semibold mt-0.5">Sign In</span>
               </button>
             )}
 
-            <Link href="/wishlist" className="flex flex-col items-center text-gray-700 hover:text-purple-600 transition-colors relative group">
+            <Link href="/wishlist" className="flex flex-col items-center text-gray-700 hover:text-primary transition-colors relative group">
               <div className="relative">
                 <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-red-500 transition-colors" style={{ fontVariationSettings: wishlistItems.length > 0 ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
                 {wishlistItems.length > 0 && (
@@ -220,11 +220,11 @@ export default function Header() {
               <span className="text-[10px] font-semibold mt-0.5">WhatsApp</span>
             </a>
 
-            <Link href="/cart" className="flex flex-col items-center text-gray-700 hover:text-purple-600 transition-colors relative group">
+            <Link href="/cart" className="flex flex-col items-center text-gray-700 hover:text-primary transition-colors relative group">
               <div className="relative">
-                <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-purple-600 transition-colors">shopping_bag</span>
+                <span className="material-symbols-outlined text-[26px] text-gray-500 group-hover:text-primary transition-colors">shopping_bag</span>
                 {cartItems && cartItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
+                  <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
                     {cartItems.length}
                   </span>
                 )}
@@ -236,7 +236,7 @@ export default function Header() {
       </div>
 
       {/* Purple Category Nav Bar */}
-      <nav className="bg-purple-700 text-white font-semibold text-sm shadow-sm relative">
+      <nav className="bg-gradient-primary text-white font-semibold text-sm shadow-md relative border-t border-purple-500/20">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex overflow-x-auto scrollbar-hide items-center relative">
           
           {/* Dropdown Button */}
