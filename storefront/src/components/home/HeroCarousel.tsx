@@ -54,9 +54,9 @@ export default function HeroCarousel() {
           <div 
             key={slide._id || index}
             onClick={() => { if (link) router.push(link); }}
-            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'} bg-primary-dark ${link ? 'cursor-pointer' : ''}`}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'} bg-gradient-hero ${link ? 'cursor-pointer' : ''}`}
           >
-            <div className="absolute inset-0 bg-black/40 z-10"></div>
+            <div className="absolute inset-0 bg-black/20 z-10"></div>
             {imageSrc && (
               <Image 
                 src={imageSrc} 
@@ -73,7 +73,7 @@ export default function HeroCarousel() {
                 <p className="text-white/80 text-base md:text-lg mb-4 max-w-xl drop-shadow">{slide.description}</p>
               )}
               {link && (
-                <a href={link} className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-md font-bold w-max transition-colors shadow-lg mt-4 flex items-center gap-2 text-sm md:text-base">
+                <a href={link} className="bg-gradient-btn-pink hover:opacity-90 text-white px-7 py-3 rounded-full font-bold w-max transition-all shadow-lg shadow-purple-500/40 mt-4 flex items-center gap-2 text-sm md:text-base active:scale-95">
                   Shop Now
                   <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </a>

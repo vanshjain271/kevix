@@ -76,7 +76,19 @@ body {
   overflow: hidden;
 }
 
-/* Custom Utilities */
+/* Custom Utilities — matches reference design */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  background: linear-gradient(to right, #C920A8, #7B2FF7, #4F46E5);
+}
+
+.bg-gradient-top-bar {
+  background: linear-gradient(to right, #C920A8, #7B2FF7, #4F46E5);
+}
+
+.bg-gradient-hero {
+  background: linear-gradient(135deg, #0D0628 0%, #1A0A4E 40%, #2D1B8E 70%, #4C1FB0 100%);
+}
+
+.bg-gradient-btn-pink {
+  background: linear-gradient(to right, #E040C8, #7B2FF7);
 }
