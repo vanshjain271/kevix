@@ -29,6 +29,21 @@ export default function CategoryNav() {
     if (combined.includes('screen') || combined.includes('glass') || combined.includes('protector')) return 'screen_lock_portrait';
     if (combined.includes('stand') || combined.includes('holder') || combined.includes('mount')) return 'phone_in_talk';
     if (combined.includes('accessory') || combined.includes('accessories')) return 'devices_other';
+    
+    // Add more common generic mappings based on user feedback
+    if (combined.includes('light') || combined.includes('lamp') || combined.includes('bulb')) return 'lightbulb';
+    if (combined.includes('umbrella') || combined.includes('rain')) return 'umbrella';
+    if (combined.includes('bag') || combined.includes('backpack')) return 'backpack';
+    if (combined.includes('shoe') || combined.includes('footwear')) return 'ice_skating'; // closest material icon
+    if (combined.includes('cloth') || combined.includes('apparel') || combined.includes('fashion') || combined.includes('wear')) return 'checkroom';
+    if (combined.includes('home') || combined.includes('decor')) return 'home';
+    if (combined.includes('kitchen') || combined.includes('cook')) return 'kitchen';
+    if (combined.includes('toy') || combined.includes('game') || combined.includes('kid')) return 'toys';
+    if (combined.includes('sport') || combined.includes('fitness')) return 'fitness_center';
+    if (combined.includes('beauty') || combined.includes('makeup') || combined.includes('cosmetic')) return 'health_and_beauty';
+    if (combined.includes('book') || combined.includes('read') || combined.includes('stationery')) return 'menu_book';
+    if (combined.includes('electronic') || combined.includes('device') || combined.includes('gadget')) return 'devices';
+    if (combined.includes('pet')) return 'pets';
 
     // Fall back to DB icon only if it's a specific non-generic one
     if (cat.icon && cat.icon !== 'category' && cat.icon !== 'phone_iphone' && cat.icon !== 'smartphone') return cat.icon;
