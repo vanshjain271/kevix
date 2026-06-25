@@ -11,15 +11,29 @@ export default function CategoryNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   const getCategoryIcon = (cat: any) => {
-    if (cat.icon && cat.icon !== 'category') return cat.icon;
-    const name = cat.name?.toLowerCase() || '';
-    if (name.includes('earphone') || name.includes('headphone') || name.includes('audio')) return 'headphones';
-    if (name.includes('cover') || name.includes('case')) return 'phone_iphone';
-    if (name.includes('battery') || name.includes('power')) return 'battery_charging_full';
-    if (name.includes('cable') || name.includes('charger')) return 'cable';
-    if (name.includes('watch') || name.includes('wearable')) return 'watch';
-    if (name.includes('speaker')) return 'speaker';
-    return 'category'; // default
+    const name = (cat.name || '').toLowerCase();
+    const slug = (cat.slug || '').toLowerCase();
+    const combined = name + ' ' + slug;
+
+    // Always match by name first — DB icons are often generic/same for all
+    if (combined.includes('earphone') || combined.includes('earbud') || combined.includes('headphone') || combined.includes('neckband') || combined.includes('audio')) return 'headphones';
+    if (combined.includes('cover') || combined.includes('case') || combined.includes('back')) return 'phone_iphone';
+    if (combined.includes('battery') || combined.includes('power bank') || combined.includes('powerbank')) return 'battery_charging_full';
+    if (combined.includes('cable') || combined.includes('charging') || combined.includes('charger') || combined.includes('adapter')) return 'cable';
+    if (combined.includes('watch') || combined.includes('wearable') || combined.includes('band')) return 'watch';
+    if (combined.includes('speaker') || combined.includes('bluetooth')) return 'speaker';
+    if (combined.includes('mobile') || combined.includes('phone') || combined.includes('smartphone')) return 'smartphone';
+    if (combined.includes('laptop') || combined.includes('computer')) return 'laptop';
+    if (combined.includes('tablet') || combined.includes('ipad')) return 'tablet';
+    if (combined.includes('deal') || combined.includes('offer') || combined.includes('sale')) return 'local_offer';
+    if (combined.includes('screen') || combined.includes('glass') || combined.includes('protector')) return 'screen_lock_portrait';
+    if (combined.includes('stand') || combined.includes('holder') || combined.includes('mount')) return 'phone_in_talk';
+    if (combined.includes('accessory') || combined.includes('accessories')) return 'devices_other';
+
+    // Fall back to DB icon only if it's a specific non-generic one
+    if (cat.icon && cat.icon !== 'category' && cat.icon !== 'phone_iphone' && cat.icon !== 'smartphone') return cat.icon;
+
+    return 'category'; // last resort default
   };
 
   if (isLoading) {
