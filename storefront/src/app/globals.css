@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6B21A8; /* Royal Purple */
-  --color-primary-dark: #581C87;
-  --color-primary-light: #9333EA;
+  --color-primary: #1E5BFF; /* Primary Brand Blue */
+  --color-primary-dark: #0B2E8A; /* Dark Blue */
+  --color-primary-light: #EAF2FF; /* Light Blue Background */
   
-  --color-secondary: #FFFFFF;
-  --color-secondary-dark: #F3F4F6;
+  --color-secondary: #FFFFFF; /* White */
+  --color-secondary-dark: #F8FAFF; /* Off White Background */
   
-  --color-accent: #7E22CE;
-  --color-accent-dark: #581C87;
-  --color-accent-light: #F3E8FF;
+  --color-accent: #6C3BFF; /* Purple Accent */
+  --color-accent-dark: #4A2BCC;
+  --color-accent-light: #A67CFF; /* Light Purple */
   
-  --color-background: #F8FAFC; /* Clean white-slate bg */
-  --color-foreground: #1E1B4B; /* Very dark purple/blue */
+  --color-background: #F8FAFF; /* Off White Background */
+  --color-foreground: #1A1A1A; /* Dark Text */
   
-  --color-surface: #FFFFFF;
-  --color-surface-border: #E2E8F0;
+  --color-surface: #FFFFFF; /* White */
+  --color-surface-border: #E5EAF5; /* Border */
   
-  --color-text-primary: #1E293B;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #94A3B8;
+  --color-text-primary: #1A1A1A; /* Dark Text */
+  --color-text-secondary: #5F6B7A; /* Secondary Text */
+  --color-text-muted: #8A99AB;
   
   --color-success: #22C55E;
   --color-warning: #EAB308;
@@ -74,4 +74,9 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Custom Utilities */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
 }
