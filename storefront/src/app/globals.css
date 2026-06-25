@@ -80,3 +80,16 @@ body {
 .bg-gradient-primary {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
 }
+
+.bg-gradient-top-bar {
+  background: linear-gradient(to right, #6C3BFF, #8A2BE2, #1E5BFF);
+}
+
+.bg-gradient-hero {
+  background: linear-gradient(135deg, #0B2E8A 0%, #1E5BFF 50%, #6C3BFF 100%);
+}
+
+.bg-gradient-btn-pink {
+  background: linear-gradient(to right, #e350ff, #6C3BFF);
+}
+
