@@ -160,7 +160,7 @@ export default function Home() {
       ) : formattedProducts.length > 0 ? (
         <>
           {allSections.map((sectionName) => {
-            const sectionProducts = formattedProducts.filter((p: any) => !p.isLot && p.homepageSections.includes(sectionName));
+            const sectionProducts = formattedProducts.filter((p: any) => p.homepageSections.includes(sectionName));
             if (sectionProducts.length === 0) return null;
             return (
               <ProductCarousel
