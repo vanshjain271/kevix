@@ -490,9 +490,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Description */}
             <div>
               <h3 className="text-xl font-medium text-text-primary mb-4 border-b border-surface-border pb-2">Description</h3>
-              <p className="text-sm text-text-primary leading-relaxed whitespace-pre-line">
-                {displayProduct.description || "No description provided."}
-              </p>
+              <div 
+                className="text-sm text-text-primary leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: displayProduct.description || "No description provided." }}
+              />
             </div>
 
             {/* Reviews Section */}

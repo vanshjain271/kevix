@@ -290,7 +290,8 @@ class ProductService {
         'category', 'brand', 'sku', 'salePrice', 'mrp', 'costPrice',
         'stock', 'hsnCode', 'taxRate', 'variants', 'minOrderQty',
         'maxOrderQty', 'unit', 'warranty', 'isActive', 'sortOrder', 'tags',
-        'colour', 'modal', 'youtubeUrl', 'bulkPricing', 'homepageSections'
+        'colour', 'modal', 'youtubeUrl', 'bulkPricing', 'homepageSections',
+        'availableModels'
       ];
 
       for (const field of allowedFields) {

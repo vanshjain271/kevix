@@ -221,11 +221,10 @@ const productSchema = new mongoose.Schema({
     lowercase: true
   }],
   // Homepage toggles
-  homepageSections: [{
-    type: String,
-    trim: true,
+  homepageSections: {
+    type: [String],
     default: []
-  }],
+  },
   // Bulk/Tiered Pricing
   bulkPricing: [{
     minQty: { type: Number, required: true },
