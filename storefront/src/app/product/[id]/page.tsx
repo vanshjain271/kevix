@@ -182,6 +182,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   <div 
                     key={idx} 
                     onClick={() => setActiveImage(imgStr)}
+                    onMouseEnter={() => setActiveImage(imgStr)}
                     className={`w-16 h-16 border rounded-sm overflow-hidden shrink-0 transition-all cursor-pointer ${activeImage === imgStr ? 'border-primary ring-1 ring-primary' : 'border-surface-border hover:border-text-muted'}`}
                   >
                     <div className="relative w-full h-full pointer-events-none">

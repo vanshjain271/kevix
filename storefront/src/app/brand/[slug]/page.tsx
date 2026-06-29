@@ -8,6 +8,7 @@ import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import HoverZoomImage from '@/components/product/HoverZoomImage';
 import ImageZoom from '@/components/ui/ImageZoom';
+import ProductCardCarousel from '@/components/ui/ProductCardCarousel';
 import api from '@/lib/api';
 import useSWR from 'swr';
 
@@ -52,10 +53,10 @@ function ProductCard({ product }: { product: any }) {
   return (
     <Link href={`/product/${product.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <ImageZoom 
-          src={product.image || product.images?.[0]?.url || DEFAULT_IMG} 
+        <ProductCardCarousel 
+          images={product.images?.length > 0 ? product.images.map((img: any) => img.url || img) : [product.image || DEFAULT_IMG]} 
           alt={product.name} 
-          className="w-full h-full p-3 group-hover:scale-105 transition-transform duration-300" 
+          useHoverZoom={false}
         />
         {product.discount > 0 && <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">{product.discount}% OFF</span>}
         <button onClick={handleWishlist} className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all ${wishlisted ? 'bg-red-50 text-red-500' : 'bg-white/90 text-gray-400 hover:text-red-400'}`}>

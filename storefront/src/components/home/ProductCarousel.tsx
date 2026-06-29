@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
 import ImageZoom from '@/components/ui/ImageZoom';
+import ProductCardCarousel from '@/components/ui/ProductCardCarousel';
 
 interface Product {
   id: string;
@@ -95,7 +96,11 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`} className="group shrink-0 w-44 md:w-52 bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <ImageZoom src={product.image} alt={product.name} className="w-full h-full p-3 group-hover:scale-105 transition-transform duration-300" />
+        <ProductCardCarousel 
+          images={product.images || [product.image]} 
+          alt={product.name} 
+          useHoverZoom={false}
+        />
         {product.discount > 0 && (
           <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
             {product.discount}% OFF

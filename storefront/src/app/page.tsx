@@ -10,6 +10,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import HoverZoomImage from '@/components/product/HoverZoomImage';
+import ProductCardCarousel from '@/components/ui/ProductCardCarousel';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop';
 
@@ -21,6 +22,7 @@ function formatProduct(p: any) {
     mrp: p.mrp || 0,
     discount: p.mrp > 0 ? Math.round(((p.mrp - p.salePrice) / p.mrp) * 100) : 0,
     image: p.images?.[0]?.url || p.images?.[0] || DEFAULT_IMAGE,
+    images: p.images?.length > 0 ? p.images.map((img: any) => img.url || img) : [DEFAULT_IMAGE],
     rating: p.averageRating || 4.5,
     reviews: p.totalReviews || 0,
     homepageSections: p.homepageSections || [],
@@ -67,12 +69,10 @@ function ProductCardGrid({ product }: { product: any }) {
   return (
     <Link href={`/product/${product.id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <HoverZoomImage 
-          src={product.image} 
+        <ProductCardCarousel 
+          images={product.images || [product.image]} 
           alt={product.name} 
-          scale={2}
-          className="w-full h-full"
-          imageClassName="p-3" 
+          useHoverZoom={true}
         />
         {product.discount > 0 && (
           <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">

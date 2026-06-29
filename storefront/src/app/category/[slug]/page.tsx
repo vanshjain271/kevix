@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { use, useState } from 'react';
 import { useCategories, useProducts } from '@/hooks/useApi';
 import HoverZoomImage from '@/components/product/HoverZoomImage';
+import ProductCardCarousel from '@/components/ui/ProductCardCarousel';
 
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -29,6 +30,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     mrp: p.mrp,
     discount: Math.round(((p.mrp - p.salePrice) / p.mrp) * 100),
     image: p.images && p.images.length > 0 ? (p.images[0].url || p.images[0]) : 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop',
+    images: p.images?.length > 0 ? p.images.map((img: any) => img.url || img) : ['https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop'],
     rating: p.averageRating || 4.5,
     reviews: p.totalReviews || 0,
     brand: p.brand?.name || p.brand || 'Generic',
@@ -153,12 +155,10 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               {displayProducts.map((product: any) => (
                 <div key={product.id} className="bg-white border border-surface-border hover:shadow-lg transition-shadow rounded-sm group relative flex flex-col h-full">
                   <Link href={`/product/${product.id}`} className="block relative aspect-square p-4">
-                    <HoverZoomImage 
-                      src={product.image}
+                    <ProductCardCarousel 
+                      images={product.images || [product.image]}
                       alt={product.name}
-                      scale={2}
-                      className="w-full h-full"
-                      imageClassName="p-4"
+                      useHoverZoom={true}
                     />
                     <button className="absolute top-3 right-3 text-text-muted hover:text-primary transition-colors z-10 bg-white/50 rounded-full w-8 h-8 flex items-center justify-center">
                       <span className="material-symbols-outlined text-[20px]">favorite</span>

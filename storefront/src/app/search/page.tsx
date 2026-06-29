@@ -8,6 +8,7 @@ import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProducts } from '@/hooks/useApi';
 import ImageZoom from '@/components/ui/ImageZoom';
+import ProductCardCarousel from '@/components/ui/ProductCardCarousel';
 
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=400';
 
@@ -41,10 +42,10 @@ function ProductCard({ product }: { product: any }) {
   return (
     <Link href={`/product/${id}`} className="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <ImageZoom 
-          src={img} 
+        <ProductCardCarousel 
+          images={product.images || [product.image]} 
           alt={product.name} 
-          className="w-full h-full p-3" 
+          useHoverZoom={false}
         />
         {discount > 0 && <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">{discount}% OFF</span>}
         <button
