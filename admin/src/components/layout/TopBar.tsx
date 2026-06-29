@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { AppBar, Toolbar, Box, IconButton, Badge, Typography, Button, Menu, MenuItem } from '@mui/material';
-import { Notifications, AccountCircle, Storefront, OpenInNew } from '@mui/icons-material';
+import { Notifications, AccountCircle, Storefront, OpenInNew, Menu as MenuIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { SIDEBAR_WIDTH } from '../../theme/theme';
 
-const TopBar: React.FC = () => {
+interface TopBarProps {
+  handleDrawerToggle: () => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({ handleDrawerToggle }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -35,14 +39,23 @@ const TopBar: React.FC = () => {
     <AppBar
       position="fixed"
       sx={{
-        width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
-        ml: `${SIDEBAR_WIDTH}px`,
+        width: { sm: `calc(100% - ${SIDEBAR_WIDTH}px)` },
+        ml: { sm: `${SIDEBAR_WIDTH}px` },
         backgroundColor: '#fff',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
         color: '#1F2937',
       }}
     >
       <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ mr: 2, display: { sm: 'none' } }}
+        >
+          <MenuIcon />
+        </IconButton>
         <Button
           startIcon={<Storefront />}
           endIcon={<OpenInNew fontSize="small" />}

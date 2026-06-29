@@ -69,7 +69,12 @@ const navItems: NavItem[] = [
   },
 ];
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  mobileOpen: boolean;
+  handleDrawerToggle: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, handleDrawerToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { i18n } = useTranslation();
@@ -102,6 +107,9 @@ const Sidebar: React.FC = () => {
       setOpenItems((prev) => ({ ...prev, [item.title]: !prev[item.title] }));
     } else if (item.path) {
       navigate(item.path);
+      if (window.innerWidth < 600) {
+        handleDrawerToggle();
+      }
     }
   };
 
@@ -158,21 +166,8 @@ const Sidebar: React.FC = () => {
     );
   };
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: SIDEBAR_WIDTH,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: SIDEBAR_WIDTH,
-          boxSizing: 'border-box',
-          backgroundColor: SIDEBAR_BG,
-          color: '#0F172A',
-          borderRight: '1px solid #E2E8F0',
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       {/* Store Switcher */}
       <Box sx={{ p: 2 }}>
         <Box 
@@ -226,7 +221,51 @@ const Sidebar: React.FC = () => {
           {i18n.language === 'en' ? 'Switch to Hindi' : 'Switch to English'}
         </Button>
       </Box>
-    </Drawer>
+    </>
+  );
+
+  return (
+    <Box
+      component="nav"
+      sx={{ width: { sm: SIDEBAR_WIDTH }, flexShrink: { sm: 0 } }}
+    >
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: SIDEBAR_WIDTH,
+            backgroundColor: SIDEBAR_BG,
+            color: '#0F172A',
+            borderRight: '1px solid #E2E8F0',
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', sm: 'block' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: SIDEBAR_WIDTH,
+            backgroundColor: SIDEBAR_BG,
+            color: '#0F172A',
+            borderRight: '1px solid #E2E8F0',
+          },
+        }}
+        open
+      >
+        {drawerContent}
+      </Drawer>
+    </Box>
   );
 };
 

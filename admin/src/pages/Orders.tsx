@@ -713,7 +713,7 @@ const Orders: React.FC = () => {
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: 2, gap: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 600 }}>Orders</Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           {selectedRows.length > 0 && (
@@ -729,10 +729,10 @@ const Orders: React.FC = () => {
       </Box>
 
       {/* Search + Date Filter Row */}
-      <Box sx={{ display: 'flex', gap: 1.5, mb: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, mb: 2, alignItems: { xs: 'stretch', sm: 'flex-start' }, flexWrap: 'wrap' }}>
         {/* Search box */}
         <TextField
-          sx={{ flex: 1, minWidth: 280, '& .MuiOutlinedInput-root': { borderRadius: 2, backgroundColor: '#fff', '&:hover fieldset': { borderColor: '#3B82F6' } } }}
+          sx={{ flex: 1, minWidth: { xs: '100%', sm: 280 }, '& .MuiOutlinedInput-root': { borderRadius: 2, backgroundColor: '#fff', '&:hover fieldset': { borderColor: '#3B82F6' } } }}
           placeholder="Search by Order ID, Customer Name, or Phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

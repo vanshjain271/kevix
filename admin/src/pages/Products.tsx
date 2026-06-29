@@ -255,9 +255,9 @@ const Products: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', mb: 3, gap: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>Products</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button variant="outlined" startIcon={<Upload />} onClick={() => setImportOpen(true)}>
             Import CSV
           </Button>
@@ -273,17 +273,17 @@ const Products: React.FC = () => {
         </Alert>
       )}
 
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mb: 3 }}>
         <TextField
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           size="small"
           InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
-          sx={{ width: 350 }}
+          sx={{ width: { xs: '100%', sm: 350 } }}
         />
 
-        <Box sx={{ ml: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box sx={{ ml: { sm: 'auto' }, display: 'flex', gap: 2, alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'flex-end' } }}>
           <Typography variant="body2" color="text.secondary">Sort by:</Typography>
           <TextField
             select
