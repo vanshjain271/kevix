@@ -32,6 +32,16 @@ const _cacheGet = (key) => {
 const _cacheSet = (key, data, ttl) => {
   _cache.set(key, { data, expiresAt: Date.now() + ttl });
 };
+
+// 🧹 Fix for Memory Leak: Automatically clean up expired cache entries every 60 seconds
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of _cache.entries()) {
+    if (now > entry.expiresAt) {
+      _cache.delete(key);
+    }
+  }
+}, 60 * 1000);
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ProductService {
