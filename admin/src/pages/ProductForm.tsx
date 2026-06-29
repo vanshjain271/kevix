@@ -222,6 +222,7 @@ const ProductForm: React.FC = () => {
 
   // New Fields
   const [homepageSections, setHomepageSections] = useState<string[]>([]);
+  const [homepageSectionInput, setHomepageSectionInput] = useState('');
   const [bulkPricing, setBulkPricing] = useState<BulkPriceTier[]>([]);
 
   // UI
@@ -416,7 +417,11 @@ const ProductForm: React.FC = () => {
         formData.append('availableModels', JSON.stringify(cleanedModels));
       }
 
-      formData.append('homepageSections', JSON.stringify(homepageSections));
+      let finalSections = [...homepageSections];
+      if (homepageSectionInput.trim() && !finalSections.includes(homepageSectionInput.trim())) {
+        finalSections.push(homepageSectionInput.trim());
+      }
+      formData.append('homepageSections', JSON.stringify(finalSections));
       if (bulkPricing.length > 0) {
         const cleanedBulk = bulkPricing
           .filter(t => t.minQty && t.salePrice)
@@ -835,6 +840,8 @@ const ProductForm: React.FC = () => {
                   options={[]}
                   value={homepageSections}
                   onChange={(_, newValue) => setHomepageSections(newValue)}
+                  inputValue={homepageSectionInput}
+                  onInputChange={(_, newInputValue) => setHomepageSectionInput(newInputValue)}
                   renderTags={(value: readonly string[], getTagProps) =>
                     value.map((option: string, index: number) => {
                       const { key, ...tagProps } = getTagProps({ index });
