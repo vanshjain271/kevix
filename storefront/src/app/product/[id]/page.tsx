@@ -47,15 +47,34 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   // Image Zoom State
-  const [zoomState, setZoomState] = useState({ isZooming: false, x: 0, y: 0 });
+  const [zoomState, setZoomState] = useState({ isZooming: false, lensLeft: 0, lensTop: 0, bgX: 0, bgY: 0 });
+  
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomState({ isZooming: true, x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+    const mouseX = e.clientX - left;
+    const mouseY = e.clientY - top;
+    
+    // Lens is 40% of the container size
+    const lensW = width * 0.4;
+    const lensH = height * 0.4;
+    
+    const lensLeft = Math.max(0, Math.min(width - lensW, mouseX - lensW / 2));
+    const lensTop = Math.max(0, Math.min(height - lensH, mouseY - lensH / 2));
+    
+    // Background position percentage (0 to 100) based on lens position
+    const bgX = (lensLeft / (width - lensW)) * 100;
+    const bgY = (lensTop / (height - lensH)) * 100;
+    
+    setZoomState({ 
+      isZooming: true, 
+      lensLeft: (lensLeft / width) * 100, // for inline styles in %
+      lensTop: (lensTop / height) * 100,
+      bgX, 
+      bgY 
+    });
   };
   const handleMouseLeave = () => {
-    setZoomState({ isZooming: false, x: 0, y: 0 });
+    setZoomState({ isZooming: false, lensLeft: 0, lensTop: 0, bgX: 0, bgY: 0 });
   };
 
   const getStepQty = (product: any, currentQty: number) => {
@@ -212,12 +231,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {/* Lens overlay (desktop only) */}
               {zoomState.isZooming && activeImage && (
                 <div 
-                  className="hidden md:block absolute pointer-events-none bg-blue-500/10 border border-blue-500/30"
+                  className="hidden md:block absolute pointer-events-none bg-black/5 border border-black/10 backdrop-brightness-105"
                   style={{
                     width: '40%',
                     height: '40%',
-                    left: `${Math.max(0, Math.min(60, zoomState.x - 20))}%`,
-                    top: `${Math.max(0, Math.min(60, zoomState.y - 20))}%`,
+                    left: `${zoomState.lensLeft}%`,
+                    top: `${zoomState.lensTop}%`,
                   }}
                 />
               )}
@@ -231,13 +250,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Side Zoom Window - Only visible on desktop when hovering */}
               {zoomState.isZooming && activeImage && (
-                <div className="hidden md:block absolute top-0 left-full ml-4 w-[600px] h-[500px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-sm pointer-events-none">
+                <div className="hidden md:block absolute top-0 left-full ml-6 w-[500px] h-[500px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-md pointer-events-none animate-zoom-fade">
                   <div 
                     className="w-full h-full bg-no-repeat"
                     style={{
                       backgroundImage: `url(${activeImage})`,
                       backgroundSize: '250%', 
-                      backgroundPosition: `${zoomState.x}% ${zoomState.y}%`,
+                      backgroundPosition: `${zoomState.bgX}% ${zoomState.bgY}%`,
                     }}
                   />
                 </div>

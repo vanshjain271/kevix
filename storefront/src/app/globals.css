@@ -68,6 +68,15 @@ body {
   animation: marquee 20s linear infinite;
 }
 
+@keyframes zoomFade {
+  0% { opacity: 0; transform: scale(0.98) translateX(-10px); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+
+.animate-zoom-fade {
+  animation: zoomFade 0.2s ease-out forwards;
+}
+
 /* Line clamp */
 .line-clamp-2 {
   display: -webkit-box;
