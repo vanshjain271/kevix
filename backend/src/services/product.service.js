@@ -369,6 +369,17 @@ class ProductService {
       };
     }
   }
+
+  /**
+   * Clear all product-related cache
+   */
+  invalidateProductCache() {
+    for (const key of _cache.keys()) {
+      if (key.startsWith('product')) {
+        _cache.delete(key);
+      }
+    }
+  }
 }
 
 module.exports = new ProductService();
