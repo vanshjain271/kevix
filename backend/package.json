@@ -4,7 +4,7 @@
   "description": "Kevix B2B Wholesale Platform Backend",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node --max-old-space-size=150 src/server.js",
     "dev": "nodemon src/server.js",
     "seed:admin": "node src/scripts/seed-admin.js",
     "cron:jobs": "node src/scripts/cron-jobs.js"

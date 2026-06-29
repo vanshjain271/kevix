@@ -112,9 +112,18 @@ app.use(
 
 // Health
 app.get('/', (req, res) => {
+  const os = require('os');
   res.json({
     success: true,
-    message: 'Kevix API running 🚀'
+    message: 'Kevix API running 🚀',
+    memory: {
+      process: process.memoryUsage(),
+      system: {
+        total: Math.round(os.totalmem() / 1024 / 1024) + ' MB',
+        free: Math.round(os.freemem() / 1024 / 1024) + ' MB',
+        loadavg: os.loadavg()
+      }
+    }
   });
 });
 
