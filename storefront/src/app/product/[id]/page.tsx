@@ -47,15 +47,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   // Image Zoom State
-  const [zoomStyle, setZoomStyle] = useState({ transformOrigin: 'center' });
+  const [zoomState, setZoomState] = useState({ isZooming: false, x: 0, y: 0 });
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
-    setZoomStyle({ transformOrigin: `${x}% ${y}%` });
+    setZoomState({ isZooming: true, x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
   };
   const handleMouseLeave = () => {
-    setZoomStyle({ transformOrigin: 'center' });
+    setZoomState({ isZooming: false, x: 0, y: 0 });
   };
 
   const getStepQty = (product: any, currentQty: number) => {
@@ -195,9 +195,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             
             {/* Main Image */}
             <div 
-              className="order-1 md:order-2 flex-grow aspect-square md:aspect-auto md:h-[450px] relative border border-surface-border rounded-sm p-4 group cursor-crosshair overflow-hidden"
+              className="order-1 md:order-2 flex-grow aspect-square md:aspect-auto md:h-[450px] relative border border-surface-border rounded-sm p-4 group cursor-crosshair"
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
+              onMouseEnter={() => setZoomState(prev => ({ ...prev, isZooming: true }))}
             >
               {activeImage && (
                 <Image 
@@ -205,8 +206,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   src={activeImage} 
                   alt={displayProduct.name} 
                   fill 
-                  style={zoomStyle}
-                  className="object-contain p-4 group-hover:scale-[2] transition-transform duration-200" 
+                  className="object-contain p-4" 
+                />
+              )}
+              {/* Lens overlay (desktop only) */}
+              {zoomState.isZooming && activeImage && (
+                <div 
+                  className="hidden md:block absolute pointer-events-none bg-blue-500/10 border border-blue-500/30"
+                  style={{
+                    width: '40%',
+                    height: '40%',
+                    left: `${Math.max(0, Math.min(60, zoomState.x - 20))}%`,
+                    top: `${Math.max(0, Math.min(60, zoomState.y - 20))}%`,
+                  }}
                 />
               )}
               <button 
@@ -216,6 +228,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               >
                 <span className={`material-symbols-outlined text-[24px] ${inWishlist ? 'fill-current' : ''}`}>favorite</span>
               </button>
+
+              {/* Side Zoom Window - Only visible on desktop when hovering */}
+              {zoomState.isZooming && activeImage && (
+                <div className="hidden md:block absolute top-0 left-full ml-4 w-[600px] h-[500px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-sm pointer-events-none">
+                  <div 
+                    className="w-full h-full bg-no-repeat"
+                    style={{
+                      backgroundImage: `url(${activeImage})`,
+                      backgroundSize: '250%', 
+                      backgroundPosition: `${zoomState.x}% ${zoomState.y}%`,
+                    }}
+                  />
+                </div>
+              )}
             </div>
             
           </div>
