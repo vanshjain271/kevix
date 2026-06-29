@@ -43,6 +43,7 @@ const LotForm: React.FC = () => {
   // Status & Images
   const [isActive, setIsActive] = useState(true);
   const [homepageSections, setHomepageSections] = useState<string[]>([]);
+  const [homepageSectionInput, setHomepageSectionInput] = useState('');
   const [images, setImages] = useState<ImagePreview[]>([]);
   const [dragActive, setDragActive] = useState(false);
 
@@ -166,7 +167,11 @@ const LotForm: React.FC = () => {
         category.forEach(catId => formData.append('category', catId));
       }
       formData.append('isActive', String(isActive));
-      formData.append('homepageSections', JSON.stringify(homepageSections));
+      let finalSections = [...homepageSections];
+      if (homepageSectionInput.trim() && !finalSections.includes(homepageSectionInput.trim())) {
+        finalSections.push(homepageSectionInput.trim());
+      }
+      formData.append('homepageSections', JSON.stringify(finalSections));
 
       const lotDetails = {
         fullLotQuantity: parseInt(fullLotQuantity),
@@ -459,6 +464,8 @@ const LotForm: React.FC = () => {
                   options={[]}
                   value={homepageSections}
                   onChange={(_, newValue) => setHomepageSections(newValue)}
+                  inputValue={homepageSectionInput}
+                  onInputChange={(_, newInputValue) => setHomepageSectionInput(newInputValue)}
                   renderTags={(value: readonly string[], getTagProps) =>
                     value.map((option: string, index: number) => {
                       const { key, ...tagProps } = getTagProps({ index });

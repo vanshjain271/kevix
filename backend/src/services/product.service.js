@@ -15,8 +15,8 @@ const Brand = require('../models/Brand');
 const S3Service = require('./s3.service');
 
 // ─── In-Memory Cache ───────────────────────────────────────────────────────────
-const PRODUCT_LIST_TTL = 2 * 60 * 1000;  // 2 minutes for product lists
-const PRODUCT_ITEM_TTL = 5 * 60 * 1000;  // 5 minutes for single products
+const PRODUCT_LIST_TTL = 30 * 1000;  // 30 seconds for product lists (was 2 min, reduced for near-realtime updates)
+const PRODUCT_ITEM_TTL = 60 * 1000;  // 60 seconds for single products (was 5 min)
 const _cache = new Map(); // key → { data, expiresAt }
 
 const _cacheGet = (key) => {
@@ -300,9 +300,12 @@ class ProductService {
         }
       }
 
-      // Force Mongoose to recognize array changes
-      if (updates.images !== undefined) {
-        product.markModified('images');
+      // Force Mongoose to recognize array mutations (including clearing to [])
+      const arrayFields = ['images', 'homepageSections', 'bulkPricing', 'variants', 'availableModels', 'tags', 'category'];
+      for (const field of arrayFields) {
+        if (updates[field] !== undefined) {
+          product.markModified(field);
+        }
       }
 
       await product.save();
