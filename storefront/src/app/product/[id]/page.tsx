@@ -487,6 +487,59 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
+            {/* Product Specifications / Attributes */}
+            {(displayProduct.sku || displayProduct.colour || displayProduct.modal || displayProduct.unit || displayProduct.warranty || displayProduct.youtubeUrl) && (
+              <div className="border-b border-surface-border pb-6 mt-6">
+                <h3 className="text-xl font-medium text-text-primary mb-4 border-b border-surface-border pb-2">Product Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                  {displayProduct.sku && (
+                    <div className="flex flex-col">
+                      <span className="text-text-secondary font-medium">SKU</span>
+                      <span className="text-text-primary">{displayProduct.sku}</span>
+                    </div>
+                  )}
+                  {displayProduct.colour && (
+                    <div className="flex flex-col">
+                      <span className="text-text-secondary font-medium">Colour</span>
+                      <span className="text-text-primary">{displayProduct.colour}</span>
+                    </div>
+                  )}
+                  {displayProduct.modal && (
+                    <div className="flex flex-col">
+                      <span className="text-text-secondary font-medium">Model / Series</span>
+                      <span className="text-text-primary">{displayProduct.modal}</span>
+                    </div>
+                  )}
+                  {displayProduct.unit && (
+                    <div className="flex flex-col">
+                      <span className="text-text-secondary font-medium">Unit</span>
+                      <span className="text-text-primary">{displayProduct.unit}</span>
+                    </div>
+                  )}
+                  {displayProduct.paymentMode && displayProduct.paymentMode !== 'default' && (
+                    <div className="flex flex-col">
+                      <span className="text-text-secondary font-medium">Payment Mode</span>
+                      <span className="text-text-primary">{displayProduct.paymentMode === 'cod' ? 'COD Only' : 'Prepaid Only'}</span>
+                    </div>
+                  )}
+                  {displayProduct.warranty && (
+                    <div className="flex flex-col sm:col-span-2 mt-1">
+                      <span className="text-text-secondary font-medium">Warranty Details</span>
+                      <span className="text-text-primary">{displayProduct.warranty}</span>
+                    </div>
+                  )}
+                  {displayProduct.youtubeUrl && (
+                    <div className="flex flex-col sm:col-span-2 mt-1">
+                      <span className="text-text-secondary font-medium">Product Video</span>
+                      <a href={displayProduct.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 mt-1">
+                        <span className="material-symbols-outlined text-[16px]">smart_display</span> Watch on YouTube
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <div>
               <h3 className="text-xl font-medium text-text-primary mb-4 border-b border-surface-border pb-2">Description</h3>

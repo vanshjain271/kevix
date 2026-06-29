@@ -230,6 +230,12 @@ const productSchema = new mongoose.Schema({
     minQty: { type: Number, required: true },
     salePrice: { type: Number, required: true }
   }],
+  // Payment Mode
+  paymentMode: {
+    type: String,
+    enum: ['default', 'cod', 'prepaid'],
+    default: 'default'
+  },
   // Mobile Models for bulk ordering (e.g. Tempered Glass for 50 different phones)
   availableModels: [{
     name: { type: String, required: true },

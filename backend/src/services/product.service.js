@@ -291,7 +291,7 @@ class ProductService {
         'stock', 'hsnCode', 'taxRate', 'variants', 'minOrderQty',
         'maxOrderQty', 'unit', 'warranty', 'isActive', 'sortOrder', 'tags',
         'colour', 'modal', 'youtubeUrl', 'bulkPricing', 'homepageSections',
-        'availableModels'
+        'availableModels', 'paymentMode'
       ];
 
       for (const field of allowedFields) {
