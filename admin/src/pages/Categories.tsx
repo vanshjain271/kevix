@@ -154,7 +154,6 @@ const Categories: React.FC = () => {
                           </Typography>
                         )}
                         <Typography variant="h6" sx={{ fontSize: isSub ? '1.1rem' : '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{category.icon || 'category'}</span>
                           {category.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">{category.slug}</Typography>
