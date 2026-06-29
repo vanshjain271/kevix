@@ -52,6 +52,28 @@ const submitReview = async (req, res) => {
 };
 
 /**
+ * Customer: Get my reviews
+ * GET /api/v1/reviews/me
+ */
+const getMyReviews = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const reviews = await Review.find({ user: userId })
+            .populate('product', 'name images mrp salePrice discount')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return res.status(200).json({
+            success: true,
+            reviews,
+        });
+    } catch (error) {
+        console.error('Get My Reviews Error:', error);
+        return res.status(500).json({ success: false, message: 'Failed to get your reviews' });
+    }
+};
+
+/**
  * Public: Get approved reviews for a product
  * GET /api/v1/reviews/product/:productId
  */
@@ -190,4 +212,5 @@ module.exports = {
     getAllReviews,
     updateReviewStatus,
     deleteReview,
+    getMyReviews,
 };

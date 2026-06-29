@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useOrders, useAddresses, useWishlist } from '@/hooks/useApi';
+import { useOrders, useAddresses, useWishlist, useMyReviews } from '@/hooks/useApi';
 import api, { API_BASE_URL } from '@/lib/api';
 import HoverZoomImage from '@/components/product/HoverZoomImage';
 
@@ -31,6 +31,7 @@ export default function AccountPage() {
   const { orders, isLoading: isLoadingOrders } = useOrders();
   const { addresses, mutate: mutateAddresses } = useAddresses();
   const { wishlist, isLoading: isLoadingWishlist, mutate: mutateWishlist } = useWishlist();
+  const { reviews: myReviews, isLoading: isLoadingReviews, mutate: mutateReviews } = useMyReviews();
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -529,12 +530,61 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* Other views placeholder */}
+            {/* Reviews View */}
             {['reviews'].includes(activeTab) && (
-              <div className="p-12 text-center flex flex-col items-center justify-center h-full text-text-secondary">
-                <span className="material-symbols-outlined text-[64px] mb-4 opacity-20">construction</span>
-                <h2 className="text-xl font-bold text-text-primary mb-2">Section under construction</h2>
-                <p>This feature will be available soon.</p>
+              <div className="p-4 md:p-8">
+                <h2 className="font-bold text-text-primary mb-6 text-xl">My Reviews & Ratings</h2>
+                {isLoadingReviews ? (
+                  <div className="flex justify-center items-center py-20">
+                    <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+                  </div>
+                ) : myReviews.length > 0 ? (
+                  <div className="space-y-6">
+                    {myReviews.map((review: any) => (
+                      <div key={review._id} className="border border-surface-border rounded-lg p-6 bg-white">
+                        <div className="flex justify-between items-start mb-4">
+                          <Link href={`/product/${review.product?._id}`} className="flex items-center gap-4 group">
+                            {review.product?.images?.[0] && (
+                              <div className="w-16 h-16 rounded-md overflow-hidden bg-surface flex-shrink-0">
+                                <Image src={review.product.images[0]?.url || review.product.images[0]} alt={review.product.name} width={64} height={64} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-semibold text-text-primary group-hover:text-primary transition-colors line-clamp-1">{review.product?.name}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="bg-success text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                                  {review.rating} <span className="material-symbols-outlined text-[10px]">star</span>
+                                </span>
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${review.status === 'APPROVED' ? 'bg-success/10 text-success' : review.status === 'REJECTED' ? 'bg-danger/10 text-danger' : 'bg-yellow-100 text-yellow-700'}`}>
+                                  {review.status}
+                                </span>
+                              </div>
+                            </div>
+                          </Link>
+                          <div className="text-xs text-text-muted text-right">
+                            {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </div>
+                        </div>
+                        
+                        {review.title && <h4 className="font-bold text-text-primary mb-2">{review.title}</h4>}
+                        <p className="text-sm text-text-secondary leading-relaxed mb-4">{review.comment}</p>
+                        
+                        {review.adminReply && (
+                          <div className="bg-surface rounded-md p-4 mt-4 border border-surface-border relative">
+                            <span className="absolute -top-3 left-4 bg-surface px-2 text-[10px] font-bold text-primary uppercase tracking-wider">Kevix Support</span>
+                            <p className="text-sm text-text-secondary">{review.adminReply}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-12 text-center flex flex-col items-center">
+                    <span className="material-symbols-outlined text-[64px] text-surface-border mb-4">rate_review</span>
+                    <h2 className="text-xl font-bold text-text-primary mb-2">No Reviews Yet</h2>
+                    <p className="text-text-secondary mb-6">You haven't reviewed any products yet. Share your experience to help others!</p>
+                  </div>
+                )}
               </div>
             )}
 

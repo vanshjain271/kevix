@@ -46,10 +46,23 @@ export function useOrders() {
 }
 
 export function useReviews(productId: string) {
-  const { data, error, isLoading, mutate } = useSWR(productId ? `/reviews?productId=${productId}` : null, fetcher);
-
+  const { data, error, isLoading, mutate } = useSWR(`/reviews/product/${productId}?page=1&limit=50`, fetcher);
   return {
-    reviews: data?.data?.reviews || [],
+    reviews: data?.reviews || [],
+    stats: {
+      averageRating: data?.averageRating || 0,
+      totalReviews: data?.totalReviews || 0,
+    },
+    isLoading,
+    isError: error,
+    mutate
+  };
+}
+
+export function useMyReviews() {
+  const { data, error, isLoading, mutate } = useSWR('/reviews/me', fetcher);
+  return {
+    reviews: data?.reviews || [],
     isLoading,
     isError: error,
     mutate
