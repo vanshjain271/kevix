@@ -250,7 +250,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Side Zoom Window - Only visible on desktop when hovering */}
               {zoomState.isZooming && activeImage && (
-                <div className="hidden md:block absolute top-0 left-full ml-6 w-[500px] h-[500px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-md pointer-events-none animate-zoom-fade">
+                <div className="hidden lg:block absolute top-0 left-full ml-4 w-[400px] h-[500px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-md pointer-events-none animate-zoom-fade">
                   <div 
                     className="w-full h-full bg-no-repeat"
                     style={{
@@ -266,7 +266,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Right: Product Info */}
-          <div className="w-full md:w-3/5 p-4 md:p-8 space-y-6 pb-24 md:pb-8">
+          <div className={`w-full md:w-3/5 p-4 md:p-8 space-y-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out ${zoomState.isZooming && activeImage ? 'lg:pl-[420px]' : ''}`}>
             
             {/* Title & Rating */}
             <div>
