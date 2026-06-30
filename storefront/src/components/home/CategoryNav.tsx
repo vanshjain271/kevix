@@ -66,7 +66,7 @@ export default function CategoryNav() {
   }
 
   return (
-    <div className="bg-white border-b border-surface-border">
+    <div className="bg-white border-b border-surface-border relative z-40">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <button 
           onClick={() => setIsOpen(!isOpen)}
@@ -80,27 +80,31 @@ export default function CategoryNav() {
         </button>
 
         {isOpen && (
-          <div className="flex overflow-x-auto scrollbar-hide gap-8 py-4 border-t border-gray-100">
-            {categories.map((cat: any) => {
-              const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
-              const displayIcon = getCategoryIcon(cat);
-              
-              return (
-                <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative" style={{background: '#EDE9FE'}}>
-                    {isDeal && (
-                      <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
-                        NEW
-                      </span>
-                    )}
-                    <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
-                      {displayIcon}
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold text-text-primary group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>
-                </Link>
-              );
-            })}
+          <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-xl z-50">
+            <div className="max-w-7xl mx-auto px-4 md:px-8">
+              <div className="flex overflow-x-auto scrollbar-hide gap-8 py-4">
+                {categories.map((cat: any) => {
+                  const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
+                  const displayIcon = getCategoryIcon(cat);
+                  
+                  return (
+                    <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} onClick={() => setIsOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative" style={{background: '#EDE9FE'}}>
+                        {isDeal && (
+                          <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
+                            NEW
+                          </span>
+                        )}
+                        <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
+                          {displayIcon}
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-text-primary group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
