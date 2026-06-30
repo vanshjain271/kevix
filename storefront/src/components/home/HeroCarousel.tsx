@@ -33,7 +33,7 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative w-full h-[280px] md:h-[450px] bg-background overflow-hidden border-b border-surface-border">
+    <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] md:aspect-[2.5/1] lg:aspect-[3/1] xl:aspect-[3.5/1] bg-background overflow-hidden border-b border-surface-border">
       {displayBanners.map((slide: any, index: number) => {
         const isActive = index === current;
         
@@ -56,13 +56,14 @@ export default function HeroCarousel() {
             onClick={() => { if (link) router.push(link); }}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'} bg-gradient-hero ${link ? 'cursor-pointer' : ''}`}
           >
-            <div className="absolute inset-0 bg-black/20 z-10"></div>
+            {/* Only show dark overlay if there's text to make readable */}
+            {(slide.title || slide.description) && <div className="absolute inset-0 bg-black/30 z-10 pointer-events-none"></div>}
             {imageSrc && (
               <Image 
                 src={imageSrc} 
                 alt={slide.title || 'Banner'}
                 fill
-                className="object-cover object-center"
+                className="object-contain object-center"
                 priority={index === 0}
                 onError={(e: any) => { e.target.style.display = 'none'; }}
               />
