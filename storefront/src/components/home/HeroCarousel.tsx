@@ -33,7 +33,7 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] md:aspect-[2.5/1] lg:aspect-[3/1] xl:aspect-[3.5/1] bg-background overflow-hidden border-b border-surface-border">
+    <div className="relative w-full h-[55vw] max-h-[560px] min-h-[200px] bg-black overflow-hidden border-b border-surface-border">
       {displayBanners.map((slide: any, index: number) => {
         const isActive = index === current;
         
@@ -63,7 +63,7 @@ export default function HeroCarousel() {
                 src={imageSrc} 
                 alt={slide.title || 'Banner'}
                 fill
-                className="object-contain object-center"
+                className="object-contain sm:object-cover object-center"
                 priority={index === 0}
                 onError={(e: any) => { e.target.style.display = 'none'; }}
               />
