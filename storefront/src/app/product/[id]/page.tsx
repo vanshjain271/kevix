@@ -250,7 +250,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Side Zoom Window - Only visible on desktop when hovering */}
               {zoomState.isZooming && activeImage && (
-                <div className="hidden lg:block absolute top-0 left-full ml-4 w-[400px] h-[500px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-md pointer-events-none animate-zoom-fade">
+                <div className="hidden lg:block absolute top-0 left-full ml-4 w-[320px] h-[420px] bg-white border border-surface-border shadow-2xl z-50 overflow-hidden rounded-md pointer-events-none animate-zoom-fade">
                   <div 
                     className="w-full h-full bg-no-repeat"
                     style={{
@@ -266,7 +266,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Right: Product Info */}
-          <div className={`w-full md:w-3/5 p-4 md:p-8 space-y-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out ${zoomState.isZooming && activeImage ? 'lg:pl-[420px]' : ''}`}>
+          <div className={`w-full md:w-3/5 p-4 md:p-8 space-y-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out ${zoomState.isZooming && activeImage ? 'lg:pl-[340px]' : ''}`}>
             
             {/* Title & Rating */}
             <div>
@@ -292,7 +292,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {displayProduct.isLot ? (
               <div className="border-b border-surface-border pb-6">
                 <div className="text-xl font-bold text-text-primary mb-4">Select Lot Size</div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex flex-wrap gap-4">
                   {displayProduct.lotDetails?.fullLotQuantity > 0 && (
                     <div 
                       onClick={() => setSelectedLotType('full')}
