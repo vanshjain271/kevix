@@ -41,7 +41,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-text-primary text-lg">Head Office</h3>
                 <p className="text-text-secondary mt-1 whitespace-pre-line">
-                  {settings?.contactAddress || 'Kevix HQ\\nNew Delhi, India'}
+                  {settings?.contactAddress || 'Gitamandir Ahmedabad'}
                 </p>
               </div>
             </div>
