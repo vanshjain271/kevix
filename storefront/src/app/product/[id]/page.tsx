@@ -266,7 +266,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Right: Product Info */}
-          <div className={`w-full md:w-3/5 p-4 md:p-8 space-y-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out ${zoomState.isZooming && activeImage ? 'md:translate-x-[110%] md:opacity-0' : 'md:translate-x-0 md:opacity-100'}`}>
+          <div className="w-full md:w-3/5 p-4 md:p-8 space-y-6 pb-24 md:pb-8">
             
             {/* Title & Rating */}
             <div>
