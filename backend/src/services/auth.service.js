@@ -34,7 +34,7 @@ class AuthService {
     }
     
     // Generate OTP
-    const isTestPhone = ['9999999999', '8888888888'].includes(phone);
+    const isTestPhone = ['9999999999', '8888888888', '+919999999999', '+918888888888'].includes(phone);
     const otp = isTestPhone ? '123456' : SMSService.generateOTP();
     
     // Set OTP on user (hashed)

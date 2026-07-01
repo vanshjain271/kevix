@@ -38,7 +38,7 @@ const authValidation = {
     body('phone')
       .trim()
       .notEmpty().withMessage('Phone number is required')
-      .matches(/^[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit Indian phone number'),
+      .matches(/^(?:\+91)?[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit Indian phone number (with or without +91)'),
     handleValidationErrors
   ],
   
@@ -46,7 +46,7 @@ const authValidation = {
     body('phone')
       .trim()
       .notEmpty().withMessage('Phone number is required')
-      .matches(/^[6-9]\d{9}$/).withMessage('Invalid phone number'),
+      .matches(/^(?:\+91)?[6-9]\d{9}$/).withMessage('Invalid phone number'),
     body('otp')
       .trim()
       .notEmpty().withMessage('OTP is required')
