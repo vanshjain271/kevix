@@ -113,6 +113,9 @@ const createProduct = async (req, res) => {
     if (typeof productData.lotDetails === 'string') {
       try { productData.lotDetails = JSON.parse(productData.lotDetails); } catch (err) { console.error('Failed to parse lotDetails:', err); }
     }
+    if (typeof productData.availableModels === 'string') {
+      try { productData.availableModels = JSON.parse(productData.availableModels); } catch (err) { console.error('Failed to parse availableModels:', err); }
+    }
 
     const result = await ProductService.createProduct(productData, imageFiles);
 
@@ -169,6 +172,9 @@ const updateProduct = async (req, res) => {
     }
     if (typeof updates.lotDetails === 'string') {
       try { updates.lotDetails = JSON.parse(updates.lotDetails); } catch (err) { console.error('Failed to parse lotDetails:', err); }
+    }
+    if (typeof updates.availableModels === 'string') {
+      try { updates.availableModels = JSON.parse(updates.availableModels); } catch (err) { console.error('Failed to parse availableModels:', err); }
     }
 
     const result = await ProductService.updateProduct(productId, updates, newImageFiles);
