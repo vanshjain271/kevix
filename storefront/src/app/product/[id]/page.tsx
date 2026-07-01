@@ -402,11 +402,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <button 
                   onClick={async (e) => {
                     e.preventDefault();
+                    if (!isAuthenticated) { openLoginModal(); return; }
                     if (displayProduct.hasModels) {
                       setIsModelsModalOpen(true);
                       return;
                     }
-                    if (!isAuthenticated) { openLoginModal(); return; }
                     let qty = 1;
                     if (displayProduct.isLot && displayProduct.lotDetails) {
                       if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;
@@ -434,11 +434,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <button 
                 onClick={async (e) => {
                   e.preventDefault();
+                  if (!isAuthenticated) { openLoginModal(); return; }
                   if (displayProduct.hasModels) {
                     setIsModelsModalOpen(true);
                     return;
                   }
-                  if (!isAuthenticated) { openLoginModal(); return; }
                   let qty = 1;
                   if (displayProduct.isLot && displayProduct.lotDetails) {
                     if (selectedLotType === 'full') qty = displayProduct.lotDetails.fullLotQuantity;

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
 interface ModelsOrderModalProps {
   product: any;
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface ModelsOrderModalProps {
 
 export default function ModelsOrderModal({ product, isOpen, onClose }: ModelsOrderModalProps) {
   const { addToCart, isLoading } = useCartStore();
+  const { isAuthenticated, openLoginModal } = useAuthStore();
   const [modelQuantities, setModelQuantities] = useState<Record<string, number>>({});
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState('');
@@ -31,6 +33,11 @@ export default function ModelsOrderModal({ product, isOpen, onClose }: ModelsOrd
   };
 
   const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
     if (totalQuantity < minOrderQty) {
       setError(`Total quantity must be at least ${minOrderQty} to meet MOQ.`);
       return;
