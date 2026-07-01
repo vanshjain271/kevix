@@ -185,13 +185,13 @@ export default function ProductCarousel({ title, subtitle, products, viewAllLink
   return (
     <section className="bg-white py-6 border-b border-purple-50">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-extrabold text-gray-900">{title}</h2>
-            {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        <div className="flex items-center justify-between mb-4 gap-4">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-extrabold text-gray-900 truncate" title={title}>{title}</h2>
+            {subtitle && <p className="text-sm text-gray-500 mt-0.5 truncate" title={subtitle}>{subtitle}</p>}
           </div>
           {viewAllLink && (
-            <Link href={viewAllLink} className="text-sm text-purple-600 font-bold hover:underline flex items-center gap-1">
+            <Link href={viewAllLink} className="shrink-0 text-sm text-purple-600 font-bold hover:underline flex items-center gap-1">
               View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           )}

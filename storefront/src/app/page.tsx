@@ -162,11 +162,15 @@ export default function Home() {
           {allSections.map((sectionName) => {
             const sectionProducts = formattedProducts.filter((p: any) => p.homepageSections.includes(sectionName));
             if (sectionProducts.length === 0) return null;
+            
+            // If the section name is a long comma-separated SEO string, just take the first part
+            const displayTitle = (sectionName as string).split(',')[0].trim();
+            
             return (
               <ProductCarousel
                 key={sectionName as string}
-                title={sectionName as string}
-                subtitle={`Explore our ${sectionName} picks`}
+                title={displayTitle}
+                subtitle={`Explore our ${displayTitle} collection`}
                 products={sectionProducts}
                 viewAllLink={`/search?section=${encodeURIComponent(sectionName as string)}`}
               />
