@@ -22,7 +22,7 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Phone number is required'],
     trim: true,
-    match: [/^[6-9]\d{9}$/, 'Invalid phone number']
+    match: [/^(?:\+91)?[6-9]\d{9}$/, 'Invalid phone number']
   },
   addressLine1: {
     type: String,
@@ -90,7 +90,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     sparse: true,
     trim: true,
-    match: [/^[6-9]\d{9}$/, 'Invalid Indian phone number']
+    match: [/^(?:\+91)?[6-9]\d{9}$/, 'Invalid Indian phone number']
   },
   email: {
     type: String,
