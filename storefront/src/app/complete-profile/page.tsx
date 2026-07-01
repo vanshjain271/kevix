@@ -32,10 +32,15 @@ export default function CompleteProfilePage() {
 
     // Pre-fill existing details
     if (user) {
+      let strippedPhone = user.phone || '';
+      if (strippedPhone.startsWith('+91')) {
+        strippedPhone = strippedPhone.substring(3);
+      }
+      
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        phone: user.phone || '',
+        phone: strippedPhone,
       });
     }
   }, [isAuthenticated, user, router]);
@@ -63,7 +68,11 @@ export default function CompleteProfilePage() {
 
     setLoading(true);
     try {
-      const res = await api.put('/users/me', formData);
+      const payload = {
+        ...formData,
+        phone: formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`
+      };
+      const res = await api.put('/users/me', payload);
       if (res.data.success) {
         // Update user context
         setAuth(useAuthStore.getState().token || '', res.data.user);
