@@ -73,7 +73,7 @@ const userValidation = {
     body('phone')
       .optional()
       .trim()
-      .matches(/^[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit Indian phone number'),
+      .matches(/^(?:\+91)?[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit Indian phone number'),
     body('addresses')
       .optional()
       .isArray().withMessage('Addresses must be an array'),
@@ -85,7 +85,7 @@ const userValidation = {
     body('addresses.*.phone')
       .optional()
       .trim()
-      .matches(/^[6-9]\d{9}$/).withMessage('Invalid phone number'),
+      .matches(/^(?:\+91)?[6-9]\d{9}$/).withMessage('Invalid phone number'),
     body('addresses.*.addressLine1')
       .optional()
       .trim()
