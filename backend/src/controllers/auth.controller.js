@@ -42,7 +42,7 @@ const sendOTP = async (req, res) => {
     console.error('Send OTP Error:', error);
     return res.status(500).json({
       success: false,
-      message: 'An error occurred while sending OTP'
+      message: error.message || 'An error occurred while sending OTP'
     });
   }
 };
@@ -72,7 +72,7 @@ const verifyOTP = async (req, res) => {
     console.error('Verify OTP Error:', error);
     return res.status(500).json({
       success: false,
-      message: 'An error occurred while verifying OTP'
+      message: error.message || 'An error occurred while verifying OTP'
     });
   }
 };
