@@ -28,7 +28,7 @@ function formatProduct(p: any) {
     homepageSections: p.homepageSections || [],
     isLot: p.isLot || false,
     lotDetails: p.lotDetails || null,
-    categoryName: p.category?.name || 'Uncategorized',
+    categoryName: (Array.isArray(p.category) && p.category.length > 0) ? p.category[0].name : (p.category?.name || 'Uncategorized'),
   };
 }
 
