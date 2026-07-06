@@ -469,7 +469,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <span className="material-symbols-outlined text-[18px]">list_alt</span> BULK INQUIRE
               </button>
               <a 
-                href={`https://wa.me/918866847353?text=Hi, I want to enquire about ${encodeURIComponent(displayProduct.name)}. Link: ${typeof window !== 'undefined' ? window.location.href : ''}`}
+                href={`https://wa.me/917428143728?text=Hi, I want to enquire about ${encodeURIComponent(displayProduct.name)}. Link: ${typeof window !== 'undefined' ? window.location.href : ''}`}
                 target="_blank" rel="noopener noreferrer"
                 className="flex-1 min-w-[140px] bg-[#25D366] hover:bg-[#1DA851] text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow"
               >

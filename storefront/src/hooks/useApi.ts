@@ -85,7 +85,7 @@ export function useBanners() {
   return { banners: data?.banners || [], error, isLoading };
 }
 
-export function useProducts(categoryId?: string | null, search?: string, limit: number = 200) {
+export function useProducts(categoryId?: string | null, search?: string, limit: number = 100) {
   const queryParams = new URLSearchParams();
   if (categoryId) queryParams.append('categoryId', categoryId);
   if (search) queryParams.append('search', search);

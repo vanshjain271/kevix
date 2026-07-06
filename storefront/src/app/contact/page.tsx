@@ -53,7 +53,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-text-primary text-lg">Phone Number</h3>
                 <p className="text-text-secondary mt-1">
-                  <a href={`tel:${settings?.contactPhone || '+918866847353'}`} className="hover:text-accent transition-colors">
+                  <a href={`tel:${settings?.contactPhone || '+917428143728'}`} className="hover:text-accent transition-colors">
                     {settings?.contactPhone || '+91 88668 47353'}
                   </a>
                 </p>

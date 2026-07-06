@@ -194,7 +194,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                         Add to Cart
                       </Link>
                       <a 
-                        href={`https://wa.me/918866847353?text=Hi, I want to inquire about ${product.name}`} 
+                        href={`https://wa.me/917428143728?text=Hi, I want to inquire about ${product.name}`} 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="w-9 h-9 shrink-0 flex items-center justify-center border border-[#25D366] text-[#25D366] rounded-sm hover:bg-[#25D366] hover:text-white transition-colors"

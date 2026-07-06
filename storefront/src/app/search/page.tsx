@@ -69,7 +69,7 @@ function ProductCard({ product }: { product: any }) {
               : <><span className="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add</>}
           </button>
           <a 
-            href={`https://wa.me/918866847353?text=Hi, I want to inquire about ${product.name}`} 
+            href={`https://wa.me/917428143728?text=Hi, I want to inquire about ${product.name}`} 
             target="_blank" 
             rel="noopener noreferrer" 
             onClick={(e) => e.stopPropagation()}

@@ -211,7 +211,7 @@ export default function Header() {
               <span className="text-[10px] font-semibold mt-0.5">Wishlist</span>
             </Link>
 
-            <a href="https://wa.me/918866847353" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-green-600 hover:text-green-500 transition-colors group">
+            <a href="https://wa.me/917428143728" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-green-600 hover:text-green-500 transition-colors group">
               <div className="relative flex items-center justify-center">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-[26px] h-[26px]">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
@@ -249,30 +249,57 @@ export default function Header() {
               All Categories
               <span className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${isCategoryMenuOpen ? 'rotate-180' : ''}`}>arrow_drop_down</span>
             </button>
-            
-            {/* Dropdown Menu */}
-            {isCategoryMenuOpen && (
-              <div className="absolute top-full left-0 mt-0 w-64 bg-white rounded-b-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <Link 
-                  href="/category/all" 
-                  onClick={() => setIsCategoryMenuOpen(false)}
-                  className="block px-5 py-2.5 text-gray-800 hover:bg-purple-50 hover:text-purple-700 transition-colors"
-                >
-                  View All Products
-                </Link>
-                {categories && categories.map((cat: any) => (
-                  <Link 
-                    key={cat._id} 
-                    href={`/category/${cat.slug}`} 
-                    onClick={() => setIsCategoryMenuOpen(false)}
-                    className="block px-5 py-2.5 text-gray-800 hover:bg-purple-50 hover:text-purple-700 transition-colors capitalize"
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Emoji Category Popup Dropdown (Replaces the vertical text one) */}
+          {isCategoryMenuOpen && (
+            <div className="absolute top-full left-0 right-0 bg-white shadow-xl z-50 border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200" ref={categoryMenuRef}>
+              <div className="max-w-7xl mx-auto px-4 md:px-8">
+                <div className="flex overflow-x-auto scrollbar-hide gap-8 py-6">
+                  {categories && categories.map((cat: any) => {
+                    const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
+                    // We need getCategoryIcon defined in Header
+                    const name = (cat.name || '').toLowerCase();
+                    const slug = (cat.slug || '').toLowerCase();
+                    const combined = name + ' ' + slug;
+                    
+                    let displayIcon = 'category';
+                    if (combined.includes('earphone') || combined.includes('earbud') || combined.includes('headphone') || combined.includes('neckband') || combined.includes('audio')) displayIcon = 'headphones';
+                    else if (combined.includes('cover') || combined.includes('case') || combined.includes('back')) displayIcon = 'phone_iphone';
+                    else if (combined.includes('battery') || combined.includes('power bank') || combined.includes('powerbank')) displayIcon = 'battery_charging_full';
+                    else if (combined.includes('cable') || combined.includes('charging') || combined.includes('charger') || combined.includes('adapter')) displayIcon = 'cable';
+                    else if (combined.includes('watch') || combined.includes('wearable') || combined.includes('band')) displayIcon = 'watch';
+                    else if (combined.includes('speaker') || combined.includes('bluetooth')) displayIcon = 'speaker';
+                    else if (cat.icon && cat.icon !== 'category' && cat.icon !== 'phone_iphone' && cat.icon !== 'smartphone') displayIcon = cat.icon;
+
+                    return (
+                      <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} onClick={() => setIsCategoryMenuOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative" style={{background: '#EDE9FE'}}>
+                          {isDeal && (
+                            <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
+                              NEW
+                            </span>
+                          )}
+                          <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
+                            {displayIcon}
+                          </span>
+                        </div>
+                        <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>
+                      </Link>
+                    );
+                  })}
+                  <Link href="/category/all" onClick={() => setIsCategoryMenuOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
+                    <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative bg-gray-100">
+                      <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300 text-gray-600">
+                        apps
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">View All</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Horizontal Scrollable Categories */}
           <div className="flex overflow-x-auto scrollbar-hide py-2.5 gap-6 items-center w-full">

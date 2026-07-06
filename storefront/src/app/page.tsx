@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import CategoryNav from '@/components/home/CategoryNav';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import ProductCarousel from '@/components/home/ProductCarousel';
 import { useProducts } from '@/hooks/useApi';
@@ -124,7 +123,6 @@ export default function Home() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <CategoryNav />
       <HeroCarousel />
 
 
