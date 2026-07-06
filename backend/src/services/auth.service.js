@@ -196,6 +196,7 @@ class AuthService {
         };
       }
 
+      let user;
       let isNewUser = false;
 
       // 2. Find or create user in our MongoDB
