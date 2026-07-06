@@ -7,8 +7,7 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../../models/Category');
 const { authenticate } = require('../../middleware/auth.middleware');
-const S3Service = require('../../services/s3.service');
-const s3Service = new S3Service();
+const s3Service = require('../../services/s3.service');
 const { handleSingleUpload } = require('../../middleware/upload.middleware');
 
 // All routes require authentication
