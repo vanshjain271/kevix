@@ -236,11 +236,11 @@ export default function Header() {
       </div>
 
       {/* Purple Category Nav Bar */}
-      <nav className="bg-gradient-primary text-white font-semibold text-sm shadow-md relative border-t border-purple-500/20">
+      <nav className="bg-gradient-primary text-white font-semibold text-sm shadow-md relative border-t border-purple-500/20" ref={categoryMenuRef}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex overflow-x-auto scrollbar-hide items-center relative">
           
           {/* Dropdown Button */}
-          <div className="relative shrink-0 border-r border-purple-600 pr-4 mr-4 py-2.5" ref={categoryMenuRef}>
+          <div className="relative shrink-0 border-r border-purple-600 pr-4 mr-4 py-2.5">
             <button 
               onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
               className="whitespace-nowrap hover:text-purple-200 transition-colors flex items-center gap-1.5 focus:outline-none"
@@ -253,7 +253,7 @@ export default function Header() {
 
           {/* Emoji Category Popup Dropdown (Replaces the vertical text one) */}
           {isCategoryMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-white shadow-xl z-50 border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200" ref={categoryMenuRef}>
+            <div className="absolute top-full left-0 right-0 bg-white shadow-xl z-50 border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="max-w-7xl mx-auto px-4 md:px-8">
                 <div className="flex overflow-x-auto scrollbar-hide gap-8 py-6">
                   {categories && categories.map((cat: any) => {
