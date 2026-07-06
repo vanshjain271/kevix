@@ -98,6 +98,8 @@ class AuthService {
       };
     }
     
+    const isNewUser = !user.lastLoginAt;
+
     // Verify OTP
     const verification = await user.verifyOTP(otp);
     
@@ -126,6 +128,7 @@ class AuthService {
       success: true,
       message: 'OTP verified successfully',
       token,
+      isNewUser,
       user: userData
     };
   }
@@ -193,15 +196,18 @@ class AuthService {
         };
       }
 
-      let user;
+      let isNewUser = false;
 
       // 2. Find or create user in our MongoDB
       if (phone_number) {
         const cleanedPhone = phone_number.replace(/\D/g, '').slice(-10);
+        const existing = await User.findOne({ phone: cleanedPhone });
+        if (!existing) isNewUser = true;
         user = await User.findOrCreateByPhone(cleanedPhone);
       } else if (email) {
         user = await User.findOne({ email });
         if (!user) {
+          isNewUser = true;
           user = await User.create({
             email,
             name: name || '',
@@ -242,6 +248,7 @@ class AuthService {
         success: true,
         message: 'Login successful via Firebase',
         token,
+        isNewUser,
         user: userData
       };
     } catch (error) {

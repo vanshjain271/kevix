@@ -59,7 +59,7 @@ export default function AuthModal() {
       const res = await api.post('/auth/firebase-login', { idToken });
       
       if (res.data.success) {
-        const { token, user } = res.data;
+        const { token, user, isNewUser } = res.data;
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         let updatedUser = user;
@@ -79,8 +79,8 @@ export default function AuthModal() {
         setAuth(token, updatedUser);
         handleClose();
         
-        // Redirect to complete profile if they logged in but don't have basic details
-        if (mode === 'login' && (!updatedUser.name || !updatedUser.email)) {
+        // Redirect to complete profile ONLY if this is a brand new user
+        if (isNewUser) {
           router.push('/complete-profile');
         }
       } else {

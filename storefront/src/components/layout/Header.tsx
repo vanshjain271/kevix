@@ -42,15 +42,6 @@ export default function Header() {
 
   const pathname = usePathname();
   
-  // Force profile completion
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const { name, email, phone } = user;
-      if ((!name || !email || !phone) && pathname !== '/complete-profile') {
-        router.push('/complete-profile');
-      }
-    }
-  }, [isAuthenticated, user, pathname, router]);
 
   const fetchSuggestions = async (query: string) => {
     if (query.length < 2) { setSuggestions([]); return; }

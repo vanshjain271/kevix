@@ -66,6 +66,7 @@ const verifyOTP = async (req, res) => {
       success: true,
       message: result.message,
       token: result.token,
+      isNewUser: result.isNewUser,
       user: result.user
     });
   } catch (error) {
@@ -103,6 +104,7 @@ const firebaseLogin = async (req, res) => {
       success: true,
       message: result.message,
       token: result.token,
+      isNewUser: result.isNewUser,
       user: result.user
     });
   } catch (error) {
