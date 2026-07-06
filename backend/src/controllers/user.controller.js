@@ -64,9 +64,16 @@ const updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('Update Profile Error:', error);
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'field';
+      return res.status(400).json({
+        success: false,
+        message: `This ${field} is already registered with another account.`
+      });
+    }
     return res.status(500).json({
       success: false,
-      message: 'An error occurred while updating profile'
+      message: error.message || 'An error occurred while updating profile'
     });
   }
 };
