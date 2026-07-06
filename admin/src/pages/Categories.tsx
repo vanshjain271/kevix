@@ -13,6 +13,7 @@ interface Category {
   slug: string;
   description?: string;
   icon?: string;
+  image?: string;
   isActive: boolean;
   parent?: string | { _id: string; name: string } | null;
   level?: number;
@@ -26,7 +27,7 @@ const Categories: React.FC = () => {
   const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
-  const [form, setForm] = useState<{ name: string; description: string; isActive: boolean; parent: string }>({ ...emptyForm, parent: '' });
+  const [form, setForm] = useState<{ name: string; description: string; isActive: boolean; parent: string; imageFile: File | null; imagePreview: string | null }>({ ...emptyForm, parent: '', imageFile: null, imagePreview: null });
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -47,14 +48,14 @@ const Categories: React.FC = () => {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ ...emptyForm, parent: '' });
+    setForm({ ...emptyForm, parent: '', imageFile: null, imagePreview: null });
     setDialogOpen(true);
   };
 
   const openEdit = (cat: Category) => {
     setEditing(cat);
     const parentId = typeof cat.parent === 'string' ? cat.parent : cat.parent?._id || '';
-    setForm({ name: cat.name, description: cat.description || '', isActive: cat.isActive, parent: parentId });
+    setForm({ name: cat.name, description: cat.description || '', isActive: cat.isActive, parent: parentId, imageFile: null, imagePreview: cat.image || null });
     setDialogOpen(true);
   };
 
@@ -62,18 +63,22 @@ const Categories: React.FC = () => {
     if (!form.name.trim()) return;
     setSaving(true);
     try {
-      const payload = {
-        name: form.name.trim(),
-        description: form.description,
-        isActive: form.isActive,
-        parent: form.parent || ''
-      };
+      const formData = new FormData();
+      formData.append('name', form.name.trim());
+      formData.append('description', form.description);
+      formData.append('isActive', String(form.isActive));
+      if (form.parent) formData.append('parent', form.parent);
+      if (form.imageFile) formData.append('image', form.imageFile);
 
       if (editing) {
-        await apiClient.put(`/admin/categories/${editing._id}`, payload);
+        await apiClient.put(`/admin/categories/${editing._id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         setSnackbar({ open: true, message: 'Category updated!', severity: 'success' });
       } else {
-        await apiClient.post('/admin/categories', payload);
+        await apiClient.post('/admin/categories', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         setSnackbar({ open: true, message: 'Category created!', severity: 'success' });
       }
       setDialogOpen(false);
@@ -154,6 +159,7 @@ const Categories: React.FC = () => {
                           </Typography>
                         )}
                         <Typography variant="h6" sx={{ fontSize: isSub ? '1.1rem' : '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {category.image && <img src={category.image} alt={category.name} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
                           {category.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">{category.slug}</Typography>
@@ -221,6 +227,26 @@ const Categories: React.FC = () => {
               <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
             ))}
           </TextField>
+            <Box sx={{ mt: 3, mb: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Category Image</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {(form.imagePreview) && (
+                  <img src={form.imagePreview} alt="Preview" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover' }} />
+                )}
+                <Button variant="outlined" component="label" startIcon={<CloudUpload />}>
+                  Upload Image
+                  <input type="file" hidden accept="image/*" onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      setForm({ ...form, imageFile: file, imagePreview: URL.createObjectURL(file) });
+                    }
+                  }} />
+                </Button>
+                {form.imageFile && (
+                  <Typography variant="caption" color="text.secondary">{form.imageFile.name}</Typography>
+                )}
+              </Box>
+            </Box>
           <FormControlLabel
             control={<Switch checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />}
             label="Active"

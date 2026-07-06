@@ -292,9 +292,13 @@ export default function Header() {
                             NEW
                           </span>
                         )}
-                        <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
-                          {displayIcon}
-                        </span>
+                        {cat.image ? (
+                          <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                        ) : (
+                          <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
+                            {displayIcon}
+                          </span>
+                        )}
                       </div>
                       <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>
                     </Link>

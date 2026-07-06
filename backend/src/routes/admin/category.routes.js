@@ -8,6 +8,8 @@ const router = express.Router();
 const Category = require('../../models/Category');
 const { authenticate } = require('../../middleware/auth.middleware');
 const S3Service = require('../../services/s3.service');
+const s3Service = new S3Service();
+const { handleSingleUpload } = require('../../middleware/upload.middleware');
 
 // All routes require authentication
 router.use(authenticate);
@@ -39,16 +41,25 @@ router.get('/', async (req, res) => {
  * POST /api/v1/admin/categories
  * Create new category
  */
-router.post('/', async (req, res) => {
+router.post('/', handleSingleUpload, async (req, res) => {
     try {
         let { name, description, parent, isActive, sortOrder } = req.body;
+        let image = null;
+
+        if (req.file) {
+            const uploadResult = await s3Service.uploadFile(req.file, 'categories');
+            if (uploadResult.success) {
+                image = uploadResult.url;
+            }
+        }
 
         const category = new Category({
             name,
             description,
             parent: parent || null,
             isActive: isActive !== 'false' && isActive !== false,
-            sortOrder: sortOrder || 0
+            sortOrder: sortOrder || 0,
+            image
         });
 
         await category.save();
@@ -79,7 +90,7 @@ router.post('/', async (req, res) => {
  * PUT /api/v1/admin/categories/:id
  * Update category
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', handleSingleUpload, async (req, res) => {
     try {
         let { name, description, parent, isActive, sortOrder } = req.body;
 
@@ -97,6 +108,17 @@ router.put('/:id', async (req, res) => {
         if (parent !== undefined) category.parent = parent || null;
         if (isActive !== undefined) category.isActive = isActive !== 'false' && isActive !== false;
         if (sortOrder !== undefined) category.sortOrder = sortOrder;
+
+        if (req.file) {
+            const uploadResult = await s3Service.uploadFile(req.file, 'categories');
+            if (uploadResult.success) {
+                // Delete old image if it exists
+                if (category.image) {
+                    await s3Service.deleteFile(category.image);
+                }
+                category.image = uploadResult.url;
+            }
+        }
 
         await category.save();
 
@@ -127,6 +149,10 @@ router.delete('/:id', async (req, res) => {
                 success: false,
                 message: 'Category not found'
             });
+        }
+
+        if (category.image) {
+            await s3Service.deleteFile(category.image);
         }
 
         res.json({
