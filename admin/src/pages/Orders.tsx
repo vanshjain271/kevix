@@ -468,20 +468,16 @@ const Orders: React.FC = () => {
     
     setLoading(true);
     try {
-      const resp = await fetch(`${API_BASE}/admin/orders/${order._id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      const data = await resp.json();
-      if (data.success) {
+      const resp = await apiClient.delete(`/admin/orders/${order._id}`);
+      if (resp.data && resp.data.success) {
         showToast('Order deleted successfully', 'success');
         setDetailOpen(false);
         fetchOrders(); // Refresh list
       } else {
-        showToast(data.message || 'Failed to delete order', 'error');
+        showToast(resp.data?.message || 'Failed to delete order', 'error');
       }
-    } catch (err) {
-      showToast('Error deleting order', 'error');
+    } catch (err: any) {
+      showToast(err.response?.data?.message || 'Error deleting order', 'error');
     } finally {
       setLoading(false);
     }
