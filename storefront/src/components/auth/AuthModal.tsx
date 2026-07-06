@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { auth, googleProvider, RecaptchaVerifier, signInWithPhoneNumber } from '@/lib/firebase';
+import { signInWithPopup, ConfirmationResult } from 'firebase/auth';
 
 export default function AuthModal() {
   const router = useRouter();
@@ -18,7 +20,21 @@ export default function AuthModal() {
   const [step, setStep] = useState<'form' | 'otp'>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [devOtp, setDevOtp] = useState('');
+  
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
+
+  useEffect(() => {
+    if (isLoginModalOpen && !recaptchaVerifier.current && auth) {
+      try {
+        recaptchaVerifier.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible'
+        });
+      } catch (err) {
+        console.error('Failed to initialize recaptcha:', err);
+      }
+    }
+  }, [isLoginModalOpen]);
 
   if (!isLoginModalOpen) return null;
 
@@ -30,12 +46,52 @@ export default function AuthModal() {
     setOtp('');
     setStep('form');
     setError('');
-    setDevOtp('');
+    setConfirmationResult(null);
   };
 
   const handleClose = () => {
     resetModal();
     closeLoginModal();
+  };
+
+  const processFirebaseToken = async (idToken: string) => {
+    try {
+      const res = await api.post('/auth/firebase-login', { idToken });
+      
+      if (res.data.success) {
+        const { token, user } = res.data;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        let updatedUser = user;
+
+        // If in signup mode, update the newly created profile with the extra fields
+        if (mode === 'signup' && phone) {
+          try {
+            const profileRes = await api.put('/users/me', { name, email });
+            if (profileRes.data.success) {
+              updatedUser = profileRes.data.user;
+            }
+          } catch (profileErr) {
+            console.error('Failed to update profile after signup:', profileErr);
+          }
+        }
+
+        setAuth(token, updatedUser);
+        handleClose();
+        
+        // Redirect to complete profile if they logged in but don't have basic details
+        if (mode === 'login' && (!updatedUser.name || !updatedUser.email)) {
+          router.push('/complete-profile');
+        }
+      } else {
+        setError(res.data.message || 'Login failed.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || err.message || 'Server error during login.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -51,19 +107,21 @@ export default function AuthModal() {
       }
     }
     
+    if (!auth || !recaptchaVerifier.current) {
+      setError('Authentication service is currently unavailable.');
+      return;
+    }
+
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/auth/send-otp', { phone: `+91${phone}` });
-      if (res.data.success) {
-        setDevOtp(res.data.devOtp || '');
-        setStep('otp');
-      } else {
-        setError(res.data.message || 'Failed to send OTP.');
-      }
+      const formattedPhone = `+91${phone}`;
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier.current);
+      setConfirmationResult(confirmation);
+      setStep('otp');
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || err.message || 'Failed to send OTP. Please try again.');
+      setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -75,59 +133,52 @@ export default function AuthModal() {
       setError('Please enter a valid OTP');
       return;
     }
+    if (!confirmationResult) {
+      setError('No OTP session found. Please request a new OTP.');
+      return;
+    }
 
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/auth/verify-otp', { phone: `+91${phone}`, otp });
-      
-      if (res.data.success) {
-        const { token, user } = res.data;
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set token for the immediate next request
-        
-        let updatedUser = user;
-
-        if (mode === 'signup') {
-          // Send profile update
-          try {
-            const profileRes = await api.put('/users/me', { 
-              name, 
-              email, 
-              // We'd send pincode if backend supported it here, or maybe address structure. 
-              // Sending as part of generic data.
-            });
-            if (profileRes.data.success) {
-              updatedUser = profileRes.data.user;
-            }
-          } catch (profileErr) {
-            console.error('Failed to update profile after signup:', profileErr);
-            // It's okay, we'll still log them in
-          }
-        }
-
-        setAuth(token, updatedUser);
-        handleClose();
-        
-        if (mode === 'login') {
-          if (!updatedUser.name || !updatedUser.email) {
-            router.push('/complete-profile');
-          }
-        }
-      } else {
-        setError(res.data.message || 'Verification failed. Please try again.');
-      }
+      const result = await confirmationResult.confirm(otp);
+      const idToken = await result.user.getIdToken(true);
+      await processFirebaseToken(idToken);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || err.message || 'Invalid OTP. Please try again.');
-    } finally {
+      setError('Invalid OTP. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!auth || !googleProvider) {
+      setError('Google Sign-In is currently unavailable.');
+      return;
+    }
+    
+    setError('');
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken(true);
+      await processFirebaseToken(idToken);
+    } catch (err: any) {
+      console.error(err);
+      // Only show error if they didn't just close the popup
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.message || 'Google Sign-In failed.');
+      }
       setLoading(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+      {/* Invisible Recaptcha Container */}
+      <div id="recaptcha-container"></div>
+
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative">
-        
         {/* Close Button */}
         <button 
           onClick={handleClose}
@@ -136,7 +187,7 @@ export default function AuthModal() {
           <span className="material-symbols-outlined text-2xl">close</span>
         </button>
 
-        {/* Purple Header */}
+        {/* Header */}
         <div className="bg-gradient-to-br from-primary to-primary-dark p-8 text-white relative">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-2xl">
@@ -144,11 +195,11 @@ export default function AuthModal() {
             </span>
           </div>
           <h2 className="text-2xl font-bold mb-1">
-            {step === 'form' ? (mode === 'login' ? 'Login to Kevix' : 'Create Account') : 'Verify OTP'}
+            {step === 'form' ? (mode === 'login' ? 'Welcome Back' : 'Create an Account') : 'Verify OTP'}
           </h2>
           <p className="text-white/80 text-sm">
             {step === 'form' 
-              ? 'Access your Orders, Wishlist and Recommendations'
+              ? (mode === 'login' ? 'Login to access your orders and wishlist' : 'Sign up for a professional wholesale experience')
               : `OTP sent to +91 ${phone}`
             }
           </p>
@@ -164,102 +215,114 @@ export default function AuthModal() {
           )}
 
           {step === 'form' ? (
-            <form onSubmit={handleSendOtp} className="space-y-5">
-              
-              {/* Tabs */}
-              <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
-                <button 
-                  type="button" 
-                  onClick={() => { setMode('login'); setError(''); }} 
-                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-colors ${mode === 'login' ? 'bg-white shadow text-primary' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Log In
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => { setMode('signup'); setError(''); }} 
-                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-colors ${mode === 'signup' ? 'bg-white shadow text-primary' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Sign Up
-                </button>
-              </div>
+            <div className="space-y-6">
+              <form onSubmit={handleSendOtp} className="space-y-5">
+                
+                {/* Professional Toggle */}
+                <div className="flex rounded-lg bg-gray-100 p-1 mb-2">
+                  <button 
+                    type="button" 
+                    onClick={() => { setMode('login'); setError(''); }} 
+                    className={`flex-1 py-2.5 text-sm font-bold rounded-md transition-colors ${mode === 'login' ? 'bg-white shadow text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Log In
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => { setMode('signup'); setError(''); }} 
+                    className={`flex-1 py-2.5 text-sm font-bold rounded-md transition-colors ${mode === 'signup' ? 'bg-white shadow text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Sign Up
+                  </button>
+                </div>
 
-              {mode === 'signup' && (
-                <>
+                <p className="text-center text-sm font-medium text-gray-500 mb-2">
+                  {mode === 'login' ? 'Already have an account?' : 'New Customer?'}
+                </p>
+
+                {mode === 'signup' && (
+                  <>
+                    <div>
+                      <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Full Name</label>
+                      <input 
+                        type="text" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. John Doe"
+                        className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
+                        required={mode === 'signup'}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Email Address</label>
+                      <input 
+                        type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="e.g. john@example.com"
+                        className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
+                        required={mode === 'signup'}
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Mobile Number</label>
+                  <div className="flex items-center border-2 border-surface-border rounded-lg overflow-hidden focus-within:border-primary transition-colors">
+                    <span className="px-3 py-3 bg-surface text-text-secondary font-medium text-sm border-r border-surface-border">+91</span>
+                    <input 
+                      type="tel" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      placeholder="Enter 10-digit number"
+                      className="flex-1 px-4 py-3 text-text-primary outline-none text-base bg-white"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {mode === 'signup' && (
                   <div>
-                    <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Full Name</label>
+                    <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Pincode</label>
                     <input 
                       type="text" 
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. John Doe"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="e.g. 110001"
                       className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
                       required={mode === 'signup'}
                     />
                   </div>
-                  <div>
-                    <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Email Address</label>
-                    <input 
-                      type="email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. john@example.com"
-                      className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
-                      required={mode === 'signup'}
-                    />
-                  </div>
-                </>
-              )}
+                )}
 
-              <div>
-                <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Mobile Number</label>
-                <div className="flex items-center border-2 border-surface-border rounded-lg overflow-hidden focus-within:border-primary transition-colors">
-                  <span className="px-3 py-3 bg-surface text-text-secondary font-medium text-sm border-r border-surface-border">+91</span>
-                  <input 
-                    type="tel" 
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="Enter 10-digit number"
-                    className="flex-1 px-4 py-3 text-text-primary outline-none text-base bg-white"
-                    required
-                  />
-                </div>
+                <button 
+                  type="submit" 
+                  disabled={loading || phone.length < 10 || (mode === 'signup' && (!name || !email || pincode.length < 6))}
+                  className="w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 rounded-lg shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                >
+                  {loading ? (
+                    <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+                  ) : (mode === 'signup' ? 'CREATE ACCOUNT' : 'GET OTP')}
+                </button>
+              </form>
+
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">OR</span>
+                <div className="flex-grow border-t border-gray-200"></div>
               </div>
 
-              {mode === 'signup' && (
-                <div>
-                  <label className="text-xs font-semibold text-text-secondary uppercase mb-2 block">Pincode</label>
-                  <input 
-                    type="text" 
-                    value={pincode}
-                    onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="e.g. 110001"
-                    className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
-                    required={mode === 'signup'}
-                  />
-                </div>
-              )}
-
-              <p className="text-xs text-text-secondary leading-relaxed mt-2">
-                By continuing, you agree to Kevix's{' '}
-                <span className="text-primary cursor-pointer hover:underline">Terms of Use</span>
-                {' '}and{' '}
-                <span className="text-primary cursor-pointer hover:underline">Privacy Policy</span>.
-              </p>
-              
               <button 
-                type="submit" 
-                disabled={loading || phone.length < 10 || (mode === 'signup' && (!name || !email || pincode.length < 6))}
-                className="w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 rounded-lg shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3.5 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
-                {loading ? (
-                  <>
-                    <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
-                    Sending OTP...
-                  </>
-                ) : (mode === 'signup' ? 'CREATE ACCOUNT' : 'GET OTP')}
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                Continue with Google
               </button>
-            </form>
+            </div>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">
               <div>
@@ -267,7 +330,7 @@ export default function AuthModal() {
                   <label className="text-xs font-semibold text-text-secondary uppercase block">Enter OTP</label>
                   <button 
                     type="button" 
-                    onClick={() => { setStep('form'); setOtp(''); setError(''); setDevOtp(''); }}
+                    onClick={() => { setStep('form'); setOtp(''); setError(''); }}
                     className="text-primary text-xs font-semibold hover:underline"
                   >
                     Change Number
@@ -282,17 +345,11 @@ export default function AuthModal() {
                   autoFocus
                   required
                 />
-                {devOtp && (
-                  <p className="text-xs text-success mt-2 font-bold bg-success/10 p-2 border border-success/20 rounded-lg flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">bug_report</span>
-                    Dev Mode OTP: <span className="tracking-widest ml-1">{devOtp}</span>
-                  </p>
-                )}
               </div>
               
               <button 
                 type="submit" 
-                disabled={loading || otp.length < 4}
+                disabled={loading || otp.length < 6} // Firebase OTP is usually 6 digits
                 className="w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 rounded-lg shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
@@ -302,17 +359,6 @@ export default function AuthModal() {
                   </>
                 ) : (mode === 'signup' ? 'VERIFY & CREATE' : 'VERIFY & LOGIN')}
               </button>
-
-              <p className="text-center text-sm text-text-secondary">
-                Didn't receive OTP?{' '}
-                <button 
-                  type="button"
-                  onClick={handleSendOtp as any}
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Resend
-                </button>
-              </p>
             </form>
           )}
         </div>
