@@ -28,6 +28,7 @@ function formatProduct(p: any) {
     homepageSections: p.homepageSections || [],
     isLot: p.isLot || false,
     lotDetails: p.lotDetails || null,
+    categoryName: p.category?.name || 'Uncategorized',
   };
 }
 
@@ -117,8 +118,9 @@ function ProductCardGrid({ product }: { product: any }) {
 export default function Home() {
   const { products, isLoading } = useProducts();
   const formattedProducts = products.map(formatProduct);
-  const allSections = Array.from(new Set(formattedProducts.flatMap((p: any) => p.homepageSections as string[])));
   const lotProducts = formattedProducts.filter((p: any) => p.isLot);
+  const normalProducts = formattedProducts.filter((p: any) => !p.isLot);
+  const allCategories = Array.from(new Set(normalProducts.map((p: any) => p.categoryName)));
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -141,20 +143,17 @@ export default function Home() {
         </div>
       ) : formattedProducts.length > 0 ? (
         <>
-          {allSections.map((sectionName) => {
-            const sectionProducts = formattedProducts.filter((p: any) => p.homepageSections.includes(sectionName));
-            if (sectionProducts.length === 0) return null;
-            
-            // If the section name is a long comma-separated SEO string, just take the first part
-            const displayTitle = (sectionName as string).split(',')[0].trim();
+          {allCategories.map((categoryName) => {
+            const categoryProducts = normalProducts.filter((p: any) => p.categoryName === categoryName);
+            if (categoryProducts.length === 0) return null;
             
             return (
               <ProductCarousel
-                key={sectionName as string}
-                title={displayTitle}
-                subtitle={`Explore our ${displayTitle} collection`}
-                products={sectionProducts}
-                viewAllLink={`/search?section=${encodeURIComponent(sectionName as string)}`}
+                key={categoryName as string}
+                title={categoryName as string}
+                subtitle={`Explore our ${categoryName} collection`}
+                products={categoryProducts}
+                viewAllLink={`/category/${encodeURIComponent((categoryName as string).toLowerCase().replace(/\s+/g, '-'))}`}
               />
             );
           })}
