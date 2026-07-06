@@ -249,7 +249,9 @@ const OrderDetailDrawer: React.FC<{
                 </Avatar>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>{name}</Typography>
-                  {item.variantName && <Typography variant="caption" color="text.secondary">{item.variantName}</Typography>}
+                  {item.variantName && <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Variant: {item.variantName}</Typography>}
+                  {item.selectedModel && <Typography variant="caption" color="primary" sx={{ display: 'block', fontWeight: 500 }}>Model: {item.selectedModel}</Typography>}
+                  {item.lotType && item.lotType !== 'none' && <Typography variant="caption" color="secondary" sx={{ display: 'block', fontWeight: 500 }}>Lot: {item.lotType}</Typography>}
                   {item.sku && <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>SKU: {item.sku}</Typography>}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
                     <Box>

@@ -102,10 +102,13 @@ class CartService {
             slug: product.slug,
             image: product.images?.[0] || '',
             isActive: product.isActive,
-            taxRate: Number(product.taxRate) || 0, // Added taxRate here
+            taxRate: Number(product.taxRate) || 0,
             minOrderQty: Number(product.minOrderQty) || 1
           },
           variant: variantData,
+          variantName: variantData?.name || null,
+          selectedModel: item.selectedModel || null,
+          lotType: item.lotType || 'none',
           quantity: itemQuantity,
           price,
           mrp,

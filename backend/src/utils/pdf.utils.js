@@ -201,7 +201,7 @@ const drawPage = (doc, inv, companyConfig) => {
     const discAmt = Math.max(0, item.mrp - item.price) * item.quantity;
     const rowData = [
       String(idx + 1),
-      item.name + (item.variantName ? ` (${item.variantName})` : ''),
+      item.name + (item.variantName ? ` - ${item.variantName}` : '') + (item.selectedModel ? ` [Model: ${item.selectedModel}]` : '') + (item.lotType && item.lotType !== 'none' ? ` [Lot: ${item.lotType}]` : ''),
       String(item.quantity),
       fmt(item.mrp),
       fmt(item.price),

@@ -29,6 +29,8 @@ class OrderService {
       if (!product || !product.isActive) return { success: false, message: `Product ${item.productId} not available` };
       
       let price, mrp, stock;
+      let variantName = '';
+      let sku = product.sku || '';
       
       if (item.variantId && product.hasVariants) {
         const variant = product.variants.id(item.variantId);
@@ -36,6 +38,8 @@ class OrderService {
         price = variant.salePrice;
         mrp = variant.mrp;
         stock = variant.stock;
+        variantName = variant.name;
+        if (variant.sku) sku = variant.sku;
       } else {
         price = product.salePrice;
         mrp = product.mrp;
@@ -77,6 +81,9 @@ class OrderService {
       orderItems.push({ 
         product: product._id, 
         variant: item.variantId || null, 
+        variantName,
+        sku,
+        lotType: item.lotType || 'none',
         selectedModel: item.selectedModel || null,
         name: product.name, 
         image: product.images?.[0] || '', 
