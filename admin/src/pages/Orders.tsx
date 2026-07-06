@@ -89,9 +89,10 @@ const OrderDetailDrawer: React.FC<{
   onClose: () => void;
   onEditStatus: () => void;
   onEditOrder: () => void;
+  onDeleteOrder: () => void;
   onPrint: () => void;
   onRecordPayment: () => void;
-}> = ({ order, open, onClose, onEditStatus, onEditOrder, onPrint, onRecordPayment }) => {
+}> = ({ order, open, onClose, onEditStatus, onEditOrder, onDeleteOrder, onPrint, onRecordPayment }) => {
   const navigate = useNavigate();
   if (!order) return null;
 
@@ -135,6 +136,10 @@ const OrderDetailDrawer: React.FC<{
           </Box>
         </Box>
         <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <IconButton size="small" title="Delete Order" onClick={onDeleteOrder}
+            sx={{ color: '#EF4444', '&:hover': { color: '#DC2626', bgcolor: 'rgba(239,68,68,0.1)' } }}>
+            <DeleteOutline fontSize="small" />
+          </IconButton>
           <IconButton size="small" title="Edit / Update Status" onClick={onEditStatus}
             sx={{ color: '#94A3B8', '&:hover': { color: '#3B82F6', bgcolor: 'rgba(59,130,246,0.1)' } }}>
             <Edit fontSize="small" />
@@ -456,6 +461,30 @@ const Orders: React.FC = () => {
     setDetailOpen(false); // close drawer first to avoid z-index issues
     setSelectedOrder(order);
     setTimeout(() => setStatusDialog(true), 150);
+  };
+
+  const handleDeleteOrder = async (order: any) => {
+    if (!window.confirm(`Are you sure you want to COMPLETELY DELETE order ${order.orderNumber}? This action cannot be undone.`)) return;
+    
+    setLoading(true);
+    try {
+      const resp = await fetch(`${API_BASE}/admin/orders/${order._id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      const data = await resp.json();
+      if (data.success) {
+        showToast('Order deleted successfully', 'success');
+        setDetailOpen(false);
+        fetchOrders(); // Refresh list
+      } else {
+        showToast(data.message || 'Failed to delete order', 'error');
+      }
+    } catch (err) {
+      showToast('Error deleting order', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openEditDialog = (order: any) => {
@@ -851,6 +880,7 @@ const Orders: React.FC = () => {
         onClose={() => setDetailOpen(false)}
         onEditStatus={() => openStatusDialog(detailOrder)}
         onEditOrder={() => openEditDialog(detailOrder)}
+        onDeleteOrder={() => handleDeleteOrder(detailOrder)}
         onPrint={() => printInvoice(detailOrder!)}
         onRecordPayment={() => openPaymentDialog(detailOrder)}
       />
