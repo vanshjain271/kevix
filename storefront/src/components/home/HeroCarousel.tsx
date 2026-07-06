@@ -16,7 +16,7 @@ export default function HeroCarousel() {
     if (displayBanners.length === 0) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev === displayBanners.length - 1 ? 0 : prev + 1));
-    }, 6000);
+    }, 3000);
     return () => clearInterval(timer);
   }, [displayBanners.length]);
 
@@ -56,8 +56,6 @@ export default function HeroCarousel() {
             onClick={() => { if (link) router.push(link); }}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-95 z-0'} bg-gradient-hero ${link ? 'cursor-pointer' : ''}`}
           >
-            {/* Only show dark overlay if there's text to make readable */}
-            {(slide.title || slide.description) && <div className="absolute inset-0 bg-black/30 z-10 pointer-events-none"></div>}
             {imageSrc && (
               <Image 
                 src={imageSrc} 
@@ -68,18 +66,7 @@ export default function HeroCarousel() {
                 onError={(e: any) => { e.target.style.display = 'none'; }}
               />
             )}
-            <div className="relative z-20 h-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col justify-center text-white">
-              <h2 className="text-3xl md:text-5xl font-bold mb-2 md:mb-4 drop-shadow-lg leading-tight max-w-2xl">{slide.title}</h2>
-              {slide.description && (
-                <p className="text-white/80 text-base md:text-lg mb-4 max-w-xl drop-shadow">{slide.description}</p>
-              )}
-              {link && (
-                <a href={link} className="bg-gradient-btn-pink hover:opacity-90 text-white px-7 py-3 rounded-full font-bold w-max transition-all shadow-lg shadow-purple-500/40 mt-4 flex items-center gap-2 text-sm md:text-base active:scale-95">
-                  Shop Now
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </a>
-              )}
-            </div>
+            {/* Image Only - Text and Buttons removed per request since they overlap banner graphics */}
           </div>
         );
       })}
