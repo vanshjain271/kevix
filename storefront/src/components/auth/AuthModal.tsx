@@ -25,14 +25,28 @@ export default function AuthModal() {
   const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
 
   useEffect(() => {
-    if (isLoginModalOpen && !recaptchaVerifier.current && auth) {
-      try {
-        recaptchaVerifier.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible'
-        });
-      } catch (err) {
-        console.error('Failed to initialize recaptcha:', err);
-      }
+    if (isLoginModalOpen && auth) {
+      const timer = setTimeout(() => {
+        if (!recaptchaVerifier.current) {
+          try {
+            recaptchaVerifier.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+              size: 'invisible'
+            });
+          } catch (err) {
+            console.error('Failed to initialize recaptcha:', err);
+          }
+        }
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+        if (recaptchaVerifier.current) {
+          try {
+            recaptchaVerifier.current.clear();
+          } catch (e) {}
+          recaptchaVerifier.current = null;
+        }
+      };
     }
   }, [isLoginModalOpen]);
 
