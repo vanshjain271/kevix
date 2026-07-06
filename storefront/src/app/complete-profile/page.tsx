@@ -119,7 +119,7 @@ export default function CompleteProfilePage() {
               onChange={handleChange}
               disabled={!!user?.name && user.name.trim() !== ''}
               className="w-full border border-surface-border rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary disabled:bg-gray-100 disabled:text-gray-500"
-              placeholder="e.g. John Doe"
+              placeholder="Enter your full name"
               required
             />
           </div>

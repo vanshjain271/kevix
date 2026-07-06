@@ -248,7 +248,7 @@ export default function AuthModal() {
                         type="text" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g. John Doe"
+                        placeholder="Enter your full name"
                         className="w-full border-2 border-surface-border rounded-lg px-4 py-3 text-text-primary outline-none focus:border-primary transition-colors bg-white"
                         required={mode === 'signup'}
                       />
