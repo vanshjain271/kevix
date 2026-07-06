@@ -85,10 +85,11 @@ export function useBanners() {
   return { banners: data?.banners || [], error, isLoading };
 }
 
-export function useProducts(categoryId?: string | null, search?: string) {
+export function useProducts(categoryId?: string | null, search?: string, limit: number = 200) {
   const queryParams = new URLSearchParams();
   if (categoryId) queryParams.append('categoryId', categoryId);
   if (search) queryParams.append('search', search);
+  queryParams.append('limit', limit.toString());
   const queryString = queryParams.toString();
   const url = queryString ? `/products?${queryString}` : '/products';
 
