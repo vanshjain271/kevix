@@ -251,55 +251,6 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Emoji Category Popup Dropdown (Replaces the vertical text one) */}
-          {isCategoryMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-white shadow-xl z-50 border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="max-w-7xl mx-auto px-4 md:px-8">
-                <div className="flex overflow-x-auto scrollbar-hide gap-8 py-6">
-                  {categories && categories.map((cat: any) => {
-                    const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
-                    // We need getCategoryIcon defined in Header
-                    const name = (cat.name || '').toLowerCase();
-                    const slug = (cat.slug || '').toLowerCase();
-                    const combined = name + ' ' + slug;
-                    
-                    let displayIcon = 'category';
-                    if (combined.includes('earphone') || combined.includes('earbud') || combined.includes('headphone') || combined.includes('neckband') || combined.includes('audio')) displayIcon = 'headphones';
-                    else if (combined.includes('cover') || combined.includes('case') || combined.includes('back')) displayIcon = 'phone_iphone';
-                    else if (combined.includes('battery') || combined.includes('power bank') || combined.includes('powerbank')) displayIcon = 'battery_charging_full';
-                    else if (combined.includes('cable') || combined.includes('charging') || combined.includes('charger') || combined.includes('adapter')) displayIcon = 'cable';
-                    else if (combined.includes('watch') || combined.includes('wearable') || combined.includes('band')) displayIcon = 'watch';
-                    else if (combined.includes('speaker') || combined.includes('bluetooth')) displayIcon = 'speaker';
-                    else if (cat.icon && cat.icon !== 'category' && cat.icon !== 'phone_iphone' && cat.icon !== 'smartphone') displayIcon = cat.icon;
-
-                    return (
-                      <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} onClick={() => setIsCategoryMenuOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
-                        <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative" style={{background: '#EDE9FE'}}>
-                          {isDeal && (
-                            <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
-                              NEW
-                            </span>
-                          )}
-                          <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
-                            {displayIcon}
-                          </span>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>
-                      </Link>
-                    );
-                  })}
-                  <Link href="/category/all" onClick={() => setIsCategoryMenuOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative bg-gray-100">
-                      <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300 text-gray-600">
-                        apps
-                      </span>
-                    </div>
-                    <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">View All</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Horizontal Scrollable Categories */}
           <div className="flex overflow-x-auto scrollbar-hide py-2.5 gap-6 items-center w-full">
@@ -311,6 +262,56 @@ export default function Header() {
           </div>
 
         </div>
+
+        {/* Emoji Category Popup Dropdown (Replaces the vertical text one) */}
+        {isCategoryMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-white shadow-xl z-50 border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="max-w-7xl mx-auto px-4 md:px-8">
+              <div className="flex overflow-x-auto scrollbar-hide gap-8 py-6">
+                {categories && categories.map((cat: any) => {
+                  const isDeal = cat.name?.toLowerCase().includes('deal') || cat.slug?.toLowerCase().includes('deal');
+                  // We need getCategoryIcon defined in Header
+                  const name = (cat.name || '').toLowerCase();
+                  const slug = (cat.slug || '').toLowerCase();
+                  const combined = name + ' ' + slug;
+                  
+                  let displayIcon = 'category';
+                  if (combined.includes('earphone') || combined.includes('earbud') || combined.includes('headphone') || combined.includes('neckband') || combined.includes('audio')) displayIcon = 'headphones';
+                  else if (combined.includes('cover') || combined.includes('case') || combined.includes('back')) displayIcon = 'phone_iphone';
+                  else if (combined.includes('battery') || combined.includes('power bank') || combined.includes('powerbank')) displayIcon = 'battery_charging_full';
+                  else if (combined.includes('cable') || combined.includes('charging') || combined.includes('charger') || combined.includes('adapter')) displayIcon = 'cable';
+                  else if (combined.includes('watch') || combined.includes('wearable') || combined.includes('band')) displayIcon = 'watch';
+                  else if (combined.includes('speaker') || combined.includes('bluetooth')) displayIcon = 'speaker';
+                  else if (cat.icon && cat.icon !== 'category' && cat.icon !== 'phone_iphone' && cat.icon !== 'smartphone') displayIcon = cat.icon;
+
+                  return (
+                    <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} onClick={() => setIsCategoryMenuOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative" style={{background: '#EDE9FE'}}>
+                        {isDeal && (
+                          <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
+                            NEW
+                          </span>
+                        )}
+                        <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300" style={{color: '#7B2FF7'}}>
+                          {displayIcon}
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">{cat.name}</span>
+                    </Link>
+                  );
+                })}
+                <Link href="/category/all" onClick={() => setIsCategoryMenuOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative bg-gray-100">
+                    <span className="material-symbols-outlined text-[26px] group-hover:scale-110 transition-transform duration-300 text-gray-600">
+                      apps
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold text-gray-800 group-hover:text-primary transition-colors duration-300 capitalize text-center w-full truncate">View All</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
     </header>
   );
