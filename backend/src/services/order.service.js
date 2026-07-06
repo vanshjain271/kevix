@@ -373,6 +373,12 @@ class OrderService {
     return { success: true, order, message: 'Order cancelled successfully' };
   }
 
+  async deleteOrder(orderId) {
+    const order = await Order.findByIdAndDelete(orderId);
+    if (!order) return { success: false, message: 'Order not found' };
+    return { success: true, message: 'Order deleted successfully' };
+  }
+
   async handleRazorpayWebhook(body, rawBody, signature) {
     return { success: true };
   }

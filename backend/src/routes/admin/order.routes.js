@@ -21,6 +21,7 @@ router.post('/:orderId/confirm', auth.adminOnly, AdminOrderController.confirmOrd
 router.post('/:orderId/cod-collected', auth.adminOnly, AdminOrderController.markCodCollected);
 router.put('/:orderId/status', auth.adminOnly, AdminOrderController.updateOrderStatus);
 router.post('/:orderId/cancel', auth.adminOnly, AdminOrderController.cancelOrder);
+router.delete('/:orderId', auth.adminOnly, AdminOrderController.deleteOrder);
 
 // Packing slip & Invoice
 router.get('/:orderId/packing-slip', auth.adminOnly, AdminOrderController.generatePackingSlip);

@@ -236,6 +236,44 @@ const cancelOrder = async (req, res) => {
 };
 
 /**
+ * @desc    Delete order completely
+ * @route   DELETE /api/v1/admin/orders/:orderId
+ * @access  Admin
+ */
+const deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    // Call the service for hard delete
+    const result = await OrderService.deleteOrder(orderId);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    logActivity({
+      userId: req.user.userId,
+      action: 'DELETE',
+      entityType: 'Order',
+      entityId: orderId,
+      description: `Order deleted completely`,
+      ip: req.ip,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Order deleted successfully'
+    });
+  } catch (error) {
+    console.error('Admin Delete Order Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while deleting order'
+    });
+  }
+};
+
+/**
  * @desc    Generate and download packing slip PDF
  * @route   GET /api/v1/admin/orders/:orderId/packing-slip
  * @access  Admin
@@ -493,6 +531,7 @@ module.exports = {
   markCodCollected,
   updateOrderStatus,
   cancelOrder,
+  deleteOrder,
   generatePackingSlip,
   generateInvoicePDFDirect,
   editOrder,
