@@ -25,17 +25,20 @@ graph TD
         API[Express.js REST API]
         S3[AWS S3 - Image Storage]
         MongoDB[(MongoDB Database)]
+        PDFGenerator[PDFKit - Invoice Generator]
     end
 
     %% External Integrations
     subgraph External [External APIs]
         MSG91[MSG91 Messaging API]
         WhatsApp[Meta WhatsApp API]
+        GA[Google Analytics GA4]
     end
 
     %% Relationships
     Customer <-->|Browses, Adds to Cart, Buys| Storefront
-    Admin <-->|Manages Orders, Products| Dashboard
+    Storefront -->|Analytics Events| GA
+    Admin <-->|Manages Orders, Products, Invoices| Dashboard
     
     Storefront <-->|JSON over HTTPS| API
     Dashboard <-->|JSON over HTTPS (JWT Admin)| API
@@ -44,6 +47,7 @@ graph TD
     API --> |Uploads Images| S3
     API --> |Triggers OTP/SMS| MSG91
     API --> |Triggers Updates| WhatsApp
+    API --> |Generates PDF| PDFGenerator
 ```
 
 ---
@@ -188,6 +192,7 @@ The backend incorporates an event-driven mindset for handling post-checkout logi
     - `SMSService` hits MSG91 Flow API.
     - MSG91 dispatches a WhatsApp message.
     - MSG91 dispatches a standard SMS message.
+7. **Invoice Generation:** The Admin can click "Download Invoice", triggering `InvoiceService` which uses `PDFKit` to dynamically stream a fully formatted PDF document directly to the client browser without saving it to disk.
 
 ---
 

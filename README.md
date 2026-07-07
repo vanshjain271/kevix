@@ -56,9 +56,13 @@ The central nervous system driving data persistence, authentication, and externa
 
 ### 📊 Administrative Control
 *   **Banner Engine:** Upload, edit, and instantly deploy Hero Banners and Promotional grids to the Storefront.
-*   **Order Lifecycle:** Track orders from `Pending` → `Confirmed` → `Packed` → `Shipped` → `Delivered`.
+*   **Order Lifecycle & Invoices:** Track orders from `Pending` → `Confirmed` → `Packed` → `Shipped` → `Delivered`, and automatically generate/download **PDF Invoices**.
 *   **Automated Communication:** Dispatch automated WhatsApp and SMS updates to customers instantly when order statuses change.
 *   **Bulk Queries:** Integrated CRM to manage B2B inquiries directly from the dashboard.
+
+### 🌐 Integrations & Analytics
+*   **Google Analytics (GA4):** Fully integrated tracking for storefront visitors, conversions, and e-commerce events.
+*   **Vercel Deployment:** Pre-configured for edge-optimized deployments on Vercel.
 
 ---
 
