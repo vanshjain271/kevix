@@ -148,7 +148,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
           {isLoading ? (
             <div className="flex justify-center items-center h-64 w-full">
-              <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+              <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
             </div>
           ) : displayProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

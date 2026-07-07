@@ -23,7 +23,7 @@ export default function HeroCarousel() {
   if (isLoading) {
     return (
       <div className="w-full h-[280px] md:h-[450px] bg-surface flex items-center justify-center border-b border-surface-border">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+        <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
       </div>
     );
   }

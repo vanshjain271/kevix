@@ -158,7 +158,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (isLoading) {
     return (
       <div className="bg-background min-h-screen pb-12 flex justify-center items-center">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+        <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
       </div>
     );
   }
@@ -608,7 +608,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
               
               {isLoadingReviews ? (
-                <div className="flex justify-center p-6"><span className="material-symbols-outlined animate-spin text-primary">progress_activity</span></div>
+                <div className="flex justify-center p-6"><svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
               ) : reviews && reviews.length > 0 ? (
                 <div className="space-y-4">
                   {reviews.map((review: any) => (
@@ -721,7 +721,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   disabled={reviewSubmitting}
                   className="w-full bg-primary text-white font-bold py-3 rounded-sm hover:bg-primary-dark transition-colors disabled:opacity-70 flex justify-center items-center"
                 >
-                  {reviewSubmitting ? <span className="material-symbols-outlined animate-spin">progress_activity</span> : 'Submit Review'}
+                  {reviewSubmitting ? <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> : 'Submit Review'}
                 </button>
                 <p className="text-xs text-text-secondary mt-2 text-center">Your review will be public after approval.</p>
               </div>

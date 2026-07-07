@@ -160,7 +160,7 @@ export default function CheckoutPage() {
   if (isCartLoading || !isAuthenticated) {
     return (
       <div className="bg-background min-h-screen pb-12 flex justify-center items-center">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+        <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
       </div>
     );
   }

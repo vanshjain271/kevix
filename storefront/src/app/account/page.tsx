@@ -148,7 +148,7 @@ export default function AccountPage() {
   if (!isAuthenticated) {
     return (
       <div className="bg-background min-h-screen pb-12 flex justify-center items-center">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+        <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
       </div>
     );
   }
@@ -261,7 +261,7 @@ export default function AccountPage() {
                 {/* Orders List */}
                 {isLoadingOrders ? (
                   <div className="p-12 flex justify-center">
-                    <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+                    <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
                   </div>
                 ) : orders.length > 0 ? (
                   orders.map((order: any) => {
@@ -470,7 +470,7 @@ export default function AccountPage() {
                 
                 {isLoadingWishlist ? (
                   <div className="flex justify-center p-12">
-                    <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+                    <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
                   </div>
                 ) : wishlist && wishlist.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -536,7 +536,7 @@ export default function AccountPage() {
                 <h2 className="font-bold text-text-primary mb-6 text-xl">My Reviews & Ratings</h2>
                 {isLoadingReviews ? (
                   <div className="flex justify-center items-center py-20">
-                    <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+                    <img src="/icon.png" alt="Loading" className="w-12 h-12 animate-pulse rounded-full" />
                   </div>
                 ) : myReviews.length > 0 ? (
                   <div className="space-y-6">
