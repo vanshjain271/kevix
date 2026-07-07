@@ -116,6 +116,44 @@ export default function RootLayout({
             </Script>
           </>
         )}
+        {/* Structured Data (Schema.org) for Sitelinks & Brand Recognition */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": "https://www.kevix.in/#website",
+                  "url": "https://www.kevix.in",
+                  "name": "Kevix",
+                  "description": "Premium Mobile Accessories Store",
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://www.kevix.in/search?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
+                },
+                {
+                  "@type": "Organization",
+                  "@id": "https://www.kevix.in/#organization",
+                  "name": "Kevix",
+                  "url": "https://www.kevix.in",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "@id": "https://www.kevix.in/#logo",
+                    "url": "https://www.kevix.in/icon.png",
+                    "caption": "Kevix"
+                  },
+                  "image": {
+                    "@id": "https://www.kevix.in/#logo"
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col font-sans">
         <SWRProvider>
