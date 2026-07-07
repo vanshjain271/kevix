@@ -23,7 +23,29 @@ export async function generateMetadata(): Promise<Metadata> {
       return {
         title: data?.metaTitle || data?.storeName || "Kevix | Premium Mobile Accessories",
         description: data?.metaDescription || "Shop for the best quality chargers, cables, earbuds, and more.",
-        keywords: data?.metaKeywords || "",
+        keywords: data?.metaKeywords || "Kevix, Kevi, Mobile accessories, Premium cases, Chargers, Cables, Earbuds",
+        openGraph: {
+          title: data?.metaTitle || data?.storeName || "Kevix | Premium Mobile Accessories",
+          description: data?.metaDescription || "Shop for the best quality chargers, cables, earbuds, and more.",
+          url: 'https://www.kevix.in',
+          siteName: data?.storeName || 'Kevix',
+          images: [
+            {
+              url: 'https://www.kevix.in/icon.png',
+              width: 512,
+              height: 512,
+              alt: 'Kevix Logo',
+            },
+          ],
+          locale: 'en_IN',
+          type: 'website',
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: data?.metaTitle || data?.storeName || "Kevix | Premium Mobile Accessories",
+          description: data?.metaDescription || "Shop for the best quality chargers, cables, earbuds, and more.",
+          images: ['https://www.kevix.in/icon.png'],
+        },
       };
     }
   } catch (error) {
@@ -34,6 +56,29 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Kevix | Premium Mobile Accessories",
     description: "Shop for the best quality chargers, cables, earbuds, and more.",
+    keywords: "Kevix, Kevi, Mobile accessories, Premium cases, Chargers, Cables, Earbuds",
+    openGraph: {
+      title: "Kevix | Premium Mobile Accessories",
+      description: "Shop for the best quality chargers, cables, earbuds, and more.",
+      url: 'https://www.kevix.in',
+      siteName: 'Kevix',
+      images: [
+        {
+          url: 'https://www.kevix.in/icon.png',
+          width: 512,
+          height: 512,
+          alt: 'Kevix Logo',
+        },
+      ],
+      locale: 'en_IN',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: "Kevix | Premium Mobile Accessories",
+      description: "Shop for the best quality chargers, cables, earbuds, and more.",
+      images: ['https://www.kevix.in/icon.png'],
+    },
   };
 }
 
