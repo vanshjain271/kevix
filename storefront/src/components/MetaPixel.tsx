@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 
@@ -27,7 +27,7 @@ export const event = (name: string, options = {}) => {
   }
 };
 
-export default function MetaPixel() {
+function PixelTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -38,10 +38,17 @@ export default function MetaPixel() {
     }
   }, [pathname, searchParams]);
 
+  return null;
+}
+
+export default function MetaPixel() {
   if (!FB_PIXEL_ID) return null;
 
   return (
     <>
+      <Suspense fallback={null}>
+        <PixelTracker />
+      </Suspense>
       <Script
         id="fb-pixel"
         strategy="afterInteractive"
