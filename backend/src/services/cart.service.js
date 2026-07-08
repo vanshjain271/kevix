@@ -78,16 +78,22 @@ class CartService {
         // Apply Lot Pricing if product is a lot
         if (product.isLot && product.lotDetails) {
           if (product.lotDetails.allowHalfLot && itemQuantity === product.lotDetails.halfLotQuantity) {
-            price = product.lotDetails.halfLotPrice;
-            itemSubtotal = price * itemQuantity;
+            let totalHalfPrice = product.lotDetails.halfLotPrice;
+            if (totalHalfPrice < product.salePrice * 0.1) totalHalfPrice *= product.lotDetails.halfLotQuantity;
+            price = itemQuantity > 0 ? totalHalfPrice / itemQuantity : 0;
+            itemSubtotal = totalHalfPrice;
             mrp = price; // Override MRP for lot items to avoid weird discounts
           } else if (product.lotDetails.allowMiniLot && itemQuantity === product.lotDetails.miniLotQuantity) {
-            price = product.lotDetails.miniLotPrice;
-            itemSubtotal = price * itemQuantity;
+            let totalMiniPrice = product.lotDetails.miniLotPrice;
+            if (totalMiniPrice < product.salePrice * 0.1) totalMiniPrice *= product.lotDetails.miniLotQuantity;
+            price = itemQuantity > 0 ? totalMiniPrice / itemQuantity : 0;
+            itemSubtotal = totalMiniPrice;
             mrp = price;
           } else if (product.lotDetails.fullLotQuantity > 0) {
-            price = product.lotDetails.fullLotPrice;
-            itemSubtotal = price * itemQuantity;
+            let totalFullPrice = product.lotDetails.fullLotPrice;
+            if (totalFullPrice < product.salePrice * 0.1) totalFullPrice *= product.lotDetails.fullLotQuantity;
+            price = itemQuantity > 0 ? totalFullPrice / itemQuantity : 0;
+            itemSubtotal = totalFullPrice;
             mrp = price;
           }
         } else {
@@ -103,7 +109,9 @@ class CartService {
             image: product.images?.[0] || '',
             isActive: product.isActive,
             taxRate: Number(product.taxRate) || 0,
-            minOrderQty: Number(product.minOrderQty) || 1
+            minOrderQty: Number(product.minOrderQty) || 1,
+            isLot: product.isLot,
+            lotDetails: product.lotDetails
           },
           variant: variantData,
           variantName: variantData?.name || null,
