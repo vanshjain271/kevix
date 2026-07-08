@@ -78,15 +78,15 @@ class CartService {
         // Apply Lot Pricing if product is a lot
         if (product.isLot && product.lotDetails) {
           if (product.lotDetails.allowHalfLot && itemQuantity === product.lotDetails.halfLotQuantity) {
-            itemSubtotal = product.lotDetails.halfLotPrice;
-            price = itemQuantity > 0 ? itemSubtotal / itemQuantity : 0;
+            price = product.lotDetails.halfLotPrice;
+            itemSubtotal = price * itemQuantity;
             mrp = price; // Override MRP for lot items to avoid weird discounts
           } else if (product.lotDetails.allowMiniLot && itemQuantity === product.lotDetails.miniLotQuantity) {
-            itemSubtotal = product.lotDetails.miniLotPrice;
-            price = itemQuantity > 0 ? itemSubtotal / itemQuantity : 0;
+            price = product.lotDetails.miniLotPrice;
+            itemSubtotal = price * itemQuantity;
             mrp = price;
           } else if (product.lotDetails.fullLotQuantity > 0) {
-            price = product.lotDetails.fullLotPrice / product.lotDetails.fullLotQuantity;
+            price = product.lotDetails.fullLotPrice;
             itemSubtotal = price * itemQuantity;
             mrp = price;
           }
