@@ -28,8 +28,9 @@ const updateProfile = async (req, res) => {
             if (!isMatch) {
                 return res.status(400).json({ success: false, message: 'Incorrect old password' });
             }
-            user.password = newPassword;
-            // password will be hashed in pre-save middleware
+            // Hash the new password before saving
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(newPassword, salt);
         } else if (newPassword && !oldPassword) {
             return res.status(400).json({ success: false, message: 'Old password is required to set a new password' });
         }
