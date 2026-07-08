@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import BulkInquiryModal from '@/components/product/BulkInquiryModal';
 import ModelsOrderModal from '@/components/product/ModelsOrderModal';
+import { event } from '@/components/MetaPixel';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -97,8 +98,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       if (!displayProduct.isLot && displayProduct.hasVariants && displayProduct.variants?.length > 0 && !selectedVariant) {
         setSelectedVariant(displayProduct.variants[0]);
       }
+
+      // Track ViewContent for Meta Pixel
+      event('ViewContent', {
+        content_name: displayProduct.name,
+        content_ids: [displayProduct._id || displayProduct.id],
+        content_type: 'product',
+        value: displayProduct.salePrice,
+        currency: 'INR'
+      });
     }
-  }, [product?._id]);
+  }, [displayProduct?._id]);
 
   const inWishlist = wishlist.some((item: any) => item._id === displayProduct?._id);
   const cartItem = items.find(i => {

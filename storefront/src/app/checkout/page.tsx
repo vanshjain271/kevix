@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
 import { useAddresses, useSettings } from '@/hooks/useApi';
 import api from '@/lib/api';
+import { event } from '@/components/MetaPixel';
 
 interface AddressForm {
   name: string;
@@ -44,6 +45,8 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setIsMounted(true);
+    // Track checkout initialization
+    event('InitiateCheckout');
   }, []);
 
   useEffect(() => {
@@ -145,6 +148,7 @@ export default function CheckoutPage() {
       });
 
       if (res.data.success) {
+        event('Purchase', { value: orderTotal, currency: 'INR' });
         clearLocalCart();
         await fetchCart();
         router.push('/account');

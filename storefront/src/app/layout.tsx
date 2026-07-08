@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SWRProvider from "@/components/SWRProvider";
+import MetaPixel from "@/components/MetaPixel";
 
 import Script from 'next/script';
 
@@ -162,6 +163,7 @@ export default function RootLayout({
           <AuthModal />
           <Footer />
         </SWRProvider>
+        <MetaPixel />
       </body>
     </html>
   );

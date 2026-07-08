@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import { event } from '@/components/MetaPixel';
 
 export interface CartItem {
   id: string;        // item._id (subdoc id)
@@ -82,6 +83,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   addToCart: async (productId: string, quantity = 1, variantId?: string, selectedModel?: string) => {
     try {
       await api.post('/cart/items', { productId, quantity, variantId: variantId || undefined, selectedModel: selectedModel || undefined });
+      event('AddToCart');
       await get().fetchCart();
     } catch (error: any) {
       console.error('Failed to add to cart:', error?.response?.data?.message || error);
