@@ -59,16 +59,22 @@ class OrderService {
       // Apply Lot Pricing if product is a lot
       if (product.isLot && product.lotDetails) {
         if (product.lotDetails.allowHalfLot && item.quantity === product.lotDetails.halfLotQuantity) {
-          itemTotal = product.lotDetails.halfLotPrice;
-          price = item.quantity > 0 ? itemTotal / item.quantity : 0;
+          let totalHalfPrice = product.lotDetails.halfLotPrice;
+          if (totalHalfPrice < product.salePrice * 0.1) totalHalfPrice *= product.lotDetails.halfLotQuantity;
+          price = item.quantity > 0 ? totalHalfPrice / item.quantity : 0;
+          itemTotal = totalHalfPrice;
           mrp = price;
         } else if (product.lotDetails.allowMiniLot && item.quantity === product.lotDetails.miniLotQuantity) {
-          itemTotal = product.lotDetails.miniLotPrice;
-          price = item.quantity > 0 ? itemTotal / item.quantity : 0;
+          let totalMiniPrice = product.lotDetails.miniLotPrice;
+          if (totalMiniPrice < product.salePrice * 0.1) totalMiniPrice *= product.lotDetails.miniLotQuantity;
+          price = item.quantity > 0 ? totalMiniPrice / item.quantity : 0;
+          itemTotal = totalMiniPrice;
           mrp = price;
         } else if (product.lotDetails.fullLotQuantity > 0) {
-          price = product.lotDetails.fullLotPrice / product.lotDetails.fullLotQuantity;
-          itemTotal = price * item.quantity;
+          let totalFullPrice = product.lotDetails.fullLotPrice;
+          if (totalFullPrice < product.salePrice * 0.1) totalFullPrice *= product.lotDetails.fullLotQuantity;
+          price = item.quantity > 0 ? totalFullPrice / item.quantity : 0;
+          itemTotal = totalFullPrice;
           mrp = price;
         }
       }
