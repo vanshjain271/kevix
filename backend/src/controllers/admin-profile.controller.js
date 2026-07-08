@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const getProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select('-password');
+        const user = await User.findById(req.user.userId).select('-password');
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -16,7 +16,7 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
     try {
         const { name, email, oldPassword, newPassword } = req.body;
-        const user = await User.findById(req.user._id).select('+password');
+        const user = await User.findById(req.user.userId).select('+password');
         
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
