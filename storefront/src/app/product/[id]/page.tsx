@@ -215,7 +215,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     className={`w-16 h-16 border rounded-sm overflow-hidden shrink-0 transition-all cursor-pointer ${activeImage === imgStr ? 'border-primary ring-1 ring-primary' : 'border-surface-border hover:border-text-muted'}`}
                   >
                     <div className="relative w-full h-full pointer-events-none">
-                      <Image src={imgStr} alt={`Thumbnail ${idx}`} fill className="object-cover" />
+                      <Image src={imgStr} alt={`Thumbnail ${idx}`} fill sizes="64px" className="object-cover" />
                     </div>
                   </div>
                 );
@@ -235,6 +235,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   src={activeImage} 
                   alt={displayProduct.name} 
                   fill 
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-contain p-4" 
                 />
               )}
@@ -511,7 +512,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       <div className="flex items-center gap-3">
                         {variant.image && (
                           <div className="w-12 h-12 relative rounded border border-surface-border overflow-hidden shrink-0">
-                            <Image src={variant.image} alt={variant.name} fill className="object-cover" />
+                            <Image src={variant.image} alt={variant.name} fill sizes="64px" className="object-cover" />
                           </div>
                         )}
                         <div>

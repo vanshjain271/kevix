@@ -292,7 +292,7 @@ export default function AccountPage() {
                             <div key={item._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div className="flex items-start gap-4">
                                 <div className="w-20 h-20 relative bg-surface rounded p-1 shrink-0">
-                                  <Image src={image} alt="Product" fill className="object-contain" />
+                                  <Image src={image} alt="Product" fill sizes="64px" className="object-contain" />
                                 </div>
                                 <div>
                                   <Link href={`/product/${product?._id}`}>

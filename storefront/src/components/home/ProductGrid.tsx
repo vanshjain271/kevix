@@ -49,6 +49,7 @@ export default function ProductGrid({ title, products, subtitle, timer }: Produc
                 src={product.image} 
                 alt={product.name} 
                 fill
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 20vw"
                 className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
               />
             </Link>

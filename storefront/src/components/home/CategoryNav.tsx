@@ -90,6 +90,9 @@ export default function CategoryNav() {
                   return (
                     <Link href={`/category/${cat.slug}`} key={cat._id || cat.id} onClick={() => setIsOpen(false)} className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-[80px] relative">
                       <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 relative" style={{background: '#EDE9FE'}}>
+                        {cat.image && (
+                           <Image src={cat.image} alt={cat.name} fill sizes="80px" className="object-cover" />
+                        )}
                         {isDeal && (
                           <span className="absolute top-0 right-0 bg-primary text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 leading-none tracking-wider shadow-sm">
                             NEW

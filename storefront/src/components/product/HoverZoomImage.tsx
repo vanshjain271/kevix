@@ -9,9 +9,10 @@ interface HoverZoomImageProps {
   className?: string;
   imageClassName?: string;
   scale?: number;
+  sizes?: string;
 }
 
-export default function HoverZoomImage({ src, alt, className = "", imageClassName = "", scale = 2 }: HoverZoomImageProps) {
+export default function HoverZoomImage({ src, alt, className = "", imageClassName = "", scale = 2, sizes = "(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" }: HoverZoomImageProps) {
   const [zoomStyle, setZoomStyle] = useState({ transformOrigin: 'center' });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -35,6 +36,7 @@ export default function HoverZoomImage({ src, alt, className = "", imageClassNam
         src={src} 
         alt={alt} 
         fill 
+        sizes={sizes}
         style={zoomStyle}
         className={`object-contain transition-transform duration-200 group-hover:scale-[2] ${imageClassName}`} 
       />

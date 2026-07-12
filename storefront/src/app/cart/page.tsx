@@ -140,7 +140,7 @@ export default function CartPage() {
                     {/* Item Image */}
                     <div className="w-full sm:w-28 shrink-0 flex flex-col items-center gap-4">
                       <div className="w-24 h-24 relative">
-                        <Image src={image} alt={product.name} fill className="object-contain" />
+                        <Image src={image} alt={product.name} fill sizes="96px" className="object-contain" />
                       </div>
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-surface-border rounded-sm">

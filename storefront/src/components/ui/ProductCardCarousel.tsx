@@ -41,7 +41,8 @@ export default function ProductCardCarousel({ images, alt, useHoverZoom = false 
           alt={alt} 
           scale={2}
           className="w-full h-full"
-          imageClassName="p-3" 
+          imageClassName="p-3"
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
       ) : (
         <ImageZoom 

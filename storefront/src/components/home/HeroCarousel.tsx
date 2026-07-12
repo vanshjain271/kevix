@@ -61,6 +61,7 @@ export default function HeroCarousel() {
                 src={imageSrc} 
                 alt={slide.title || 'Banner'}
                 fill
+                sizes="100vw"
                 className="object-contain object-center w-full h-full"
                 priority={index === 0}
                 onError={(e: any) => { e.target.style.display = 'none'; }}
