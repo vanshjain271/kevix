@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -45,8 +45,6 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Track checkout initialization
-    event('InitiateCheckout');
   }, []);
 
   useEffect(() => {
@@ -57,6 +55,22 @@ export default function CheckoutPage() {
       fetchCart();
     }
   }, [isMounted, isAuthenticated, fetchCart, openLoginModal]);
+
+  // Track InitiateCheckout once cart is loaded
+  const hasTrackedCheckout = useRef(false);
+  useEffect(() => {
+    if (!isCartLoading && items.length > 0 && !hasTrackedCheckout.current) {
+      const value = items.reduce((sum, item) => sum + ((item.productId?.salePrice || 0) * item.quantity), 0);
+      const content_ids = items.map(item => item.productId?._id).filter(Boolean);
+      event('InitiateCheckout', {
+        value,
+        currency: 'INR',
+        content_ids,
+        num_items: items.length
+      });
+      hasTrackedCheckout.current = true;
+    }
+  }, [isCartLoading, items]);
 
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddress) {
@@ -148,7 +162,13 @@ export default function CheckoutPage() {
       });
 
       if (res.data.success) {
-        event('Purchase', { value: orderTotal, currency: 'INR' });
+        event('Purchase', { 
+          value: orderTotal, 
+          currency: 'INR',
+          content_ids: items.map(item => item.productId?._id).filter(Boolean),
+          content_type: 'product',
+          num_items: items.length
+        });
         clearLocalCart();
         await fetchCart();
         router.push('/account');

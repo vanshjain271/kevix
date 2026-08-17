@@ -429,6 +429,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     setIsAdding(true);
                     try {
                       await addToCart(displayProduct._id, qty, selectedVariant?._id);
+                      event('AddToCart', {
+                        content_name: displayProduct.name,
+                        content_ids: [displayProduct._id || displayProduct.id],
+                        content_type: 'product',
+                        value: displayProduct.salePrice * qty,
+                        currency: 'INR'
+                      });
                     } catch (err) {
                       console.error('Add to cart failed', err);
                     } finally {
@@ -461,6 +468,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   setIsAdding(true);
                   try {
                     await addToCart(displayProduct._id, qty, selectedVariant?._id);
+                    event('AddToCart', {
+                      content_name: displayProduct.name,
+                      content_ids: [displayProduct._id || displayProduct.id],
+                      content_type: 'product',
+                      value: displayProduct.salePrice * qty,
+                      currency: 'INR'
+                    });
                     router.push('/checkout');
                   } catch (err) {
                     console.error('Buy now failed', err);
@@ -529,7 +543,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!isAuthenticated) { openLoginModal(); return; }
-                            addToCart(displayProduct._id, displayProduct.minOrderQty || 1, variant._id);
+                            const qty = displayProduct.minOrderQty || 1;
+                            addToCart(displayProduct._id, qty, variant._id);
+                            event('AddToCart', {
+                              content_name: displayProduct.name,
+                              content_ids: [displayProduct._id || displayProduct.id],
+                              content_type: 'product',
+                              value: (variant.salePrice || displayProduct.salePrice) * qty,
+                              currency: 'INR'
+                            });
                           }}
                           disabled={addingToCart || (!displayProduct.isLot && variant.stock <= 0)}
                           className={`px-3 py-1.5 rounded-md font-bold text-xs flex items-center gap-1 transition-colors ${(displayProduct.isLot || variant.stock > 0) ? 'bg-primary hover:bg-primary-dark text-white' : 'bg-gray-200 text-gray-500'}`}

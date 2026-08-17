@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import Script from 'next/script';
 
 // Define the global fbq function for TypeScript
 declare global {
@@ -30,9 +29,17 @@ export const event = (name: string, options = {}) => {
 function PixelTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const hasFiredInitial = useRef(false);
 
   useEffect(() => {
-    // This effect runs on route changes to trigger a new PageView
+    // The initial PageView is fired synchronously in the <head> of layout.tsx
+    // so we skip the first render to avoid duplicates.
+    if (!hasFiredInitial.current) {
+      hasFiredInitial.current = true;
+      return;
+    }
+    
+    // This effect runs on subsequent route changes to trigger a new PageView
     if (FB_PIXEL_ID) {
       pageview();
     }
@@ -49,23 +56,6 @@ export default function MetaPixel() {
       <Suspense fallback={null}>
         <PixelTracker />
       </Suspense>
-      <Script
-        id="fb-pixel"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${FB_PIXEL_ID}');
-          `,
-        }}
-      />
       <noscript>
         <img
           height="1"
