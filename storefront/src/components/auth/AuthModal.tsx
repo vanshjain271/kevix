@@ -9,7 +9,7 @@ import { signInWithPopup, ConfirmationResult } from 'firebase/auth';
 
 export default function AuthModal() {
   const router = useRouter();
-  const { isLoginModalOpen, closeLoginModal, setAuth } = useAuthStore();
+  const { isLoginModalOpen, closeLoginModal, setAuth, isAuthenticated, openLoginModal } = useAuthStore();
   
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [phone, setPhone] = useState('');
@@ -23,6 +23,18 @@ export default function AuthModal() {
   
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
+
+  // Auto-open login modal on site load if not authenticated
+  useEffect(() => {
+    const checkAuth = () => {
+      if (!useAuthStore.getState().isAuthenticated) {
+        openLoginModal();
+      }
+    };
+    // Check after a brief delay to ensure Zustand has hydrated from localStorage
+    const timeout = setTimeout(checkAuth, 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     if (isLoginModalOpen && auth) {
@@ -64,6 +76,9 @@ export default function AuthModal() {
   };
 
   const handleClose = () => {
+    // If we want to force login, we shouldn't let unauthenticated users close the modal
+    if (!isAuthenticated) return;
+    
     resetModal();
     closeLoginModal();
   };
@@ -91,7 +106,10 @@ export default function AuthModal() {
         }
 
         setAuth(token, updatedUser);
-        handleClose();
+        
+        // Use standard close logic now that we are authenticated
+        resetModal();
+        closeLoginModal();
         
         // Redirect to complete profile ONLY if this is a brand new user
         if (isNewUser) {
@@ -193,13 +211,15 @@ export default function AuthModal() {
       <div id="recaptcha-container"></div>
 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative">
-        {/* Close Button */}
-        <button 
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-white hover:text-gray-200 z-10 w-8 h-8 flex items-center justify-center rounded-full transition-colors"
-        >
-          <span className="material-symbols-outlined text-2xl">close</span>
-        </button>
+        {/* Close Button - Hide if forced login */}
+        {isAuthenticated && (
+          <button 
+            onClick={handleClose}
+            className="absolute top-4 right-4 text-white hover:text-gray-200 z-10 w-8 h-8 flex items-center justify-center rounded-full transition-colors"
+          >
+            <span className="material-symbols-outlined text-2xl">close</span>
+          </button>
+        )}
 
         {/* Header */}
         <div className="bg-gradient-to-br from-primary to-primary-dark p-8 text-white relative">
